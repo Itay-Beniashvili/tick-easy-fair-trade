@@ -4,10 +4,10 @@ import { cn } from '@/lib/utils';
 import { useApp } from '@/context/AppContext';
 
 const navItems = [
-  { path: '/manager', icon: LayoutDashboard, label: 'סקירה כללית', end: true },
-  { path: '/manager/inbox', icon: Inbox, label: 'תיבת פניות' },
-  { path: '/manager/analytics', icon: BarChart3, label: 'ניתוח נתונים' },
-  { path: '/manager/events', icon: Calendar, label: 'אירועים' },
+  { path: '/manager', icon: LayoutDashboard, label: 'Overview', end: true },
+  { path: '/manager/inbox', icon: Inbox, label: 'Inquiries' },
+  { path: '/manager/analytics', icon: BarChart3, label: 'Analytics' },
+  { path: '/manager/events', icon: Calendar, label: 'Events' },
 ];
 
 export function ManagerSidebar() {
@@ -24,12 +24,12 @@ export function ManagerSidebar() {
       {/* Logo */}
       <div className="p-6 border-b border-sidebar-border">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-sidebar-accent flex items-center justify-center">
-            <Ticket className="w-5 h-5 text-sidebar-primary" />
+          <div className="w-10 h-10 rounded-xl bg-gradient-warm flex items-center justify-center">
+            <Ticket className="w-5 h-5 text-white" />
           </div>
           <div>
             <h1 className="font-bold text-lg">TickEasy</h1>
-            <p className="text-xs text-sidebar-foreground/60">פאנל ניהול</p>
+            <p className="text-xs text-sidebar-foreground/60">Manager Panel</p>
           </div>
         </div>
       </div>
@@ -43,10 +43,10 @@ export function ManagerSidebar() {
             end={end}
             className={({ isActive }) =>
               cn(
-                'flex items-center gap-3 px-4 py-3 rounded-xl transition-colors',
+                'flex items-center gap-3 px-4 py-3 rounded-xl transition-all',
                 isActive
-                  ? 'bg-sidebar-accent text-sidebar-primary font-medium'
-                  : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
+                  ? 'bg-sidebar-primary text-white font-medium'
+                  : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground'
               )
             }
           >
@@ -60,10 +60,10 @@ export function ManagerSidebar() {
       <div className="p-4 border-t border-sidebar-border">
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground transition-colors"
+          className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors"
         >
           <LogOut className="w-5 h-5" />
-          <span>יציאה</span>
+          <span>Log Out</span>
         </button>
       </div>
     </aside>

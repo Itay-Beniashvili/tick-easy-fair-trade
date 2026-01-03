@@ -1,13 +1,12 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRight, MapPin, Calendar, Clock, Users, Tag, Shield, CheckCircle, AlertCircle } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, Users, Tag, Shield, CheckCircle, AlertCircle } from 'lucide-react';
 import { events } from '@/data/mockData';
 import { useApp } from '@/context/AppContext';
 import { GroupPurchaseTimer } from '@/components/GroupPurchaseTimer';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { he } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 
 export default function EventDetails() {
@@ -22,12 +21,12 @@ export default function EventDetails() {
   if (!event) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <p className="text-muted-foreground">האירוע לא נמצא</p>
+        <p className="text-muted-foreground">Event not found</p>
       </div>
     );
   }
 
-  const formattedDate = format(new Date(event.date), 'EEEE, d בMMMM yyyy', { locale: he });
+  const formattedDate = format(new Date(event.date), 'EEEE, MMMM d, yyyy');
 
   const handlePurchase = () => {
     const newTicket = {
@@ -42,8 +41,8 @@ export default function EventDetails() {
       isForSale: false,
     };
     addTicket(newTicket);
-    toast.success('הכרטיס נרכש בהצלחה!', {
-      description: 'ניתן לצפות בכרטיס בארנק שלך',
+    toast.success('Ticket purchased successfully!', {
+      description: 'Check your wallet to view your ticket',
     });
     navigate('/wallet');
   };
@@ -61,8 +60,8 @@ export default function EventDetails() {
       isForSale: false,
     };
     addTicket(newTicket);
-    toast.success('הכרטיס מיד שנייה נרכש בהצלחה!', {
-      description: 'הכרטיס מאומת ומובטח',
+    toast.success('Verified resale ticket purchased!', {
+      description: 'Ticket is verified and guaranteed',
     });
     navigate('/wallet');
   };
@@ -70,25 +69,25 @@ export default function EventDetails() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Image */}
-      <div className="relative h-72">
+      <div className="relative h-80">
         <img
           src={event.image}
           alt={event.title}
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
         
         {/* Back Button */}
         <button
           onClick={() => navigate(-1)}
-          className="absolute top-12 right-4 w-10 h-10 rounded-full bg-white/90 shadow-lg flex items-center justify-center"
+          className="absolute top-12 left-4 w-10 h-10 rounded-full bg-white/90 shadow-lg flex items-center justify-center hover:bg-white transition-colors"
         >
-          <ArrowRight className="w-5 h-5 text-foreground" />
+          <ArrowLeft className="w-5 h-5 text-foreground" />
         </button>
       </div>
 
       {/* Content */}
-      <div className="relative -mt-20 px-4 pb-32">
+      <div className="relative -mt-24 px-4 pb-32">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -105,11 +104,11 @@ export default function EventDetails() {
                 <span>{event.venue}, {event.city}</span>
               </div>
               <div className="flex items-center gap-3 text-muted-foreground">
-                <Calendar className="w-5 h-5 text-primary" />
+                <Calendar className="w-5 h-5 text-accent" />
                 <span>{formattedDate}</span>
               </div>
               <div className="flex items-center gap-3 text-muted-foreground">
-                <Clock className="w-5 h-5 text-primary" />
+                <Clock className="w-5 h-5 text-highlight" />
                 <span>{event.time}</span>
               </div>
             </div>
@@ -124,26 +123,26 @@ export default function EventDetails() {
             <button
               onClick={() => setSelectedTab('primary')}
               className={cn(
-                'flex-1 py-3 rounded-xl font-medium transition-all',
+                'flex-1 py-3 rounded-2xl font-semibold transition-all',
                 selectedTab === 'primary'
-                  ? 'bg-primary text-primary-foreground'
+                  ? 'btn-primary-gradient'
                   : 'bg-muted text-muted-foreground hover:bg-muted/80'
               )}
             >
-              רכישה ראשית
+              Buy Now
             </button>
             <button
               onClick={() => setSelectedTab('resale')}
               className={cn(
-                'flex-1 py-3 rounded-xl font-medium transition-all relative',
+                'flex-1 py-3 rounded-2xl font-semibold transition-all relative',
                 selectedTab === 'resale'
-                  ? 'bg-primary text-primary-foreground'
+                  ? 'btn-primary-gradient'
                   : 'bg-muted text-muted-foreground hover:bg-muted/80'
               )}
             >
-              יד שנייה
+              Resale
               {event.resaleTickets.length > 0 && (
-                <span className="absolute -top-1 -left-1 w-5 h-5 rounded-full bg-success text-success-foreground text-xs flex items-center justify-center font-bold">
+                <span className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-success text-white text-xs flex items-center justify-center font-bold">
                   {event.resaleTickets.length}
                 </span>
               )}
@@ -162,12 +161,12 @@ export default function EventDetails() {
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <Tag className="w-5 h-5 text-primary" />
-                    <span className="text-muted-foreground">מחיר כרטיס</span>
+                    <span className="text-muted-foreground">Ticket Price</span>
                   </div>
-                  <span className="text-2xl font-bold text-primary">₪{event.price}</span>
+                  <span className="text-3xl font-bold text-gradient-warm">${event.price}</span>
                 </div>
-                <div className="text-sm text-muted-foreground">
-                  {event.availableTickets} כרטיסים זמינים
+                <div className="text-sm text-muted-foreground bg-muted px-3 py-1.5 rounded-full inline-block">
+                  {event.availableTickets} tickets available
                 </div>
               </div>
 
@@ -176,15 +175,15 @@ export default function EventDetails() {
                 onClick={handlePurchase}
                 className="w-full btn-primary-gradient py-4 text-lg"
               >
-                רכוש כרטיס
+                🎟️ Buy Ticket
               </button>
 
               <button
                 onClick={() => setShowGroupPurchase(true)}
-                className="w-full py-4 rounded-2xl border-2 border-primary text-primary font-semibold flex items-center justify-center gap-2 hover:bg-primary hover:text-primary-foreground transition-colors"
+                className="w-full py-4 rounded-2xl border-2 border-primary text-primary font-semibold flex items-center justify-center gap-2 hover:bg-primary hover:text-white transition-all"
               >
                 <Users className="w-5 h-5" />
-                רכישה קבוצתית
+                Group Purchase
               </button>
             </motion.div>
           )}
@@ -197,15 +196,15 @@ export default function EventDetails() {
               className="space-y-4"
             >
               {/* Trust Banner */}
-              <div className="bg-success/10 border border-success/20 rounded-xl p-4">
+              <div className="bg-gradient-to-r from-success/10 to-teal-500/10 border border-success/20 rounded-2xl p-4">
                 <div className="flex items-start gap-3">
                   <Shield className="w-5 h-5 text-success shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-sm font-medium text-foreground mb-1">
-                      כרטיסים מאומתים ומאובטחים
+                    <p className="text-sm font-semibold text-foreground mb-1">
+                      Verified & Protected Tickets
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      כל הכרטיסים ביד שנייה עוברים אימות ומחירם לא יכול לעלות על המחיר המקורי
+                      All resale tickets are verified. Prices cannot exceed the original face value.
                     </p>
                   </div>
                 </div>
@@ -214,7 +213,7 @@ export default function EventDetails() {
               {event.resaleTickets.length === 0 ? (
                 <div className="card-elevated p-8 text-center">
                   <AlertCircle className="w-12 h-12 text-muted-foreground/50 mx-auto mb-3" />
-                  <p className="text-muted-foreground">אין כרטיסים זמינים ביד שנייה</p>
+                  <p className="text-muted-foreground">No resale tickets available</p>
                 </div>
               ) : (
                 event.resaleTickets.map((ticket) => (
@@ -224,18 +223,18 @@ export default function EventDetails() {
                         <div className="flex items-center gap-2 mb-1">
                           <span className="verified-badge">
                             <CheckCircle className="w-3 h-3" />
-                            מאומת
+                            Verified
                           </span>
                         </div>
                         <p className="text-sm text-muted-foreground">
-                          אזור {ticket.section} | שורה {ticket.row} | מושב {ticket.seat}
+                          Section {ticket.section} · Row {ticket.row} · Seat {ticket.seat}
                         </p>
                       </div>
-                      <div className="text-left">
-                        <p className="text-xl font-bold text-primary">₪{ticket.resalePrice}</p>
+                      <div className="text-right">
+                        <p className="text-2xl font-bold text-gradient-warm">${ticket.resalePrice}</p>
                         {ticket.resalePrice < ticket.originalPrice && (
-                          <p className="text-xs text-success">
-                            חיסכון של ₪{ticket.originalPrice - ticket.resalePrice}
+                          <p className="text-xs text-success font-semibold">
+                            Save ${ticket.originalPrice - ticket.resalePrice}
                           </p>
                         )}
                       </div>
@@ -244,7 +243,7 @@ export default function EventDetails() {
                       onClick={() => handleResalePurchase(ticket.resalePrice)}
                       className="w-full btn-success-gradient py-3"
                     >
-                      רכוש כרטיס מאומת
+                      Buy Verified Ticket
                     </button>
                   </div>
                 ))

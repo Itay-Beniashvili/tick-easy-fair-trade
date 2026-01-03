@@ -4,16 +4,16 @@ import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
 const navItems = [
-  { path: '/home', icon: Home, label: 'ראשי' },
-  { path: '/wallet', icon: Wallet, label: 'הכרטיסים שלי' },
-  { path: '/profile', icon: User, label: 'פרופיל' },
+  { path: '/home', icon: Home, label: 'Home' },
+  { path: '/wallet', icon: Wallet, label: 'My Tickets' },
+  { path: '/profile', icon: User, label: 'Profile' },
 ];
 
 export function BottomNav() {
   const location = useLocation();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border glass-effect z-50">
+    <nav className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-lg border-t border-border z-50">
       <div className="flex items-center justify-around py-2 px-4 max-w-md mx-auto">
         {navItems.map(({ path, icon: Icon, label }) => {
           const isActive = location.pathname === path;
@@ -22,12 +22,12 @@ export function BottomNav() {
             <NavLink
               key={path}
               to={path}
-              className="flex flex-col items-center py-2 px-4 relative"
+              className="flex flex-col items-center py-2 px-5 relative"
             >
               {isActive && (
                 <motion.div
                   layoutId="activeTab"
-                  className="absolute inset-0 bg-primary/10 rounded-xl"
+                  className="absolute inset-0 bg-gradient-to-r from-primary/15 to-accent/15 rounded-2xl"
                   transition={{ type: 'spring', duration: 0.4 }}
                 />
               )}

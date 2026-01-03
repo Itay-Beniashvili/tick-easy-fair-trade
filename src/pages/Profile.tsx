@@ -1,16 +1,16 @@
 import { motion } from 'framer-motion';
-import { User, Settings, Shield, HelpCircle, LogOut, ChevronLeft, Bell, CreditCard } from 'lucide-react';
+import { User, Settings, Shield, HelpCircle, LogOut, ChevronRight, Bell, CreditCard, Star } from 'lucide-react';
 import { BottomNav } from '@/components/BottomNav';
 import { useApp } from '@/context/AppContext';
 import { useNavigate } from 'react-router-dom';
-import { cn } from '@/lib/utils';
 
 const menuItems = [
-  { icon: Bell, label: 'התראות', description: 'נהל את ההודעות שלך' },
-  { icon: CreditCard, label: 'אמצעי תשלום', description: 'כרטיסי אשראי וחיוב' },
-  { icon: Shield, label: 'פרטיות ואבטחה', description: 'הגדרות חשבון' },
-  { icon: HelpCircle, label: 'עזרה ותמיכה', description: 'שאלות נפוצות' },
-  { icon: Settings, label: 'הגדרות', description: 'העדפות אפליקציה' },
+  { icon: Bell, label: 'Notifications', description: 'Manage your alerts', color: 'from-primary to-accent' },
+  { icon: CreditCard, label: 'Payment Methods', description: 'Cards & billing', color: 'from-success to-teal-400' },
+  { icon: Shield, label: 'Privacy & Security', description: 'Account settings', color: 'from-highlight to-purple-400' },
+  { icon: Star, label: 'Favorites', description: 'Saved events', color: 'from-warning to-amber-400' },
+  { icon: HelpCircle, label: 'Help & Support', description: 'FAQs & contact', color: 'from-accent to-rose-400' },
+  { icon: Settings, label: 'Settings', description: 'App preferences', color: 'from-muted-foreground to-slate-400' },
 ];
 
 export default function Profile() {
@@ -25,22 +25,22 @@ export default function Profile() {
   return (
     <div className="min-h-screen bg-background pb-24">
       {/* Header */}
-      <div className="bg-gradient-to-b from-primary to-primary/90 pt-12 pb-16 px-4">
+      <div className="bg-gradient-hero pt-12 pb-20 px-4">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           className="max-w-lg mx-auto text-center"
         >
-          <div className="w-24 h-24 rounded-full bg-white/20 mx-auto mb-4 flex items-center justify-center">
-            <User className="w-12 h-12 text-primary-foreground" />
+          <div className="w-24 h-24 rounded-full bg-white/20 backdrop-blur-sm mx-auto mb-4 flex items-center justify-center ring-4 ring-white/30">
+            <User className="w-12 h-12 text-white" />
           </div>
-          <h1 className="text-xl font-bold text-primary-foreground mb-1">משתמש אורח</h1>
-          <p className="text-primary-foreground/80 text-sm">demo@tickeasy.co.il</p>
+          <h1 className="text-xl font-bold text-white mb-1">Guest User</h1>
+          <p className="text-white/80 text-sm">demo@tickeasy.com</p>
         </motion.div>
       </div>
 
-      <div className="max-w-lg mx-auto px-4 -mt-8">
+      <div className="max-w-lg mx-auto px-4 -mt-10">
         {/* Stats Card */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -50,16 +50,16 @@ export default function Profile() {
         >
           <div className="grid grid-cols-3 gap-4">
             <div className="text-center">
-              <p className="text-2xl font-bold text-primary">1</p>
-              <p className="text-xs text-muted-foreground">כרטיסים</p>
+              <p className="text-2xl font-bold text-gradient-warm">1</p>
+              <p className="text-xs text-muted-foreground">Tickets</p>
             </div>
             <div className="text-center border-x border-border">
-              <p className="text-2xl font-bold text-primary">0</p>
-              <p className="text-xs text-muted-foreground">מכירות</p>
+              <p className="text-2xl font-bold text-gradient-warm">0</p>
+              <p className="text-xs text-muted-foreground">Sales</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold text-primary">{selectedGenres.length}</p>
-              <p className="text-xs text-muted-foreground">תחומי עניין</p>
+              <p className="text-2xl font-bold text-gradient-warm">{selectedGenres.length}</p>
+              <p className="text-xs text-muted-foreground">Interests</p>
             </div>
           </div>
         </motion.div>
@@ -71,44 +71,44 @@ export default function Profile() {
             return (
               <motion.button
                 key={item.label}
-                initial={{ opacity: 0, x: 20 }}
+                initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.05, duration: 0.3 }}
-                className="w-full card-elevated p-4 flex items-center gap-4 hover:shadow-md transition-shadow"
+                className="w-full card-elevated p-4 flex items-center gap-4 hover:shadow-lg transition-all"
               >
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                  <Icon className="w-5 h-5 text-primary" />
+                <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${item.color} flex items-center justify-center shrink-0`}>
+                  <Icon className="w-6 h-6 text-white" />
                 </div>
-                <div className="flex-1 text-right">
-                  <p className="font-medium text-foreground">{item.label}</p>
+                <div className="flex-1 text-left">
+                  <p className="font-semibold text-foreground">{item.label}</p>
                   <p className="text-xs text-muted-foreground">{item.description}</p>
                 </div>
-                <ChevronLeft className="w-5 h-5 text-muted-foreground" />
+                <ChevronRight className="w-5 h-5 text-muted-foreground" />
               </motion.button>
             );
           })}
 
           {/* Logout */}
           <motion.button
-            initial={{ opacity: 0, x: 20 }}
+            initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: menuItems.length * 0.05, duration: 0.3 }}
             onClick={handleLogout}
-            className="w-full card-elevated p-4 flex items-center gap-4 hover:shadow-md transition-shadow mt-4"
+            className="w-full card-elevated p-4 flex items-center gap-4 hover:shadow-lg transition-all mt-4"
           >
-            <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center shrink-0">
-              <LogOut className="w-5 h-5 text-destructive" />
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-destructive to-rose-400 flex items-center justify-center shrink-0">
+              <LogOut className="w-6 h-6 text-white" />
             </div>
-            <div className="flex-1 text-right">
-              <p className="font-medium text-destructive">יציאה</p>
-              <p className="text-xs text-muted-foreground">התנתק מהחשבון</p>
+            <div className="flex-1 text-left">
+              <p className="font-semibold text-destructive">Log Out</p>
+              <p className="text-xs text-muted-foreground">Sign out of your account</p>
             </div>
           </motion.button>
         </div>
 
         {/* Version */}
         <p className="text-center text-xs text-muted-foreground mt-8">
-          גרסה 1.0.0 - TickEasy
+          Version 1.0.0 · TickEasy
         </p>
       </div>
 

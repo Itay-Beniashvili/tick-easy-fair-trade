@@ -10,7 +10,7 @@ interface GroupPurchaseTimerProps {
 }
 
 export function GroupPurchaseTimer({ isOpen, onClose, eventTitle }: GroupPurchaseTimerProps) {
-  const [timeLeft, setTimeLeft] = useState(600); // 10 minutes in seconds
+  const [timeLeft, setTimeLeft] = useState(600);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -36,7 +36,7 @@ export function GroupPurchaseTimer({ isOpen, onClose, eventTitle }: GroupPurchas
   const seconds = timeLeft % 60;
   const progress = (timeLeft / 600) * 100;
 
-  const groupLink = `https://tickeasy.co.il/group/${Math.random().toString(36).substring(7)}`;
+  const groupLink = `https://tickeasy.com/group/${Math.random().toString(36).substring(7)}`;
 
   const copyLink = () => {
     navigator.clipboard.writeText(groupLink);
@@ -64,43 +64,49 @@ export function GroupPurchaseTimer({ isOpen, onClose, eventTitle }: GroupPurchas
         >
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
-            <button onClick={onClose} className="p-2 hover:bg-muted rounded-full">
+            <button onClick={onClose} className="p-2 hover:bg-muted rounded-full transition-colors">
               <X className="w-5 h-5 text-muted-foreground" />
             </button>
-            <h2 className="text-xl font-bold text-foreground">רכישה קבוצתית</h2>
+            <h2 className="text-xl font-bold text-foreground">Group Purchase</h2>
             <div className="w-9" />
           </div>
 
           {/* Event */}
           <div className="text-center mb-6">
-            <p className="text-muted-foreground text-sm mb-1">אירוע:</p>
+            <p className="text-muted-foreground text-sm mb-1">Event:</p>
             <p className="font-semibold text-foreground">{eventTitle}</p>
           </div>
 
           {/* Timer Circle */}
           <div className="flex justify-center mb-6">
-            <div className="relative w-40 h-40">
+            <div className="relative w-44 h-44">
               <svg className="w-full h-full transform -rotate-90">
                 <circle
-                  cx="80"
-                  cy="80"
-                  r="70"
+                  cx="88"
+                  cy="88"
+                  r="78"
                   fill="none"
                   stroke="hsl(var(--muted))"
-                  strokeWidth="8"
+                  strokeWidth="10"
                 />
                 <circle
-                  cx="80"
-                  cy="80"
-                  r="70"
+                  cx="88"
+                  cy="88"
+                  r="78"
                   fill="none"
-                  stroke={timeLeft > 120 ? 'hsl(var(--primary))' : 'hsl(var(--destructive))'}
-                  strokeWidth="8"
+                  stroke={timeLeft > 120 ? 'url(#timerGradient)' : 'hsl(var(--destructive))'}
+                  strokeWidth="10"
                   strokeLinecap="round"
-                  strokeDasharray={440}
-                  strokeDashoffset={440 - (440 * progress) / 100}
+                  strokeDasharray={490}
+                  strokeDashoffset={490 - (490 * progress) / 100}
                   className="transition-all duration-1000"
                 />
+                <defs>
+                  <linearGradient id="timerGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="hsl(var(--primary))" />
+                    <stop offset="100%" stopColor="hsl(var(--accent))" />
+                  </linearGradient>
+                </defs>
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <Clock className={cn(
@@ -108,26 +114,26 @@ export function GroupPurchaseTimer({ isOpen, onClose, eventTitle }: GroupPurchas
                   timeLeft > 120 ? 'text-primary' : 'text-destructive animate-pulse'
                 )} />
                 <span className={cn(
-                  "text-3xl font-bold",
+                  "text-4xl font-bold",
                   timeLeft > 120 ? 'text-foreground' : 'text-destructive'
                 )}>
                   {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
                 </span>
-                <span className="text-sm text-muted-foreground">דקות נותרו</span>
+                <span className="text-sm text-muted-foreground">minutes left</span>
               </div>
             </div>
           </div>
 
           {/* Instructions */}
-          <div className="bg-muted/50 rounded-xl p-4 mb-6">
+          <div className="bg-gradient-to-r from-primary/10 to-accent/10 rounded-2xl p-4 mb-6">
             <div className="flex items-start gap-3">
               <Users className="w-5 h-5 text-primary mt-0.5 shrink-0" />
               <div>
                 <p className="text-sm text-foreground font-medium mb-1">
-                  שתף את הקישור עם החברים
+                  Share with your friends
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  הכרטיסים שמורים לקבוצה שלך ל-10 דקות. שתף את הקישור כדי שכולם יוכלו להצטרף.
+                  Tickets are reserved for 10 minutes. Share the link so everyone can join your group.
                 </p>
               </div>
             </div>
@@ -139,12 +145,11 @@ export function GroupPurchaseTimer({ isOpen, onClose, eventTitle }: GroupPurchas
               type="text"
               value={groupLink}
               readOnly
-              className="flex-1 bg-transparent text-sm text-foreground text-left truncate"
-              dir="ltr"
+              className="flex-1 bg-transparent text-sm text-foreground truncate"
             />
             <button
               onClick={copyLink}
-              className="p-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity"
+              className="p-2 btn-primary-gradient rounded-xl"
             >
               {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
             </button>
@@ -154,7 +159,7 @@ export function GroupPurchaseTimer({ isOpen, onClose, eventTitle }: GroupPurchas
           <div className="text-center text-sm text-muted-foreground">
             <span className="inline-flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
-              3 כרטיסים שמורים
+              3 tickets reserved
             </span>
           </div>
         </motion.div>

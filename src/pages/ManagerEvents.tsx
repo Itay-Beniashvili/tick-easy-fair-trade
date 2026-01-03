@@ -1,10 +1,15 @@
 import { motion } from 'framer-motion';
-import { Calendar, MapPin, Users, MoreVertical, Plus } from 'lucide-react';
+import { Calendar, MapPin, Users, MoreVertical, Plus, Flame } from 'lucide-react';
 import { ManagerSidebar } from '@/components/ManagerSidebar';
 import { MobileManagerNav } from '@/components/MobileManagerNav';
 import { events, genreLabels } from '@/data/mockData';
 import { format } from 'date-fns';
-import { he } from 'date-fns/locale';
+
+const genreColors: Record<string, string> = {
+  music: 'from-primary to-accent',
+  sports: 'from-success to-teal-400',
+  theater: 'from-highlight to-purple-400',
+};
 
 export default function ManagerEvents() {
   return (
@@ -13,7 +18,7 @@ export default function ManagerEvents() {
       
       <main className="flex-1 pb-20 lg:pb-0">
         {/* Header */}
-        <div className="bg-card border-b border-border p-6">
+        <div className="bg-gradient-hero p-6 pt-12 lg:pt-6">
           <div className="max-w-4xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: -20 }}
@@ -21,13 +26,18 @@ export default function ManagerEvents() {
               transition={{ duration: 0.5 }}
               className="flex items-center justify-between"
             >
-              <div>
-                <h1 className="text-2xl font-bold text-foreground mb-1">ניהול אירועים</h1>
-                <p className="text-muted-foreground">{events.length} אירועים פעילים</p>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center">
+                  <Flame className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-white mb-1">Events</h1>
+                  <p className="text-white/80">{events.length} active events</p>
+                </div>
               </div>
-              <button className="flex items-center gap-2 px-4 py-2 btn-primary-gradient text-sm">
+              <button className="flex items-center gap-2 px-4 py-2 bg-white text-primary font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all">
                 <Plus className="w-4 h-4" />
-                אירוע חדש
+                New Event
               </button>
             </motion.div>
           </div>
@@ -36,7 +46,7 @@ export default function ManagerEvents() {
         <div className="max-w-4xl mx-auto p-6">
           <div className="space-y-4">
             {events.map((event, index) => {
-              const formattedDate = format(new Date(event.date), 'd בMMMM yyyy', { locale: he });
+              const formattedDate = format(new Date(event.date), 'MMM d, yyyy');
 
               return (
                 <motion.div
@@ -46,48 +56,48 @@ export default function ManagerEvents() {
                   transition={{ delay: index * 0.1, duration: 0.4 }}
                   className="card-elevated p-4 flex gap-4"
                 >
-                  <img
-                    src={event.image}
-                    alt={event.title}
-                    className="w-24 h-24 lg:w-32 lg:h-24 rounded-xl object-cover shrink-0"
-                  />
+                  <div className="relative">
+                    <img
+                      src={event.image}
+                      alt={event.title}
+                      className="w-28 h-28 lg:w-36 lg:h-28 rounded-2xl object-cover shrink-0"
+                    />
+                    <div className={`absolute top-2 left-2 px-2 py-1 rounded-lg bg-gradient-to-r ${genreColors[event.genre]} text-white text-[10px] font-bold`}>
+                      {genreLabels[event.genre]}
+                    </div>
+                  </div>
                   
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <h3 className="font-bold text-foreground truncate">{event.title}</h3>
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
-                          {genreLabels[event.genre]}
-                        </span>
-                      </div>
-                      <button className="p-1 hover:bg-muted rounded-lg shrink-0">
+                      <h3 className="font-bold text-foreground truncate pr-2">{event.title}</h3>
+                      <button className="p-1.5 hover:bg-muted rounded-xl shrink-0 transition-colors">
                         <MoreVertical className="w-5 h-5 text-muted-foreground" />
                       </button>
                     </div>
 
                     <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground mb-3">
                       <div className="flex items-center gap-1">
-                        <Calendar className="w-4 h-4" />
+                        <Calendar className="w-4 h-4 text-primary" />
                         <span>{formattedDate}</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <MapPin className="w-4 h-4" />
+                        <MapPin className="w-4 h-4 text-accent" />
                         <span>{event.venue}</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <Users className="w-4 h-4" />
-                        <span>{event.availableTickets} כרטיסים נותרו</span>
+                        <Users className="w-4 h-4 text-highlight" />
+                        <span>{event.availableTickets} left</span>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-4">
                       <div>
-                        <span className="text-xs text-muted-foreground">מחיר</span>
-                        <p className="font-bold text-primary">₪{event.price}</p>
+                        <span className="text-xs text-muted-foreground">Price</span>
+                        <p className="font-bold text-gradient-warm text-lg">${event.price}</p>
                       </div>
                       <div className="h-8 border-r border-border" />
                       <div>
-                        <span className="text-xs text-muted-foreground">יד שנייה</span>
+                        <span className="text-xs text-muted-foreground">Resale</span>
                         <p className="font-bold text-success">{event.resaleTickets.length}</p>
                       </div>
                     </div>
