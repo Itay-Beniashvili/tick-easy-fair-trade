@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, AlertTriangle, Check, Tag } from 'lucide-react';
+import { X, AlertTriangle, Check, Tag, Shield } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -22,23 +22,23 @@ export function ResaleModal({ isOpen, onClose, ticketId, originalPrice, eventTit
     const numPrice = parseFloat(price);
     
     if (!price || isNaN(numPrice)) {
-      setError('נא להזין מחיר תקין');
+      setError('Please enter a valid price');
       return;
     }
 
     if (numPrice > originalPrice) {
-      setError('מכירה מעל המחיר המקורי אסורה');
+      setError('Selling above face value is prohibited');
       return;
     }
 
     if (numPrice <= 0) {
-      setError('המחיר חייב להיות גדול מ-0');
+      setError('Price must be greater than $0');
       return;
     }
 
     updateTicketForSale(ticketId, true, numPrice);
-    toast.success('הכרטיס פורסם למכירה בהצלחה!', {
-      description: `המחיר: ₪${numPrice}`,
+    toast.success('Ticket listed for sale!', {
+      description: `Listed at $${numPrice}`,
     });
     onClose();
     setPrice('');
@@ -49,7 +49,7 @@ export function ResaleModal({ isOpen, onClose, ticketId, originalPrice, eventTit
     setPrice(value);
     const numPrice = parseFloat(value);
     if (value && !isNaN(numPrice) && numPrice > originalPrice) {
-      setError('מכירה מעל המחיר המקורי אסורה');
+      setError('Selling above face value is prohibited');
     } else {
       setError('');
     }
@@ -75,35 +75,34 @@ export function ResaleModal({ isOpen, onClose, ticketId, originalPrice, eventTit
         >
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
-            <button onClick={onClose} className="p-2 hover:bg-muted rounded-full">
+            <button onClick={onClose} className="p-2 hover:bg-muted rounded-full transition-colors">
               <X className="w-5 h-5 text-muted-foreground" />
             </button>
-            <h2 className="text-xl font-bold text-foreground">מכירה חוזרת</h2>
+            <h2 className="text-xl font-bold text-foreground">Resell Ticket</h2>
             <div className="w-9" />
           </div>
 
           {/* Event Info */}
-          <div className="bg-muted/50 rounded-xl p-4 mb-6">
-            <p className="text-sm text-muted-foreground mb-1">אירוע:</p>
+          <div className="bg-muted/50 rounded-2xl p-4 mb-6">
+            <p className="text-sm text-muted-foreground mb-1">Event:</p>
             <p className="font-semibold text-foreground">{eventTitle}</p>
             <div className="flex items-center gap-2 mt-2 text-sm">
               <Tag className="w-4 h-4 text-primary" />
-              <span className="text-muted-foreground">מחיר מקורי:</span>
-              <span className="font-bold text-primary">₪{originalPrice}</span>
+              <span className="text-muted-foreground">Original price:</span>
+              <span className="font-bold text-primary">${originalPrice}</span>
             </div>
           </div>
 
           {/* Anti-Scalping Notice */}
-          <div className="bg-warning/10 border border-warning/20 rounded-xl p-4 mb-6">
+          <div className="bg-gradient-to-r from-warning/10 to-amber-500/10 border border-warning/20 rounded-2xl p-4 mb-6">
             <div className="flex items-start gap-3">
-              <AlertTriangle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
+              <Shield className="w-5 h-5 text-warning shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm font-medium text-foreground mb-1">
-                  הגנה מפני סחר בכרטיסים
+                <p className="text-sm font-semibold text-foreground mb-1">
+                  Anti-Scalping Protection
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  במערכת TickEasy, אסור למכור כרטיסים במחיר גבוה מהמחיר המקורי.
-                  זה מגן על כולם מפני סחרנים.
+                  TickEasy prevents ticket scalping. You cannot sell tickets above the original face value.
                 </p>
               </div>
             </div>
@@ -112,25 +111,24 @@ export function ResaleModal({ isOpen, onClose, ticketId, originalPrice, eventTit
           {/* Price Input */}
           <div className="mb-6">
             <label className="block text-sm font-medium text-foreground mb-2">
-              מחיר המכירה
+              Your selling price
             </label>
             <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground text-lg font-bold">
+                $
+              </span>
               <input
                 type="number"
                 value={price}
                 onChange={(e) => handlePriceChange(e.target.value)}
                 placeholder="0"
                 className={cn(
-                  "w-full py-4 px-4 pr-10 rounded-xl border text-lg font-bold text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 transition-all",
+                  "w-full py-4 px-4 pl-10 rounded-2xl border text-2xl font-bold text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 transition-all",
                   error
                     ? 'border-destructive focus:ring-destructive/20 focus:border-destructive'
                     : 'border-border focus:ring-primary/20 focus:border-primary'
                 )}
-                dir="ltr"
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground">
-                ₪
-              </span>
             </div>
             {error && (
               <motion.p
@@ -156,7 +154,7 @@ export function ResaleModal({ isOpen, onClose, ticketId, originalPrice, eventTit
             )}
           >
             <Check className="w-5 h-5" />
-            פרסם למכירה
+            List for Sale
           </button>
         </motion.div>
       </motion.div>

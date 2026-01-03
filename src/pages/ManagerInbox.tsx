@@ -7,7 +7,6 @@ import { inquiries, Inquiry } from '@/data/mockData';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import { he } from 'date-fns/locale';
 
 const typeIcons = {
   refund: RotateCcw,
@@ -16,9 +15,15 @@ const typeIcons = {
 };
 
 const typeLabels = {
-  refund: 'בקשת החזר',
-  question: 'שאלה',
-  complaint: 'תלונה',
+  refund: 'Refund',
+  question: 'Question',
+  complaint: 'Complaint',
+};
+
+const typeColors = {
+  refund: 'from-warning to-amber-400',
+  question: 'from-accent to-rose-400',
+  complaint: 'from-destructive to-rose-500',
 };
 
 export default function ManagerInbox() {
@@ -30,7 +35,7 @@ export default function ManagerInbox() {
         inq.id === id ? { ...inq, status: 'resolved' as const } : inq
       )
     );
-    toast.success('התשובה נשלחה בהצלחה');
+    toast.success('Reply sent successfully');
   };
 
   const pendingCount = localInquiries.filter(i => i.status === 'pending').length;
@@ -41,7 +46,7 @@ export default function ManagerInbox() {
       
       <main className="flex-1 pb-20 lg:pb-0">
         {/* Header */}
-        <div className="bg-card border-b border-border p-6">
+        <div className="bg-gradient-hero p-6 pt-12 lg:pt-6">
           <div className="max-w-3xl mx-auto">
             <motion.div
               initial={{ opacity: 0, y: -20 }}
@@ -49,12 +54,14 @@ export default function ManagerInbox() {
               transition={{ duration: 0.5 }}
               className="flex items-center justify-between"
             >
-              <div>
-                <h1 className="text-2xl font-bold text-foreground mb-1">תיבת פניות</h1>
-                <p className="text-muted-foreground">{pendingCount} פניות ממתינות לטיפול</p>
-              </div>
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Inbox className="w-6 h-6 text-primary" />
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center">
+                  <Inbox className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-white mb-1">Inbox</h1>
+                  <p className="text-white/80">{pendingCount} pending inquiries</p>
+                </div>
               </div>
             </motion.div>
           </div>
@@ -64,13 +71,13 @@ export default function ManagerInbox() {
           {localInquiries.length === 0 ? (
             <div className="card-elevated p-12 text-center">
               <MessageSquare className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
-              <p className="text-muted-foreground">אין פניות</p>
+              <p className="text-muted-foreground">No inquiries</p>
             </div>
           ) : (
             <div className="space-y-4">
               {localInquiries.map((inquiry, index) => {
                 const TypeIcon = typeIcons[inquiry.type];
-                const formattedDate = format(new Date(inquiry.date), 'd בMMMM', { locale: he });
+                const formattedDate = format(new Date(inquiry.date), 'MMM d, yyyy');
 
                 return (
                   <motion.div
@@ -80,32 +87,35 @@ export default function ManagerInbox() {
                     transition={{ delay: index * 0.1, duration: 0.4 }}
                     className={cn(
                       "card-elevated p-5 transition-all",
-                      inquiry.status === 'pending' ? 'border-r-4 border-r-warning' : ''
+                      inquiry.status === 'pending' ? 'border-l-4 border-l-warning' : ''
                     )}
                   >
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-3">
                         <div className={cn(
-                          "w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold",
-                          inquiry.status === 'pending' ? 'bg-warning/20 text-warning' : 'bg-success/20 text-success'
+                          "w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold bg-gradient-to-br",
+                          inquiry.status === 'pending' ? typeColors[inquiry.type] : 'from-success to-teal-400',
+                          'text-white'
                         )}>
                           {inquiry.userName.charAt(0)}
                         </div>
                         <div>
-                          <p className="font-medium text-foreground">{inquiry.userName}</p>
+                          <p className="font-semibold text-foreground">{inquiry.userName}</p>
                           <p className="text-xs text-muted-foreground">{formattedDate}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
                         <span className={cn(
-                          "px-2 py-1 rounded-full text-xs font-medium",
+                          "px-3 py-1 rounded-full text-xs font-bold",
                           inquiry.status === 'pending' 
-                            ? 'bg-warning/10 text-warning' 
-                            : 'bg-success/10 text-success'
+                            ? 'bg-warning/15 text-warning' 
+                            : 'bg-success/15 text-success'
                         )}>
-                          {inquiry.status === 'pending' ? 'ממתין' : 'טופל'}
+                          {inquiry.status === 'pending' ? 'Pending' : 'Resolved'}
                         </span>
-                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground flex items-center gap-1">
+                        <span className={cn(
+                          "px-3 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground flex items-center gap-1"
+                        )}>
                           <TypeIcon className="w-3 h-3" />
                           {typeLabels[inquiry.type]}
                         </span>
@@ -120,17 +130,17 @@ export default function ManagerInbox() {
                     {inquiry.status === 'pending' && (
                       <button
                         onClick={() => handleReply(inquiry.id)}
-                        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground font-medium text-sm hover:opacity-90 transition-opacity"
+                        className="flex items-center gap-2 px-4 py-2 btn-primary-gradient text-sm"
                       >
                         <Reply className="w-4 h-4" />
-                        שלח תשובה
+                        Send Reply
                       </button>
                     )}
 
                     {inquiry.status === 'resolved' && (
-                      <div className="flex items-center gap-2 text-sm text-success">
+                      <div className="flex items-center gap-2 text-sm text-success font-medium">
                         <Check className="w-4 h-4" />
-                        הפנייה טופלה
+                        Inquiry resolved
                       </div>
                     )}
                   </motion.div>

@@ -4,10 +4,10 @@ import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
 const navItems = [
-  { path: '/manager', icon: LayoutDashboard, label: 'סקירה' },
-  { path: '/manager/inbox', icon: Inbox, label: 'פניות' },
-  { path: '/manager/analytics', icon: BarChart3, label: 'נתונים' },
-  { path: '/manager/events', icon: Calendar, label: 'אירועים' },
+  { path: '/manager', icon: LayoutDashboard, label: 'Overview' },
+  { path: '/manager/inbox', icon: Inbox, label: 'Inbox' },
+  { path: '/manager/analytics', icon: BarChart3, label: 'Analytics' },
+  { path: '/manager/events', icon: Calendar, label: 'Events' },
 ];
 
 export function MobileManagerNav() {
@@ -21,7 +21,7 @@ export function MobileManagerNav() {
   };
 
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border glass-effect z-50">
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-lg border-t border-border z-50">
       <div className="flex items-center justify-around py-2 px-2">
         {navItems.map(({ path, icon: Icon, label }) => {
           const active = isActive(path);
@@ -36,7 +36,7 @@ export function MobileManagerNav() {
               {active && (
                 <motion.div
                   layoutId="managerActiveTab"
-                  className="absolute inset-0 bg-primary/10 rounded-xl"
+                  className="absolute inset-0 bg-gradient-to-r from-primary/15 to-accent/15 rounded-2xl"
                   transition={{ type: 'spring', duration: 0.4 }}
                 />
               )}

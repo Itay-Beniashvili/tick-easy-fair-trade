@@ -10,16 +10,16 @@ export default function Wallet() {
   return (
     <div className="min-h-screen bg-background pb-24">
       {/* Header */}
-      <div className="bg-gradient-to-b from-primary to-primary/90 pt-12 pb-8 px-4">
+      <div className="bg-gradient-hero pt-12 pb-8 px-4">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           className="max-w-lg mx-auto"
         >
-          <h1 className="text-2xl font-bold text-primary-foreground mb-1">הכרטיסים שלי</h1>
-          <p className="text-primary-foreground/80">
-            {userTickets.length} כרטיסים בארנק
+          <h1 className="text-2xl font-bold text-white mb-1">My Tickets</h1>
+          <p className="text-white/80">
+            {userTickets.length} {userTickets.length === 1 ? 'ticket' : 'tickets'} in your wallet
           </p>
         </motion.div>
       </div>
@@ -31,12 +31,12 @@ export default function Wallet() {
             animate={{ opacity: 1, scale: 1 }}
             className="text-center py-16"
           >
-            <div className="w-20 h-20 rounded-2xl bg-muted mx-auto mb-4 flex items-center justify-center">
-              <Ticket className="w-10 h-10 text-muted-foreground" />
+            <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-primary/20 to-accent/20 mx-auto mb-4 flex items-center justify-center">
+              <Ticket className="w-12 h-12 text-primary" />
             </div>
-            <h2 className="text-lg font-semibold text-foreground mb-2">אין כרטיסים</h2>
+            <h2 className="text-lg font-semibold text-foreground mb-2">No tickets yet</h2>
             <p className="text-muted-foreground">
-              הכרטיסים שתרכוש יופיעו כאן
+              Your purchased tickets will appear here
             </p>
           </motion.div>
         ) : (

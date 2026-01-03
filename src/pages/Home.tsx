@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Flame } from 'lucide-react';
 import { SearchBar } from '@/components/SearchBar';
 import { EventCard } from '@/components/EventCard';
 import { BottomNav } from '@/components/BottomNav';
@@ -14,10 +14,10 @@ export default function Home() {
   const filteredEvents = useMemo(() => {
     return events.filter(event => {
       const matchesSearch =
-        event.title.includes(search) ||
-        event.venue.includes(search) ||
-        event.city.includes(search) ||
-        event.artist.includes(search);
+        event.title.toLowerCase().includes(search.toLowerCase()) ||
+        event.venue.toLowerCase().includes(search.toLowerCase()) ||
+        event.city.toLowerCase().includes(search.toLowerCase()) ||
+        event.artist.toLowerCase().includes(search.toLowerCase());
 
       return matchesSearch;
     });
@@ -31,15 +31,17 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background pb-24">
       {/* Header */}
-      <div className="bg-gradient-to-b from-primary to-primary/90 pt-12 pb-8 px-4">
+      <div className="bg-gradient-hero pt-12 pb-8 px-4">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           className="max-w-lg mx-auto"
         >
-          <h1 className="text-2xl font-bold text-primary-foreground mb-1">שלום! 👋</h1>
-          <p className="text-primary-foreground/80 mb-6">מה נחווה היום?</p>
+          <div className="flex items-center gap-2 mb-1">
+            <h1 className="text-2xl font-bold text-white">Hey there! 👋</h1>
+          </div>
+          <p className="text-white/80 mb-6">What amazing event awaits you today?</p>
           <SearchBar value={search} onChange={setSearch} />
         </motion.div>
       </div>
@@ -49,13 +51,13 @@ export default function Home() {
         {recommendedEvents.length > 0 && !search && (
           <section>
             <motion.div
-              initial={{ opacity: 0, x: 20 }}
+              initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.4 }}
               className="flex items-center gap-2 mb-4"
             >
               <Sparkles className="w-5 h-5 text-warning" />
-              <h2 className="text-lg font-bold text-foreground">מומלץ עבורך</h2>
+              <h2 className="text-lg font-bold text-foreground">Recommended for you</h2>
             </motion.div>
             <div className="space-y-4">
               {recommendedEvents.slice(0, 3).map((event, index) => (
@@ -67,14 +69,17 @@ export default function Home() {
 
         {/* All Events */}
         <section>
-          <motion.h2
-            initial={{ opacity: 0, x: 20 }}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.4, delay: 0.2 }}
-            className="text-lg font-bold text-foreground mb-4"
+            className="flex items-center gap-2 mb-4"
           >
-            {search ? `תוצאות חיפוש` : 'כל האירועים'}
-          </motion.h2>
+            <Flame className="w-5 h-5 text-primary" />
+            <h2 className="text-lg font-bold text-foreground">
+              {search ? 'Search Results' : 'Hot Events'}
+            </h2>
+          </motion.div>
           
           {filteredEvents.length === 0 ? (
             <motion.div
@@ -82,7 +87,7 @@ export default function Home() {
               animate={{ opacity: 1 }}
               className="text-center py-12"
             >
-              <p className="text-muted-foreground">לא נמצאו אירועים</p>
+              <p className="text-muted-foreground">No events found</p>
             </motion.div>
           ) : (
             <div className="space-y-4">

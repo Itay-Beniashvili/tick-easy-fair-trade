@@ -1,16 +1,16 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Music, Trophy, Theater, ArrowLeft, Check } from 'lucide-react';
+import { Music, Trophy, Theater, ArrowRight, Check } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
 type Genre = 'music' | 'sports' | 'theater';
 
-const genres: { id: Genre; label: string; icon: typeof Music; description: string }[] = [
-  { id: 'music', label: 'מוזיקה', icon: Music, description: 'הופעות, פסטיבלים וקונצרטים' },
-  { id: 'sports', label: 'ספורט', icon: Trophy, description: 'כדורגל, כדורסל ועוד' },
-  { id: 'theater', label: 'תיאטרון', icon: Theater, description: 'הצגות, מחזות ומופעים' },
+const genres: { id: Genre; label: string; icon: typeof Music; description: string; color: string }[] = [
+  { id: 'music', label: 'Music', icon: Music, description: 'Concerts, festivals & live shows', color: 'from-primary to-accent' },
+  { id: 'sports', label: 'Sports', icon: Trophy, description: 'Basketball, football & more', color: 'from-success to-teal-400' },
+  { id: 'theater', label: 'Theater', icon: Theater, description: 'Broadway, plays & performances', color: 'from-highlight to-purple-400' },
 ];
 
 export function UserOnboarding() {
@@ -42,10 +42,10 @@ export function UserOnboarding() {
           transition={{ duration: 0.5 }}
         >
           <h1 className="text-2xl font-bold text-foreground mb-2">
-            בוא נכיר אותך טוב יותר
+            What do you love? 🎉
           </h1>
           <p className="text-muted-foreground">
-            בחר את הקטגוריות שמעניינות אותך כדי לקבל המלצות מותאמות אישית
+            Select your favorite categories for personalized recommendations
           </p>
         </motion.div>
       </div>
@@ -59,35 +59,36 @@ export function UserOnboarding() {
           return (
             <motion.button
               key={genre.id}
-              initial={{ opacity: 0, x: 30 }}
+              initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.1, duration: 0.4 }}
               onClick={() => toggleGenre(genre.id)}
               className={cn(
-                'w-full p-5 rounded-2xl border-2 transition-all duration-200 text-right',
+                'w-full p-5 rounded-2xl border-2 transition-all duration-300 text-left',
                 isSelected
-                  ? 'border-primary bg-primary/5 shadow-md'
-                  : 'border-border bg-card hover:border-primary/30'
+                  ? 'border-primary bg-primary/5 shadow-lg shadow-primary/10'
+                  : 'border-border bg-card hover:border-primary/30 hover:shadow-md'
               )}
             >
               <div className="flex items-center gap-4">
                 <div
                   className={cn(
-                    'w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-colors',
-                    isSelected ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+                    'w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 transition-all bg-gradient-to-br',
+                    isSelected ? genre.color : 'from-muted to-muted',
+                    isSelected ? 'text-white' : 'text-muted-foreground'
                   )}
                 >
-                  <Icon className="w-6 h-6" />
+                  <Icon className="w-7 h-7" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-semibold text-foreground text-lg">{genre.label}</h3>
+                  <h3 className="font-bold text-foreground text-lg">{genre.label}</h3>
                   <p className="text-sm text-muted-foreground">{genre.description}</p>
                 </div>
                 <div
                   className={cn(
-                    'w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all',
+                    'w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all',
                     isSelected
-                      ? 'border-primary bg-primary text-primary-foreground'
+                      ? 'border-primary bg-primary text-white scale-110'
                       : 'border-muted-foreground/30'
                   )}
                 >
@@ -114,8 +115,8 @@ export function UserOnboarding() {
               : 'bg-muted text-muted-foreground cursor-not-allowed'
           )}
         >
-          <span>המשך</span>
-          <ArrowLeft className="w-5 h-5" />
+          <span>Continue</span>
+          <ArrowRight className="w-5 h-5" />
         </motion.button>
 
         <button
@@ -125,7 +126,7 @@ export function UserOnboarding() {
           }}
           className="w-full mt-3 py-3 text-muted-foreground text-sm hover:text-foreground transition-colors"
         >
-          דלג לעכשיו
+          Skip for now
         </button>
       </div>
     </div>
