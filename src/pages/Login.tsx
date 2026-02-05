@@ -37,8 +37,8 @@
          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm mb-4">
            <Ticket className="w-8 h-8 text-white" />
          </div>
-         <h1 className="text-3xl font-bold text-white mb-1">ברוכים הבאים!</h1>
-         <p className="text-white/70">התחברו לחשבון שלכם</p>
+         <h1 className="text-3xl font-bold text-white mb-1">Welcome Back!</h1>
+         <p className="text-white/70">Sign in to your account</p>
        </motion.div>
  
        {/* Login Form */}
@@ -53,11 +53,10 @@
              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
              <Input
                type="email"
-               placeholder="כתובת מייל"
+               placeholder="Email address"
                value={email}
                onChange={(e) => setEmail(e.target.value)}
-               className="pl-10 h-12 bg-white/90 border-0 rounded-xl text-right"
-               dir="rtl"
+               className="pl-10 h-12 bg-white/90 border-0 rounded-xl"
              />
            </div>
            
@@ -65,11 +64,10 @@
              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
              <Input
                type={showPassword ? 'text' : 'password'}
-               placeholder="סיסמה"
+               placeholder="Password"
                value={password}
                onChange={(e) => setPassword(e.target.value)}
-               className="pl-10 pr-10 h-12 bg-white/90 border-0 rounded-xl text-right"
-               dir="rtl"
+               className="pl-10 pr-10 h-12 bg-white/90 border-0 rounded-xl"
              />
              <button
                type="button"
@@ -84,23 +82,23 @@
              type="submit"
              className="w-full h-12 rounded-xl btn-primary-gradient text-lg font-semibold"
            >
-             התחברות
+             Sign In
              <ArrowRight className="w-5 h-5 mr-2" />
            </Button>
          </form>
  
          <div className="mt-6 text-center">
            <p className="text-white/70">
-             עדיין אין לכם חשבון?{' '}
+             Don't have an account?{' '}
              <Link to="/register" className="text-white font-semibold underline">
-               הרשמה
+               Sign Up
              </Link>
            </p>
          </div>
  
          <div className="mt-4 text-center">
            <Link to="/" className="text-white/50 text-sm hover:text-white/70 transition-colors">
-             חזרה לבחירת תפקיד
+             Back to role selection
            </Link>
          </div>
        </motion.div>

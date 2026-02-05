@@ -1,9 +1,11 @@
 import { motion } from 'framer-motion';
-import { BarChart3, TrendingUp, TrendingDown, Activity } from 'lucide-react';
+ import { BarChart3, TrendingUp, TrendingDown, Activity, ChevronDown } from 'lucide-react';
 import { ManagerSidebar } from '@/components/ManagerSidebar';
 import { MobileManagerNav } from '@/components/MobileManagerNav';
-import { salesData } from '@/data/mockData';
+ import { salesData, events } from '@/data/mockData';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
+ import { useState } from 'react';
+ import { cn } from '@/lib/utils';
 
 const genreData = [
   { name: 'Music', value: 55, color: 'hsl(24, 95%, 53%)' },
@@ -22,11 +24,29 @@ const monthlyData = [
   { month: 'Aug', revenue: 85000 },
 ];
 
+ // Mock per-event analytics
+ const eventAnalytics = events.map(event => ({
+   id: event.id,
+   title: event.title,
+   ticketsSold: Math.floor(Math.random() * 500) + 100,
+   revenue: Math.floor(Math.random() * 50000) + 10000,
+   resaleCount: event.resaleTickets.length,
+   avgPrice: event.price,
+   conversionRate: Math.floor(Math.random() * 30) + 50,
+ }));
+ 
 export default function ManagerAnalytics() {
+   const [selectedEvent, setSelectedEvent] = useState<string>('all');
+   const [showEventDropdown, setShowEventDropdown] = useState(false);
+ 
   const totalRevenue = salesData.reduce((sum, d) => sum + d.revenue, 0);
   const totalSales = salesData.reduce((sum, d) => sum + d.sales, 0);
   const avgTicketPrice = Math.round(totalRevenue / totalSales);
 
+   const selectedEventData = selectedEvent === 'all' 
+     ? null 
+     : eventAnalytics.find(e => e.id === selectedEvent);
+ 
   return (
     <div className="min-h-screen bg-background flex">
       <ManagerSidebar />
@@ -53,8 +73,88 @@ export default function ManagerAnalytics() {
         </div>
 
         <div className="max-w-5xl mx-auto p-6 space-y-6">
+           {/* Event Filter */}
+           <motion.div
+             initial={{ opacity: 0, y: 20 }}
+             animate={{ opacity: 1, y: 0 }}
+             className="relative"
+           >
+             <button
+               onClick={() => setShowEventDropdown(!showEventDropdown)}
+               className="w-full sm:w-auto flex items-center justify-between gap-4 px-4 py-3 bg-card border border-border rounded-2xl hover:border-primary/50 transition-colors"
+             >
+               <span className="font-semibold text-foreground">
+                 {selectedEvent === 'all' ? 'All Events' : events.find(e => e.id === selectedEvent)?.title}
+               </span>
+               <ChevronDown className={cn(
+                 "w-5 h-5 text-muted-foreground transition-transform",
+                 showEventDropdown && "rotate-180"
+               )} />
+             </button>
+ 
+             {showEventDropdown && (
+               <motion.div
+                 initial={{ opacity: 0, y: -10 }}
+                 animate={{ opacity: 1, y: 0 }}
+                 className="absolute top-full left-0 right-0 sm:right-auto mt-2 bg-card border border-border rounded-2xl shadow-elevated z-10 overflow-hidden"
+               >
+                 <button
+                   onClick={() => { setSelectedEvent('all'); setShowEventDropdown(false); }}
+                   className={cn(
+                     "w-full px-4 py-3 text-left hover:bg-muted transition-colors",
+                     selectedEvent === 'all' && "bg-primary/10 text-primary"
+                   )}
+                 >
+                   All Events
+                 </button>
+                 {events.map(event => (
+                   <button
+                     key={event.id}
+                     onClick={() => { setSelectedEvent(event.id); setShowEventDropdown(false); }}
+                     className={cn(
+                       "w-full px-4 py-3 text-left hover:bg-muted transition-colors text-sm",
+                       selectedEvent === event.id && "bg-primary/10 text-primary"
+                     )}
+                   >
+                     {event.title}
+                   </button>
+                 ))}
+               </motion.div>
+             )}
+           </motion.div>
+ 
+           {/* Event-specific stats */}
+           {selectedEventData && (
+             <motion.div
+               initial={{ opacity: 0, y: 20 }}
+               animate={{ opacity: 1, y: 0 }}
+               className="card-elevated p-6"
+             >
+               <h2 className="text-lg font-bold text-foreground mb-4">{selectedEventData.title}</h2>
+               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                 <div className="p-4 bg-muted rounded-xl">
+                   <p className="text-2xl font-bold text-gradient-warm">{selectedEventData.ticketsSold}</p>
+                   <p className="text-xs text-muted-foreground">Tickets Sold</p>
+                 </div>
+                 <div className="p-4 bg-muted rounded-xl">
+                   <p className="text-2xl font-bold text-gradient-warm">${selectedEventData.revenue.toLocaleString()}</p>
+                   <p className="text-xs text-muted-foreground">Revenue</p>
+                 </div>
+                 <div className="p-4 bg-muted rounded-xl">
+                   <p className="text-2xl font-bold text-gradient-warm">{selectedEventData.resaleCount}</p>
+                   <p className="text-xs text-muted-foreground">Resale Listings</p>
+                 </div>
+                 <div className="p-4 bg-muted rounded-xl">
+                   <p className="text-2xl font-bold text-gradient-warm">{selectedEventData.conversionRate}%</p>
+                   <p className="text-xs text-muted-foreground">Conversion Rate</p>
+                 </div>
+               </div>
+             </motion.div>
+           )}
+ 
           {/* Summary Stats */}
-          <div className="grid grid-cols-3 gap-4">
+           {selectedEvent === 'all' && (
+             <div className="grid grid-cols-3 gap-4">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -97,6 +197,7 @@ export default function ManagerAnalytics() {
               <p className="text-xs text-muted-foreground">Avg Price</p>
             </motion.div>
           </div>
+           )}
 
           <div className="grid lg:grid-cols-2 gap-6">
             {/* Revenue Chart */}

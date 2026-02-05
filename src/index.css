@@ -60,6 +60,7 @@
     --gradient-success: linear-gradient(135deg, hsl(168 75% 42%) 0%, hsl(160 65% 50%) 100%);
     --gradient-warm: linear-gradient(135deg, hsl(45 100% 55%) 0%, hsl(24 95% 53%) 50%, hsl(350 80% 55%) 100%);
     --gradient-sunset: linear-gradient(180deg, hsl(24 90% 55%) 0%, hsl(350 70% 50%) 100%);
+   --gradient-manager: linear-gradient(135deg, hsl(220 30% 15%) 0%, hsl(220 25% 20%) 50%, hsl(220 20% 12%) 100%);
 
     /* Shadows */
     --shadow-sm: 0 1px 2px 0 hsl(20 30% 15% / 0.05);
@@ -185,6 +186,10 @@
   .bg-gradient-sunset {
     background: var(--gradient-sunset);
   }
+ 
+   .bg-gradient-manager {
+     background: var(--gradient-manager);
+   }
 
   .animate-fade-in {
     animation: fadeIn 0.5s ease-out forwards;

@@ -21,7 +21,7 @@
    };
  
    return (
-     <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+     <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-manager">
        {/* Decorative circles */}
        <div className="absolute top-20 left-10 w-32 h-32 rounded-full bg-primary/10 blur-3xl" />
        <div className="absolute bottom-20 right-10 w-40 h-40 rounded-full bg-accent/10 blur-3xl" />
@@ -36,8 +36,8 @@
          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-sm mb-4">
            <Settings className="w-8 h-8 text-white" />
          </div>
-         <h1 className="text-3xl font-bold text-white mb-1">ממשק מנהלים</h1>
-         <p className="text-white/70">התחברו לניהול האירועים שלכם</p>
+         <h1 className="text-3xl font-bold text-white mb-1">Manager Portal</h1>
+         <p className="text-white/70">Sign in to manage your events</p>
        </motion.div>
  
        {/* Login Form */}
@@ -49,31 +49,29 @@
        >
          <form onSubmit={handleLogin} className="space-y-4">
            <div className="relative">
-             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
              <Input
                type="email"
-               placeholder="כתובת מייל"
+               placeholder="Email address"
                value={email}
                onChange={(e) => setEmail(e.target.value)}
-               className="pl-10 h-12 bg-white/10 border-white/20 rounded-xl text-white text-right placeholder:text-slate-400"
-               dir="rtl"
+               className="pl-10 h-12 bg-white/10 border-white/20 rounded-xl text-white placeholder:text-muted-foreground"
              />
            </div>
            
            <div className="relative">
-             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
              <Input
                type={showPassword ? 'text' : 'password'}
-               placeholder="סיסמה"
+               placeholder="Password"
                value={password}
                onChange={(e) => setPassword(e.target.value)}
-               className="pl-10 pr-10 h-12 bg-white/10 border-white/20 rounded-xl text-white text-right placeholder:text-slate-400"
-               dir="rtl"
+               className="pl-10 pr-10 h-12 bg-white/10 border-white/20 rounded-xl text-white placeholder:text-muted-foreground"
              />
              <button
                type="button"
                onClick={() => setShowPassword(!showPassword)}
-               className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+               className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
              >
                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
              </button>
@@ -83,23 +81,23 @@
              type="submit"
              className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 text-lg font-semibold"
            >
-             התחברות
+             Sign In
              <ArrowRight className="w-5 h-5 mr-2" />
            </Button>
          </form>
  
          <div className="mt-6 text-center">
            <p className="text-white/70">
-             עדיין אין לכם חשבון?{' '}
+             Don't have an account?{' '}
              <Link to="/manager/register" className="text-white font-semibold underline">
-               הרשמה כמנהל אירועים
+               Register as Event Manager
              </Link>
            </p>
          </div>
  
          <div className="mt-4 text-center">
            <Link to="/" className="text-white/50 text-sm hover:text-white/70 transition-colors">
-             חזרה לבחירת תפקיד
+             Back to role selection
            </Link>
          </div>
        </motion.div>

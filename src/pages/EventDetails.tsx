@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, MapPin, Calendar, Clock, Users, Tag, Shield, CheckCircle, AlertCircle } from 'lucide-react';
+ import { ArrowLeft, MapPin, Calendar, Clock, Users, Tag, Shield, CheckCircle, AlertCircle, MessageCircle } from 'lucide-react';
 import { events } from '@/data/mockData';
 import { useApp } from '@/context/AppContext';
 import { GroupPurchaseTimer } from '@/components/GroupPurchaseTimer';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+ import { ContactManagerModal } from '@/components/ContactManagerModal';
 
 export default function EventDetails() {
   const { id } = useParams();
@@ -15,6 +16,7 @@ export default function EventDetails() {
   const { addTicket } = useApp();
   const [showGroupPurchase, setShowGroupPurchase] = useState(false);
   const [selectedTab, setSelectedTab] = useState<'primary' | 'resale'>('primary');
+   const [showContactManager, setShowContactManager] = useState(false);
 
   const event = events.find(e => e.id === id);
 
@@ -185,6 +187,14 @@ export default function EventDetails() {
                 <Users className="w-5 h-5" />
                 Group Purchase
               </button>
+ 
+             <button
+               onClick={() => setShowContactManager(true)}
+               className="w-full py-3 rounded-2xl bg-muted text-foreground font-medium flex items-center justify-center gap-2 hover:bg-muted/80 transition-all"
+             >
+               <MessageCircle className="w-5 h-5" />
+               Contact Event Manager
+             </button>
             </motion.div>
           )}
 
@@ -258,6 +268,12 @@ export default function EventDetails() {
         onClose={() => setShowGroupPurchase(false)}
         eventTitle={event.title}
       />
+ 
+     <ContactManagerModal
+       isOpen={showContactManager}
+       onClose={() => setShowContactManager(false)}
+       eventTitle={event.title}
+     />
     </div>
   );
 }

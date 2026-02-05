@@ -50,9 +50,9 @@ export function RoleSelection() {
                  <User className="w-7 h-7 text-white" />
                </div>
                <div className="flex-1">
-                 <h2 className="text-xl font-bold text-foreground mb-1">קונה כרטיסים</h2>
+                 <h2 className="text-xl font-bold text-foreground mb-1">Ticket Buyer</h2>
                  <p className="text-muted-foreground text-sm">
-                   גלו אירועים, קנו כרטיסים ונהלו את הארנק שלכם
+                   Discover events, buy tickets & manage your wallet
                  </p>
                </div>
             </div>
@@ -73,9 +73,9 @@ export function RoleSelection() {
                  <Settings className="w-7 h-7 text-white" />
                </div>
                <div className="flex-1">
-                 <h2 className="text-xl font-bold text-white mb-1">מנהל אירועים</h2>
+                 <h2 className="text-xl font-bold text-white mb-1">Event Manager</h2>
                  <p className="text-white/70 text-sm">
-                   נהלו אירועים, צפו בסטטיסטיקות וטפלו בפניות
+                   Manage events, view analytics & handle inquiries
                  </p>
                </div>
             </div>
@@ -90,7 +90,7 @@ export function RoleSelection() {
         transition={{ delay: 0.6, duration: 0.5 }}
         className="mt-12 text-white/60 text-sm text-center relative z-10"
       >
-         הפלטפורמה #1 לכרטיסים מאובטחים
+         The #1 platform for secure event tickets
       </motion.p>
     </div>
   );
