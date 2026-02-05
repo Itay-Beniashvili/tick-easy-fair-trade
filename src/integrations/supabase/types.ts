@@ -14,16 +14,138 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          preferred_artists: string[] | null
+          preferred_genres: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          preferred_artists?: string[] | null
+          preferred_genres?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          preferred_artists?: string[] | null
+          preferred_genres?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      tickets: {
+        Row: {
+          created_at: string
+          event_city: string
+          event_date: string
+          event_id: string
+          event_image: string | null
+          event_time: string
+          event_title: string
+          event_venue: string
+          id: string
+          is_for_sale: boolean | null
+          price: number
+          purchase_date: string
+          qr_code: string | null
+          sale_price: number | null
+          seat_info: string | null
+          ticket_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_city: string
+          event_date: string
+          event_id: string
+          event_image?: string | null
+          event_time: string
+          event_title: string
+          event_venue: string
+          id?: string
+          is_for_sale?: boolean | null
+          price: number
+          purchase_date?: string
+          qr_code?: string | null
+          sale_price?: number | null
+          seat_info?: string | null
+          ticket_type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_city?: string
+          event_date?: string
+          event_id?: string
+          event_image?: string | null
+          event_time?: string
+          event_title?: string
+          event_venue?: string
+          id?: string
+          is_for_sale?: boolean | null
+          price?: number
+          purchase_date?: string
+          qr_code?: string | null
+          sale_price?: number | null
+          seat_info?: string | null
+          ticket_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user" | "manager"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +272,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user", "manager"],
+    },
   },
 } as const
