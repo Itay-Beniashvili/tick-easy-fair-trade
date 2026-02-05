@@ -15,6 +15,10 @@ import ManagerInbox from "./pages/ManagerInbox";
 import ManagerAnalytics from "./pages/ManagerAnalytics";
 import ManagerEvents from "./pages/ManagerEvents";
 import NotFound from "./pages/NotFound";
+ import Login from "./pages/Login";
+ import Register from "./pages/Register";
+ import ManagerLogin from "./pages/ManagerLogin";
+ import ManagerRegister from "./pages/ManagerRegister";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +31,10 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<RoleSelection />} />
+             <Route path="/login" element={<Login />} />
+             <Route path="/register" element={<Register />} />
+             <Route path="/manager/login" element={<ManagerLogin />} />
+             <Route path="/manager/register" element={<ManagerRegister />} />
             <Route path="/onboarding" element={<UserOnboarding />} />
             <Route path="/home" element={<Home />} />
             <Route path="/wallet" element={<Wallet />} />
