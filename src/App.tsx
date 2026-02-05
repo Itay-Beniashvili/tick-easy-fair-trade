@@ -19,6 +19,8 @@ import NotFound from "./pages/NotFound";
  import Register from "./pages/Register";
  import ManagerLogin from "./pages/ManagerLogin";
  import ManagerRegister from "./pages/ManagerRegister";
+ import Marketplace from "./pages/Marketplace";
+ import GroupPurchaseStatus from "./pages/GroupPurchaseStatus";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +42,8 @@ const App = () => (
             <Route path="/wallet" element={<Wallet />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/event/:id" element={<EventDetails />} />
+           <Route path="/marketplace" element={<Marketplace />} />
+           <Route path="/group-purchase/:id" element={<GroupPurchaseStatus />} />
             <Route path="/manager" element={<Manager />} />
             <Route path="/manager/inbox" element={<ManagerInbox />} />
             <Route path="/manager/analytics" element={<ManagerAnalytics />} />

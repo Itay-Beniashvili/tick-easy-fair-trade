@@ -3,10 +3,12 @@ import { MapPin, Calendar, Clock, Tag } from 'lucide-react';
 import { Event, genreLabels } from '@/data/mockData';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
+ import { cn } from '@/lib/utils';
 
 interface EventCardProps {
   event: Event;
   index?: number;
+   compact?: boolean;
 }
 
 const genreColors: Record<string, string> = {
@@ -15,10 +17,42 @@ const genreColors: Record<string, string> = {
   theater: 'bg-gradient-to-r from-highlight to-purple-400',
 };
 
-export function EventCard({ event, index = 0 }: EventCardProps) {
+ export function EventCard({ event, index = 0, compact = false }: EventCardProps) {
   const navigate = useNavigate();
 
   const formattedDate = format(new Date(event.date), 'EEEE, MMMM d');
+   const shortDate = format(new Date(event.date), 'MMM d');
+ 
+   if (compact) {
+     return (
+       <motion.div
+         initial={{ opacity: 0, y: 10 }}
+         animate={{ opacity: 1, y: 0 }}
+         transition={{ delay: index * 0.05, duration: 0.3 }}
+         onClick={() => navigate(`/event/${event.id}`)}
+         className="card-elevated overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-elevated hover:scale-[1.02] active:scale-[0.98]"
+       >
+         <div className="relative h-24 overflow-hidden">
+           <img
+             src={event.image}
+             alt={event.title}
+             className="w-full h-full object-cover"
+           />
+           <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+           <div className="absolute bottom-2 left-2 right-2">
+             <h3 className="text-white font-bold text-xs leading-tight truncate">{event.title}</h3>
+             <p className="text-white/70 text-[10px]">{shortDate}</p>
+           </div>
+         </div>
+         <div className="p-2 flex items-center justify-between">
+           <span className="font-bold text-primary text-sm">${event.price}</span>
+           {event.resaleTickets.length > 0 && (
+             <span className="text-[10px] text-success font-semibold">Resale</span>
+           )}
+         </div>
+       </motion.div>
+     );
+   }
 
   return (
     <motion.div
