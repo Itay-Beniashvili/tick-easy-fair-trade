@@ -1,21 +1,8 @@
-import { motion } from 'framer-motion';
-import { User, Settings, Ticket, Shield } from 'lucide-react';
-import { useApp } from '@/context/AppContext';
-import { useNavigate } from 'react-router-dom';
+ import { motion } from 'framer-motion';
+ import { User, Settings, Ticket, Shield } from 'lucide-react';
+ import { Link } from 'react-router-dom';
 
 export function RoleSelection() {
-  const { setRole } = useApp();
-  const navigate = useNavigate();
-
-  const handleRoleSelect = (role: 'user' | 'manager') => {
-    setRole(role);
-    if (role === 'user') {
-      navigate('/onboarding');
-    } else {
-      navigate('/manager');
-    }
-  };
-
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-hero">
       {/* Decorative circles */}
@@ -49,45 +36,51 @@ export function RoleSelection() {
 
       {/* Role Cards */}
       <div className="w-full max-w-md space-y-4 relative z-10">
-        <motion.button
+         <motion.div
           initial={{ opacity: 0, x: -50 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.3, duration: 0.5 }}
-          onClick={() => handleRoleSelect('user')}
-          className="w-full p-6 rounded-3xl bg-white shadow-elevated text-left transition-all hover:scale-[1.02] hover:shadow-glow active:scale-[0.98]"
         >
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-warm flex items-center justify-center shrink-0">
-              <User className="w-7 h-7 text-white" />
+           <Link
+             to="/login"
+             className="block w-full p-6 rounded-3xl bg-white shadow-elevated text-left transition-all hover:scale-[1.02] hover:shadow-glow active:scale-[0.98]"
+           >
+             <div className="flex items-center gap-4">
+               <div className="w-14 h-14 rounded-2xl bg-gradient-warm flex items-center justify-center shrink-0">
+                 <User className="w-7 h-7 text-white" />
+               </div>
+               <div className="flex-1">
+                 <h2 className="text-xl font-bold text-foreground mb-1">קונה כרטיסים</h2>
+                 <p className="text-muted-foreground text-sm">
+                   גלו אירועים, קנו כרטיסים ונהלו את הארנק שלכם
+                 </p>
+               </div>
             </div>
-            <div className="flex-1">
-              <h2 className="text-xl font-bold text-foreground mb-1">Ticket Buyer</h2>
-              <p className="text-muted-foreground text-sm">
-                Discover events, buy tickets & manage your wallet
-              </p>
-            </div>
-          </div>
-        </motion.button>
+           </Link>
+         </motion.div>
 
-        <motion.button
+         <motion.div
           initial={{ opacity: 0, x: -50 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.4, duration: 0.5 }}
-          onClick={() => handleRoleSelect('manager')}
-          className="w-full p-6 rounded-3xl bg-white/10 backdrop-blur-sm border border-white/20 text-left transition-all hover:scale-[1.02] hover:bg-white/20 active:scale-[0.98]"
         >
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center shrink-0">
-              <Settings className="w-7 h-7 text-white" />
+           <Link
+             to="/manager/login"
+             className="block w-full p-6 rounded-3xl bg-white/10 backdrop-blur-sm border border-white/20 text-left transition-all hover:scale-[1.02] hover:bg-white/20 active:scale-[0.98]"
+           >
+             <div className="flex items-center gap-4">
+               <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center shrink-0">
+                 <Settings className="w-7 h-7 text-white" />
+               </div>
+               <div className="flex-1">
+                 <h2 className="text-xl font-bold text-white mb-1">מנהל אירועים</h2>
+                 <p className="text-white/70 text-sm">
+                   נהלו אירועים, צפו בסטטיסטיקות וטפלו בפניות
+                 </p>
+               </div>
             </div>
-            <div className="flex-1">
-              <h2 className="text-xl font-bold text-white mb-1">Event Manager</h2>
-              <p className="text-white/70 text-sm">
-                Manage events, view analytics & handle inquiries
-              </p>
-            </div>
-          </div>
-        </motion.button>
+           </Link>
+         </motion.div>
       </div>
 
       {/* Bottom Text */}
@@ -97,7 +90,7 @@ export function RoleSelection() {
         transition={{ delay: 0.6, duration: 0.5 }}
         className="mt-12 text-white/60 text-sm text-center relative z-10"
       >
-        The #1 platform for secure event tickets
+         הפלטפורמה #1 לכרטיסים מאובטחים
       </motion.p>
     </div>
   );

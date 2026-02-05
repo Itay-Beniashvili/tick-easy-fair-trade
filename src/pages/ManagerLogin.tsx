@@ -1,0 +1,108 @@
+ import { useState } from 'react';
+ import { motion } from 'framer-motion';
+ import { Mail, Lock, Settings, ArrowRight, Eye, EyeOff } from 'lucide-react';
+ import { Link, useNavigate } from 'react-router-dom';
+ import { useApp } from '@/context/AppContext';
+ import { Input } from '@/components/ui/input';
+ import { Button } from '@/components/ui/button';
+ 
+ export default function ManagerLogin() {
+   const [email, setEmail] = useState('');
+   const [password, setPassword] = useState('');
+   const [showPassword, setShowPassword] = useState(false);
+   const { setRole } = useApp();
+   const navigate = useNavigate();
+ 
+   const handleLogin = (e: React.FormEvent) => {
+     e.preventDefault();
+     // Mock login - just set the role and navigate
+     setRole('manager');
+     navigate('/manager');
+   };
+ 
+   return (
+     <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+       {/* Decorative circles */}
+       <div className="absolute top-20 left-10 w-32 h-32 rounded-full bg-primary/10 blur-3xl" />
+       <div className="absolute bottom-20 right-10 w-40 h-40 rounded-full bg-accent/10 blur-3xl" />
+       
+       {/* Logo */}
+       <motion.div
+         initial={{ opacity: 0, y: -30 }}
+         animate={{ opacity: 1, y: 0 }}
+         transition={{ duration: 0.6 }}
+         className="text-center mb-8 relative z-10"
+       >
+         <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-sm mb-4">
+           <Settings className="w-8 h-8 text-white" />
+         </div>
+         <h1 className="text-3xl font-bold text-white mb-1">ממשק מנהלים</h1>
+         <p className="text-white/70">התחברו לניהול האירועים שלכם</p>
+       </motion.div>
+ 
+       {/* Login Form */}
+       <motion.div
+         initial={{ opacity: 0, y: 20 }}
+         animate={{ opacity: 1, y: 0 }}
+         transition={{ delay: 0.2, duration: 0.5 }}
+         className="w-full max-w-sm relative z-10"
+       >
+         <form onSubmit={handleLogin} className="space-y-4">
+           <div className="relative">
+             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+             <Input
+               type="email"
+               placeholder="כתובת מייל"
+               value={email}
+               onChange={(e) => setEmail(e.target.value)}
+               className="pl-10 h-12 bg-white/10 border-white/20 rounded-xl text-white text-right placeholder:text-slate-400"
+               dir="rtl"
+             />
+           </div>
+           
+           <div className="relative">
+             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+             <Input
+               type={showPassword ? 'text' : 'password'}
+               placeholder="סיסמה"
+               value={password}
+               onChange={(e) => setPassword(e.target.value)}
+               className="pl-10 pr-10 h-12 bg-white/10 border-white/20 rounded-xl text-white text-right placeholder:text-slate-400"
+               dir="rtl"
+             />
+             <button
+               type="button"
+               onClick={() => setShowPassword(!showPassword)}
+               className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+             >
+               {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+             </button>
+           </div>
+ 
+           <Button
+             type="submit"
+             className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 text-lg font-semibold"
+           >
+             התחברות
+             <ArrowRight className="w-5 h-5 mr-2" />
+           </Button>
+         </form>
+ 
+         <div className="mt-6 text-center">
+           <p className="text-white/70">
+             עדיין אין לכם חשבון?{' '}
+             <Link to="/manager/register" className="text-white font-semibold underline">
+               הרשמה כמנהל אירועים
+             </Link>
+           </p>
+         </div>
+ 
+         <div className="mt-4 text-center">
+           <Link to="/" className="text-white/50 text-sm hover:text-white/70 transition-colors">
+             חזרה לבחירת תפקיד
+           </Link>
+         </div>
+       </motion.div>
+     </div>
+   );
+ }
