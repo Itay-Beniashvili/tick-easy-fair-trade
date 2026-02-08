@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { Calendar, MapPin, Users, MoreVertical, Plus, Flame } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { ManagerSidebar } from '@/components/ManagerSidebar';
 import { MobileManagerNav } from '@/components/MobileManagerNav';
 import { events, genreLabels } from '@/data/mockData';
@@ -12,6 +13,8 @@ const genreColors: Record<string, string> = {
 };
 
 export default function ManagerEvents() {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-background flex">
       <ManagerSidebar />
@@ -35,7 +38,10 @@ export default function ManagerEvents() {
                   <p className="text-white/80">{events.length} active events</p>
                 </div>
               </div>
-              <button className="flex items-center gap-2 px-4 py-2 bg-white text-primary font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all">
+              <button 
+                onClick={() => navigate('/manager/events/new')}
+                className="flex items-center gap-2 px-4 py-2 bg-white text-primary font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all"
+              >
                 <Plus className="w-4 h-4" />
                 New Event
               </button>

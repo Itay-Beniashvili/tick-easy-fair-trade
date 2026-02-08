@@ -1,12 +1,19 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Inbox, Reply, Check, AlertCircle, HelpCircle, RotateCcw, MessageSquare } from 'lucide-react';
+import { Inbox, Reply, Check, AlertCircle, HelpCircle, RotateCcw, MessageSquare, Filter } from 'lucide-react';
 import { ManagerSidebar } from '@/components/ManagerSidebar';
 import { MobileManagerNav } from '@/components/MobileManagerNav';
-import { inquiries, Inquiry } from '@/data/mockData';
+import { inquiries, Inquiry, events } from '@/data/mockData';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const typeIcons = {
   refund: RotateCcw,
@@ -28,6 +35,7 @@ const typeColors = {
 
 export default function ManagerInbox() {
   const [localInquiries, setLocalInquiries] = useState<Inquiry[]>(inquiries);
+  const [selectedEvent, setSelectedEvent] = useState<string>('all');
 
   const handleReply = (id: string) => {
     setLocalInquiries(prev =>
@@ -38,7 +46,16 @@ export default function ManagerInbox() {
     toast.success('Reply sent successfully');
   };
 
-  const pendingCount = localInquiries.filter(i => i.status === 'pending').length;
+  const filteredInquiries = selectedEvent === 'all' 
+    ? localInquiries 
+    : localInquiries.filter(inq => inq.eventId === selectedEvent);
+
+  const pendingCount = filteredInquiries.filter(i => i.status === 'pending').length;
+
+  const getEventTitle = (eventId: string) => {
+    const event = events.find(e => e.id === eventId);
+    return event?.title || 'Unknown Event';
+  };
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -68,14 +85,38 @@ export default function ManagerInbox() {
         </div>
 
         <div className="max-w-3xl mx-auto p-6">
-          {localInquiries.length === 0 ? (
+          {/* Event Filter */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6"
+          >
+            <div className="flex items-center gap-3">
+              <Filter className="w-5 h-5 text-muted-foreground" />
+              <Select value={selectedEvent} onValueChange={setSelectedEvent}>
+                <SelectTrigger className="w-full max-w-xs bg-card border-border">
+                  <SelectValue placeholder="Filter by event" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Events</SelectItem>
+                  {events.map(event => (
+                    <SelectItem key={event.id} value={event.id}>
+                      {event.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </motion.div>
+
+          {filteredInquiries.length === 0 ? (
             <div className="card-elevated p-12 text-center">
               <MessageSquare className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
-              <p className="text-muted-foreground">No inquiries</p>
+              <p className="text-muted-foreground">No inquiries {selectedEvent !== 'all' ? 'for this event' : ''}</p>
             </div>
           ) : (
             <div className="space-y-4">
-              {localInquiries.map((inquiry, index) => {
+              {filteredInquiries.map((inquiry, index) => {
                 const TypeIcon = typeIcons[inquiry.type];
                 const formattedDate = format(new Date(inquiry.date), 'MMM d, yyyy');
 
@@ -104,7 +145,7 @@ export default function ManagerInbox() {
                           <p className="text-xs text-muted-foreground">{formattedDate}</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap justify-end">
                         <span className={cn(
                           "px-3 py-1 rounded-full text-xs font-bold",
                           inquiry.status === 'pending' 
@@ -120,6 +161,13 @@ export default function ManagerInbox() {
                           {typeLabels[inquiry.type]}
                         </span>
                       </div>
+                    </div>
+
+                    {/* Event Badge */}
+                    <div className="mb-3">
+                      <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-lg font-medium">
+                        {getEventTitle(inquiry.eventId)}
+                      </span>
                     </div>
 
                     <h3 className="font-semibold text-foreground mb-2">{inquiry.subject}</h3>

@@ -14,6 +14,7 @@ import Manager from "./pages/Manager";
 import ManagerInbox from "./pages/ManagerInbox";
 import ManagerAnalytics from "./pages/ManagerAnalytics";
 import ManagerEvents from "./pages/ManagerEvents";
+import CreateEvent from "./pages/CreateEvent";
 import NotFound from "./pages/NotFound";
  import Login from "./pages/Login";
  import Register from "./pages/Register";
@@ -48,6 +49,7 @@ const App = () => (
             <Route path="/manager/inbox" element={<ManagerInbox />} />
             <Route path="/manager/analytics" element={<ManagerAnalytics />} />
             <Route path="/manager/events" element={<ManagerEvents />} />
+            <Route path="/manager/events/new" element={<CreateEvent />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

@@ -44,6 +44,7 @@ export interface Inquiry {
   id: string;
   userId: string;
   userName: string;
+  eventId: string;
   subject: string;
   message: string;
   date: string;
@@ -206,6 +207,7 @@ export const inquiries: Inquiry[] = [
     id: 'inq1',
     userId: 'user001',
     userName: 'John Smith',
+    eventId: '1',
     subject: 'Refund Request',
     message: 'Hi, I need to cancel my tickets for the Taylor Swift concert due to a family emergency. Can I get a refund?',
     date: '2024-08-01',
@@ -216,6 +218,7 @@ export const inquiries: Inquiry[] = [
     id: 'inq2',
     userId: 'user002',
     userName: 'Sarah Johnson',
+    eventId: '1',
     subject: 'Seat Location Question',
     message: 'I purchased tickets for Section B. Is there a map showing the exact seat locations?',
     date: '2024-08-02',
@@ -226,11 +229,34 @@ export const inquiries: Inquiry[] = [
     id: 'inq3',
     userId: 'user003',
     userName: 'Mike Wilson',
+    eventId: '2',
     subject: 'Payment Issue',
     message: 'I tried to purchase tickets but my payment failed. My credit card is valid.',
     date: '2024-08-03',
     status: 'resolved',
     type: 'complaint'
+  },
+  {
+    id: 'inq4',
+    userId: 'user004',
+    userName: 'Emily Brown',
+    eventId: '4',
+    subject: 'Accessibility Question',
+    message: 'Do you have wheelchair accessible seating available for Hamilton?',
+    date: '2024-08-04',
+    status: 'pending',
+    type: 'question'
+  },
+  {
+    id: 'inq5',
+    userId: 'user005',
+    userName: 'David Lee',
+    eventId: '5',
+    subject: 'Group Discount',
+    message: 'We are a group of 10 people. Is there a group discount available for the Coldplay concert?',
+    date: '2024-08-05',
+    status: 'pending',
+    type: 'question'
   }
 ];
 
