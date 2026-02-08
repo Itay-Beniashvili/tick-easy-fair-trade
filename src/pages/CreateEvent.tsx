@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Calendar, MapPin, Clock, DollarSign, Users, Image, FileText, Music, Dumbbell, Theater, Sparkles } from 'lucide-react';
+import { ArrowLeft, Calendar, MapPin, Clock, DollarSign, Users, Image, FileText, Music, Dumbbell, Theater } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { ManagerSidebar } from '@/components/ManagerSidebar';
 import { MobileManagerNav } from '@/components/MobileManagerNav';
@@ -47,6 +47,7 @@ export default function CreateEvent() {
     e.preventDefault();
     setIsSubmitting(true);
     
+    // Simulate API call
     setTimeout(() => {
       setIsSubmitting(false);
       toast.success('Event created successfully!');
@@ -60,35 +61,23 @@ export default function CreateEvent() {
       
       <main className="flex-1 pb-20 lg:pb-0">
         {/* Header */}
-        <div className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/90 to-accent" />
-          <div className="absolute inset-0 bg-mesh opacity-40" />
-          
-          <div className="relative p-6 pt-12 lg:pt-6">
-            <div className="max-w-3xl mx-auto">
-              <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
+        <div className="bg-gradient-hero p-6 pt-12 lg:pt-6">
+          <div className="max-w-3xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <button
+                onClick={() => navigate('/manager/events')}
+                className="flex items-center gap-2 text-white/80 hover:text-white mb-4 transition-colors"
               >
-                <button
-                  onClick={() => navigate('/manager/events')}
-                  className="flex items-center gap-2 text-white/80 hover:text-white mb-4 transition-colors"
-                >
-                  <ArrowLeft className="w-5 h-5" />
-                  Back to Events
-                </button>
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-xl flex items-center justify-center shadow-xl">
-                    <Sparkles className="w-7 h-7 text-white" />
-                  </div>
-                  <div>
-                    <h1 className="text-2xl font-bold text-white">Create New Event</h1>
-                    <p className="text-white/70 mt-1">Fill in the details to launch your event</p>
-                  </div>
-                </div>
-              </motion.div>
-            </div>
+                <ArrowLeft className="w-5 h-5" />
+                Back to Events
+              </button>
+              <h1 className="text-2xl font-bold text-white">Create New Event</h1>
+              <p className="text-white/80 mt-1">Fill in the details to create a new event</p>
+            </motion.div>
           </div>
         </div>
 
@@ -102,21 +91,18 @@ export default function CreateEvent() {
           >
             {/* Basic Info */}
             <div className="card-elevated p-6">
-              <h2 className="font-bold text-lg mb-5 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <FileText className="w-5 h-5 text-primary" />
-                </div>
+              <h2 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                <FileText className="w-5 h-5 text-primary" />
                 Basic Information
               </h2>
               
-              <div className="space-y-5">
+              <div className="space-y-4">
                 <div>
                   <label className="text-sm font-medium text-foreground mb-2 block">Event Title</label>
                   <Input
                     placeholder="e.g., Taylor Swift - Eras Tour"
                     value={formData.title}
                     onChange={(e) => handleChange('title', e.target.value)}
-                    className="h-12 rounded-xl"
                     required
                   />
                 </div>
@@ -127,7 +113,6 @@ export default function CreateEvent() {
                     placeholder="e.g., Taylor Swift"
                     value={formData.artist}
                     onChange={(e) => handleChange('artist', e.target.value)}
-                    className="h-12 rounded-xl"
                     required
                   />
                 </div>
@@ -135,7 +120,7 @@ export default function CreateEvent() {
                 <div>
                   <label className="text-sm font-medium text-foreground mb-2 block">Genre</label>
                   <Select value={formData.genre} onValueChange={(value) => handleChange('genre', value)}>
-                    <SelectTrigger className="h-12 rounded-xl">
+                    <SelectTrigger>
                       <SelectValue placeholder="Select genre" />
                     </SelectTrigger>
                     <SelectContent>
@@ -158,7 +143,6 @@ export default function CreateEvent() {
                     value={formData.description}
                     onChange={(e) => handleChange('description', e.target.value)}
                     rows={4}
-                    className="rounded-xl"
                   />
                 </div>
               </div>
@@ -166,14 +150,12 @@ export default function CreateEvent() {
 
             {/* Location & Time */}
             <div className="card-elevated p-6">
-              <h2 className="font-bold text-lg mb-5 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
-                  <MapPin className="w-5 h-5 text-accent" />
-                </div>
+              <h2 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-accent" />
                 Location & Time
               </h2>
               
-              <div className="space-y-5">
+              <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-medium text-foreground mb-2 block">Venue</label>
@@ -181,7 +163,6 @@ export default function CreateEvent() {
                       placeholder="e.g., SoFi Stadium"
                       value={formData.venue}
                       onChange={(e) => handleChange('venue', e.target.value)}
-                      className="h-12 rounded-xl"
                       required
                     />
                   </div>
@@ -191,7 +172,6 @@ export default function CreateEvent() {
                       placeholder="e.g., Los Angeles"
                       value={formData.city}
                       onChange={(e) => handleChange('city', e.target.value)}
-                      className="h-12 rounded-xl"
                       required
                     />
                   </div>
@@ -200,27 +180,25 @@ export default function CreateEvent() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="text-sm font-medium text-foreground mb-2 block flex items-center gap-2">
-                      <Calendar className="w-4 h-4 text-primary" />
+                      <Calendar className="w-4 h-4" />
                       Date
                     </label>
                     <Input
                       type="date"
                       value={formData.date}
                       onChange={(e) => handleChange('date', e.target.value)}
-                      className="h-12 rounded-xl"
                       required
                     />
                   </div>
                   <div>
                     <label className="text-sm font-medium text-foreground mb-2 block flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-accent" />
+                      <Clock className="w-4 h-4" />
                       Time
                     </label>
                     <Input
                       type="time"
                       value={formData.time}
                       onChange={(e) => handleChange('time', e.target.value)}
-                      className="h-12 rounded-xl"
                       required
                     />
                   </div>
@@ -230,10 +208,8 @@ export default function CreateEvent() {
 
             {/* Tickets & Pricing */}
             <div className="card-elevated p-6">
-              <h2 className="font-bold text-lg mb-5 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center">
-                  <DollarSign className="w-5 h-5 text-success" />
-                </div>
+              <h2 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                <DollarSign className="w-5 h-5 text-success" />
                 Tickets & Pricing
               </h2>
               
@@ -247,13 +223,12 @@ export default function CreateEvent() {
                     onChange={(e) => handleChange('price', e.target.value)}
                     min="0"
                     step="0.01"
-                    className="h-12 rounded-xl"
                     required
                   />
                 </div>
                 <div>
                   <label className="text-sm font-medium text-foreground mb-2 block flex items-center gap-2">
-                    <Users className="w-4 h-4 text-primary" />
+                    <Users className="w-4 h-4" />
                     Available Tickets
                   </label>
                   <Input
@@ -262,7 +237,6 @@ export default function CreateEvent() {
                     value={formData.availableTickets}
                     onChange={(e) => handleChange('availableTickets', e.target.value)}
                     min="1"
-                    className="h-12 rounded-xl"
                     required
                   />
                 </div>
@@ -271,10 +245,8 @@ export default function CreateEvent() {
 
             {/* Image */}
             <div className="card-elevated p-6">
-              <h2 className="font-bold text-lg mb-5 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-highlight/10 flex items-center justify-center">
-                  <Image className="w-5 h-5 text-highlight" />
-                </div>
+              <h2 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                <Image className="w-5 h-5 text-highlight" />
                 Event Image
               </h2>
               
@@ -285,7 +257,6 @@ export default function CreateEvent() {
                   placeholder="https://example.com/image.jpg"
                   value={formData.image}
                   onChange={(e) => handleChange('image', e.target.value)}
-                  className="h-12 rounded-xl"
                 />
                 <p className="text-xs text-muted-foreground mt-2">
                   Paste a URL to your event image
@@ -293,20 +264,16 @@ export default function CreateEvent() {
               </div>
 
               {formData.image && (
-                <motion.div 
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="mt-4"
-                >
+                <div className="mt-4">
                   <img
                     src={formData.image}
                     alt="Preview"
-                    className="w-full max-w-sm h-48 object-cover rounded-2xl shadow-lg"
+                    className="w-full max-w-sm h-48 object-cover rounded-xl"
                     onError={(e) => {
                       (e.target as HTMLImageElement).style.display = 'none';
                     }}
                   />
-                </motion.div>
+                </div>
               )}
             </div>
 
@@ -315,22 +282,20 @@ export default function CreateEvent() {
               <button
                 type="button"
                 onClick={() => navigate('/manager/events')}
-                className="flex-1 py-4 px-4 rounded-2xl border border-border text-foreground font-semibold hover:bg-muted transition-colors"
+                className="flex-1 py-3 px-4 rounded-xl border border-border text-foreground font-semibold hover:bg-muted transition-colors"
               >
                 Cancel
               </button>
-              <motion.button
+              <button
                 type="submit"
                 disabled={isSubmitting}
-                whileHover={{ scale: isSubmitting ? 1 : 1.01 }}
-                whileTap={{ scale: isSubmitting ? 1 : 0.99 }}
                 className={cn(
-                  "flex-1 py-4 px-4 btn-primary-gradient font-semibold text-lg",
+                  "flex-1 py-3 px-4 btn-primary-gradient font-semibold",
                   isSubmitting && "opacity-50 cursor-not-allowed"
                 )}
               >
                 {isSubmitting ? 'Creating...' : 'Create Event'}
-              </motion.button>
+              </button>
             </div>
           </motion.form>
         </div>

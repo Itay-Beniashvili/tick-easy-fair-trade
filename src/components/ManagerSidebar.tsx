@@ -1,8 +1,7 @@
-import { LayoutDashboard, Inbox, BarChart3, Calendar, LogOut, Ticket, Sparkles } from 'lucide-react';
+import { LayoutDashboard, Inbox, BarChart3, Calendar, LogOut, Ticket } from 'lucide-react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useApp } from '@/context/AppContext';
-import { motion } from 'framer-motion';
 
 const navItems = [
   { path: '/manager', icon: LayoutDashboard, label: 'Overview', end: true },
@@ -21,25 +20,22 @@ export function ManagerSidebar() {
   };
 
   return (
-    <aside className="hidden lg:flex flex-col w-72 bg-sidebar text-sidebar-foreground h-screen sticky top-0">
+    <aside className="hidden lg:flex flex-col w-64 bg-sidebar text-sidebar-foreground h-screen sticky top-0">
       {/* Logo */}
       <div className="p-6 border-b border-sidebar-border">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg">
-            <Ticket className="w-6 h-6 text-white" />
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-warm flex items-center justify-center">
+            <Ticket className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="font-bold text-xl text-sidebar-foreground">TickEasy</h1>
-            <p className="text-xs text-sidebar-foreground/50 flex items-center gap-1">
-              <Sparkles className="w-3 h-3" />
-              Manager Panel
-            </p>
+            <h1 className="font-bold text-lg">TickEasy</h1>
+            <p className="text-xs text-sidebar-foreground/60">Manager Panel</p>
           </div>
         </div>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-2">
+      <nav className="flex-1 p-4 space-y-1">
         {navItems.map(({ path, icon: Icon, label, end }) => (
           <NavLink
             key={path}
@@ -47,41 +43,28 @@ export function ManagerSidebar() {
             end={end}
             className={({ isActive }) =>
               cn(
-                'flex items-center gap-4 px-4 py-4 rounded-2xl transition-all group',
+                'flex items-center gap-3 px-4 py-3 rounded-xl transition-all',
                 isActive
-                  ? 'bg-sidebar-primary text-white font-semibold shadow-lg'
-                  : 'text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground'
+                  ? 'bg-sidebar-primary text-white font-medium'
+                  : 'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground'
               )
             }
           >
-            {({ isActive }) => (
-              <>
-                <div className={cn(
-                  "w-10 h-10 rounded-xl flex items-center justify-center transition-all",
-                  isActive ? "bg-white/20" : "bg-sidebar-accent group-hover:bg-sidebar-border"
-                )}>
-                  <Icon className="w-5 h-5" />
-                </div>
-                <span className="text-base">{label}</span>
-              </>
-            )}
+            <Icon className="w-5 h-5" />
+            <span>{label}</span>
           </NavLink>
         ))}
       </nav>
 
       {/* Logout */}
       <div className="p-4 border-t border-sidebar-border">
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+        <button
           onClick={handleLogout}
-          className="flex items-center gap-4 w-full px-4 py-4 rounded-2xl text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-all group"
+          className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors"
         >
-          <div className="w-10 h-10 rounded-xl bg-sidebar-accent group-hover:bg-destructive/20 flex items-center justify-center transition-all">
-            <LogOut className="w-5 h-5 group-hover:text-destructive" />
-          </div>
-          <span className="text-base">Log Out</span>
-        </motion.button>
+          <LogOut className="w-5 h-5" />
+          <span>Log Out</span>
+        </button>
       </div>
     </aside>
   );

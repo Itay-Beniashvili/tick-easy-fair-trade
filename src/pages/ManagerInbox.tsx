@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Inbox, Reply, Check, AlertCircle, HelpCircle, RotateCcw, MessageSquare, Filter, Sparkles } from 'lucide-react';
+import { Inbox, Reply, Check, AlertCircle, HelpCircle, RotateCcw, MessageSquare, Filter } from 'lucide-react';
 import { ManagerSidebar } from '@/components/ManagerSidebar';
 import { MobileManagerNav } from '@/components/MobileManagerNav';
 import { inquiries, Inquiry, events } from '@/data/mockData';
@@ -27,10 +27,10 @@ const typeLabels = {
   complaint: 'Complaint',
 };
 
-const typeGradients = {
-  refund: 'from-warning to-orange-400',
-  question: 'from-primary to-violet-400',
-  complaint: 'from-destructive to-red-400',
+const typeColors = {
+  refund: 'from-warning to-amber-400',
+  question: 'from-accent to-rose-400',
+  complaint: 'from-destructive to-rose-500',
 };
 
 export default function ManagerInbox() {
@@ -63,32 +63,24 @@ export default function ManagerInbox() {
       
       <main className="flex-1 pb-20 lg:pb-0">
         {/* Header */}
-        <div className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/90 to-accent" />
-          <div className="absolute inset-0 bg-mesh opacity-40" />
-          
-          <div className="relative p-6 pt-12 lg:pt-6">
-            <div className="max-w-3xl mx-auto">
-              <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="flex items-center justify-between"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-xl flex items-center justify-center shadow-xl">
-                    <Inbox className="w-7 h-7 text-white" />
-                  </div>
-                  <div>
-                    <h1 className="text-2xl font-bold text-white mb-1">Inbox</h1>
-                    <p className="text-white/70 flex items-center gap-2">
-                      <Sparkles className="w-4 h-4" />
-                      {pendingCount} pending inquiries
-                    </p>
-                  </div>
+        <div className="bg-gradient-hero p-6 pt-12 lg:pt-6">
+          <div className="max-w-3xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="flex items-center justify-between"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center">
+                  <Inbox className="w-6 h-6 text-white" />
                 </div>
-              </motion.div>
-            </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-white mb-1">Inbox</h1>
+                  <p className="text-white/80">{pendingCount} pending inquiries</p>
+                </div>
+              </div>
+            </motion.div>
           </div>
         </div>
 
@@ -99,12 +91,10 @@ export default function ManagerInbox() {
             animate={{ opacity: 1, y: 0 }}
             className="mb-6"
           >
-            <div className="flex items-center gap-3 p-4 card-elevated">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Filter className="w-5 h-5 text-primary" />
-              </div>
+            <div className="flex items-center gap-3">
+              <Filter className="w-5 h-5 text-muted-foreground" />
               <Select value={selectedEvent} onValueChange={setSelectedEvent}>
-                <SelectTrigger className="flex-1 bg-muted border-0 h-12 rounded-xl">
+                <SelectTrigger className="w-full max-w-xs bg-card border-border">
                   <SelectValue placeholder="Filter by event" />
                 </SelectTrigger>
                 <SelectContent>
@@ -120,14 +110,10 @@ export default function ManagerInbox() {
           </motion.div>
 
           {filteredInquiries.length === 0 ? (
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="card-elevated p-16 text-center"
-            >
-              <MessageSquare className="w-16 h-16 text-muted-foreground/20 mx-auto mb-4" />
-              <p className="text-muted-foreground text-lg">No inquiries {selectedEvent !== 'all' ? 'for this event' : ''}</p>
-            </motion.div>
+            <div className="card-elevated p-12 text-center">
+              <MessageSquare className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
+              <p className="text-muted-foreground">No inquiries {selectedEvent !== 'all' ? 'for this event' : ''}</p>
+            </div>
           ) : (
             <div className="space-y-4">
               {filteredInquiries.map((inquiry, index) => {
@@ -139,30 +125,29 @@ export default function ManagerInbox() {
                     key={inquiry.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05, duration: 0.4 }}
-                    whileHover={{ scale: 1.01 }}
+                    transition={{ delay: index * 0.1, duration: 0.4 }}
                     className={cn(
-                      "card-elevated p-6 transition-all",
+                      "card-elevated p-5 transition-all",
                       inquiry.status === 'pending' ? 'border-l-4 border-l-warning' : ''
                     )}
                   >
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center gap-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-3">
                         <div className={cn(
-                          "w-14 h-14 rounded-2xl flex items-center justify-center text-lg font-bold bg-gradient-to-br shadow-lg",
-                          inquiry.status === 'pending' ? typeGradients[inquiry.type] : 'from-success to-emerald-400',
+                          "w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold bg-gradient-to-br",
+                          inquiry.status === 'pending' ? typeColors[inquiry.type] : 'from-success to-teal-400',
                           'text-white'
                         )}>
                           {inquiry.userName.charAt(0)}
                         </div>
                         <div>
-                          <p className="font-semibold text-foreground text-lg">{inquiry.userName}</p>
-                          <p className="text-sm text-muted-foreground">{formattedDate}</p>
+                          <p className="font-semibold text-foreground">{inquiry.userName}</p>
+                          <p className="text-xs text-muted-foreground">{formattedDate}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2 flex-wrap justify-end">
                         <span className={cn(
-                          "px-4 py-1.5 rounded-full text-xs font-bold",
+                          "px-3 py-1 rounded-full text-xs font-bold",
                           inquiry.status === 'pending' 
                             ? 'bg-warning/15 text-warning' 
                             : 'bg-success/15 text-success'
@@ -170,41 +155,39 @@ export default function ManagerInbox() {
                           {inquiry.status === 'pending' ? 'Pending' : 'Resolved'}
                         </span>
                         <span className={cn(
-                          "px-4 py-1.5 rounded-full text-xs font-medium bg-muted text-muted-foreground flex items-center gap-1.5"
+                          "px-3 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground flex items-center gap-1"
                         )}>
-                          <TypeIcon className="w-3.5 h-3.5" />
+                          <TypeIcon className="w-3 h-3" />
                           {typeLabels[inquiry.type]}
                         </span>
                       </div>
                     </div>
 
                     {/* Event Badge */}
-                    <div className="mb-4">
-                      <span className="text-xs bg-primary/10 text-primary px-3 py-1.5 rounded-xl font-medium">
+                    <div className="mb-3">
+                      <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-lg font-medium">
                         {getEventTitle(inquiry.eventId)}
                       </span>
                     </div>
 
-                    <h3 className="font-semibold text-foreground mb-2 text-lg">{inquiry.subject}</h3>
-                    <p className="text-muted-foreground mb-5 leading-relaxed">
+                    <h3 className="font-semibold text-foreground mb-2">{inquiry.subject}</h3>
+                    <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
                       {inquiry.message}
                     </p>
 
                     {inquiry.status === 'pending' && (
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
+                      <button
                         onClick={() => handleReply(inquiry.id)}
-                        className="flex items-center gap-2 px-6 py-3 btn-primary-gradient"
+                        className="flex items-center gap-2 px-4 py-2 btn-primary-gradient text-sm"
                       >
                         <Reply className="w-4 h-4" />
                         Send Reply
-                      </motion.button>
+                      </button>
                     )}
 
                     {inquiry.status === 'resolved' && (
-                      <div className="flex items-center gap-2 text-success font-medium">
-                        <Check className="w-5 h-5" />
+                      <div className="flex items-center gap-2 text-sm text-success font-medium">
+                        <Check className="w-4 h-4" />
                         Inquiry resolved
                       </div>
                     )}

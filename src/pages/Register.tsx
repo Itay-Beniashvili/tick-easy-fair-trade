@@ -1,164 +1,118 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Mail, Lock, User, Ticket, ArrowRight, Eye, EyeOff, Sparkles } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useApp } from '@/context/AppContext';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-
-export default function Register() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const { setRole } = useApp();
-  const navigate = useNavigate();
-
-  const handleRegister = (e: React.FormEvent) => {
-    e.preventDefault();
-    setRole('user');
-    navigate('/onboarding');
-  };
-
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden">
-      {/* Modern mesh background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-accent via-primary/90 to-primary" />
-      <div className="absolute inset-0 bg-mesh opacity-60" />
-      
-      {/* Animated floating shapes */}
-      <motion.div
-        animate={{ 
-          y: [0, -20, 0],
-          rotate: [0, -5, 0],
-        }}
-        transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-24 right-16 w-44 h-44 rounded-full bg-white/10 blur-2xl"
-      />
-      <motion.div
-        animate={{ 
-          y: [0, 20, 0],
-          rotate: [0, 5, 0],
-        }}
-        transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute bottom-24 left-10 w-52 h-52 rounded-full bg-primary/20 blur-3xl"
-      />
-      <motion.div
-        animate={{ 
-          scale: [1, 1.15, 1],
-        }}
-        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-1/2 left-1/4 w-28 h-28 rounded-full bg-white/5 blur-2xl"
-      />
-      
-      {/* Logo */}
-      <motion.div
-        initial={{ opacity: 0, y: -30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="text-center mb-10 relative z-10"
-      >
-        <motion.div 
-          whileHover={{ scale: 1.05, rotate: -5 }}
-          className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-white/15 backdrop-blur-xl mb-5 border border-white/20 shadow-2xl"
-        >
-          <Ticket className="w-10 h-10 text-white" />
-        </motion.div>
-        <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">Join TickEasy</h1>
-        <p className="text-white/70 text-lg">Create your account in seconds</p>
-      </motion.div>
-
-      {/* Register Form */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, duration: 0.5 }}
-        className="w-full max-w-md relative z-10"
-      >
-        <div className="card-glass p-8">
-          <form onSubmit={handleRegister} className="space-y-5">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-white/80">Full Name</label>
-              <div className="relative">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
-                <Input
-                  type="text"
-                  placeholder="Your full name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="pl-12 h-14 bg-white/10 border-white/20 text-white placeholder:text-white/40 rounded-2xl focus:bg-white/15 focus:border-white/40 transition-all"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-white/80">Email</label>
-              <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
-                <Input
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="pl-12 h-14 bg-white/10 border-white/20 text-white placeholder:text-white/40 rounded-2xl focus:bg-white/15 focus:border-white/40 transition-all"
-                />
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-white/80">Password</label>
-              <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/50" />
-                <Input
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Create a password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pl-12 pr-12 h-14 bg-white/10 border-white/20 text-white placeholder:text-white/40 rounded-2xl focus:bg-white/15 focus:border-white/40 transition-all"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white/80 transition-colors"
-                >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
-              </div>
-            </div>
-
-            <motion.button
-              type="submit"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="w-full h-14 rounded-2xl bg-white text-primary font-bold text-lg flex items-center justify-center gap-2 shadow-xl hover:shadow-2xl transition-all"
-            >
-              Create Account
-              <ArrowRight className="w-5 h-5" />
-            </motion.button>
-          </form>
-
-          <div className="mt-8 pt-6 border-t border-white/10 text-center">
-            <p className="text-white/60">
-              Already have an account?{' '}
-              <Link to="/login" className="text-white font-semibold hover:underline">
-                Sign in
-              </Link>
-            </p>
-          </div>
-        </div>
-
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="mt-6 text-center"
-        >
-          <Link to="/" className="inline-flex items-center gap-2 text-white/50 text-sm hover:text-white/80 transition-colors">
-            <Sparkles className="w-4 h-4" />
-            Back to role selection
-          </Link>
-        </motion.div>
-      </motion.div>
-    </div>
-  );
-}
+ import { useState } from 'react';
+ import { motion } from 'framer-motion';
+ import { Mail, Lock, User, Ticket, ArrowRight, Eye, EyeOff } from 'lucide-react';
+ import { Link, useNavigate } from 'react-router-dom';
+ import { useApp } from '@/context/AppContext';
+ import { Input } from '@/components/ui/input';
+ import { Button } from '@/components/ui/button';
+ 
+ export default function Register() {
+   const [name, setName] = useState('');
+   const [email, setEmail] = useState('');
+   const [password, setPassword] = useState('');
+   const [showPassword, setShowPassword] = useState(false);
+   const { setRole } = useApp();
+   const navigate = useNavigate();
+ 
+   const handleRegister = (e: React.FormEvent) => {
+     e.preventDefault();
+     // Mock registration - just set the role and navigate to onboarding
+     setRole('user');
+     navigate('/onboarding');
+   };
+ 
+   return (
+     <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-hero">
+       {/* Decorative circles */}
+       <div className="absolute top-20 left-10 w-32 h-32 rounded-full bg-warning/20 blur-3xl" />
+       <div className="absolute bottom-20 right-10 w-40 h-40 rounded-full bg-accent/20 blur-3xl" />
+       
+       {/* Logo */}
+       <motion.div
+         initial={{ opacity: 0, y: -30 }}
+         animate={{ opacity: 1, y: 0 }}
+         transition={{ duration: 0.6 }}
+         className="text-center mb-8 relative z-10"
+       >
+         <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm mb-4">
+           <Ticket className="w-8 h-8 text-white" />
+         </div>
+         <h1 className="text-3xl font-bold text-white mb-1">Join Us!</h1>
+         <p className="text-white/70">Create your account easily</p>
+       </motion.div>
+ 
+       {/* Register Form */}
+       <motion.div
+         initial={{ opacity: 0, y: 20 }}
+         animate={{ opacity: 1, y: 0 }}
+         transition={{ delay: 0.2, duration: 0.5 }}
+         className="w-full max-w-sm relative z-10"
+       >
+         <form onSubmit={handleRegister} className="space-y-4">
+           <div className="relative">
+             <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+             <Input
+               type="text"
+               placeholder="Full name"
+               value={name}
+               onChange={(e) => setName(e.target.value)}
+               className="pl-10 h-12 bg-white/90 border-0 rounded-xl"
+             />
+           </div>
+ 
+           <div className="relative">
+             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+             <Input
+               type="email"
+               placeholder="Email address"
+               value={email}
+               onChange={(e) => setEmail(e.target.value)}
+               className="pl-10 h-12 bg-white/90 border-0 rounded-xl"
+             />
+           </div>
+           
+           <div className="relative">
+             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+             <Input
+               type={showPassword ? 'text' : 'password'}
+               placeholder="Password"
+               value={password}
+               onChange={(e) => setPassword(e.target.value)}
+               className="pl-10 pr-10 h-12 bg-white/90 border-0 rounded-xl"
+             />
+             <button
+               type="button"
+               onClick={() => setShowPassword(!showPassword)}
+               className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+             >
+               {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+             </button>
+           </div>
+ 
+           <Button
+             type="submit"
+             className="w-full h-12 rounded-xl btn-primary-gradient text-lg font-semibold"
+           >
+             Sign Up
+             <ArrowRight className="w-5 h-5 mr-2" />
+           </Button>
+         </form>
+ 
+         <div className="mt-6 text-center">
+           <p className="text-white/70">
+             Already have an account?{' '}
+             <Link to="/login" className="text-white font-semibold underline">
+               Sign In
+             </Link>
+           </p>
+         </div>
+ 
+         <div className="mt-4 text-center">
+           <Link to="/" className="text-white/50 text-sm hover:text-white/70 transition-colors">
+             Back to role selection
+           </Link>
+         </div>
+       </motion.div>
+     </div>
+   );
+ }

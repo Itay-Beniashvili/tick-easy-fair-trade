@@ -1,15 +1,15 @@
 import { motion } from 'framer-motion';
-import { Calendar, MapPin, Users, MoreVertical, Plus, Flame, TrendingUp, Sparkles } from 'lucide-react';
+import { Calendar, MapPin, Users, MoreVertical, Plus, Flame } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { ManagerSidebar } from '@/components/ManagerSidebar';
 import { MobileManagerNav } from '@/components/MobileManagerNav';
 import { events, genreLabels } from '@/data/mockData';
 import { format } from 'date-fns';
 
-const genreGradients: Record<string, string> = {
-  music: 'from-primary to-violet-400',
-  sports: 'from-success to-emerald-400',
-  theater: 'from-accent to-pink-400',
+const genreColors: Record<string, string> = {
+  music: 'from-primary to-accent',
+  sports: 'from-success to-teal-400',
+  theater: 'from-highlight to-purple-400',
 };
 
 export default function ManagerEvents() {
@@ -21,41 +21,31 @@ export default function ManagerEvents() {
       
       <main className="flex-1 pb-20 lg:pb-0">
         {/* Header */}
-        <div className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-accent via-primary to-primary" />
-          <div className="absolute inset-0 bg-mesh opacity-40" />
-          
-          <div className="relative p-6 pt-12 lg:pt-6">
-            <div className="max-w-4xl mx-auto">
-              <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="flex items-center justify-between"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-xl flex items-center justify-center shadow-xl">
-                    <Flame className="w-7 h-7 text-white" />
-                  </div>
-                  <div>
-                    <h1 className="text-2xl font-bold text-white mb-1">Events</h1>
-                    <p className="text-white/70 flex items-center gap-2">
-                      <TrendingUp className="w-4 h-4" />
-                      {events.length} active events
-                    </p>
-                  </div>
+        <div className="bg-gradient-hero p-6 pt-12 lg:pt-6">
+          <div className="max-w-4xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="flex items-center justify-between"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center">
+                  <Flame className="w-6 h-6 text-white" />
                 </div>
-                <motion.button 
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => navigate('/manager/events/new')}
-                  className="flex items-center gap-2 px-5 py-3 bg-white text-primary font-semibold rounded-2xl shadow-xl hover:shadow-2xl transition-all"
-                >
-                  <Plus className="w-5 h-5" />
-                  New Event
-                </motion.button>
-              </motion.div>
-            </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-white mb-1">Events</h1>
+                  <p className="text-white/80">{events.length} active events</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => navigate('/manager/events/new')}
+                className="flex items-center gap-2 px-4 py-2 bg-white text-primary font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all"
+              >
+                <Plus className="w-4 h-4" />
+                New Event
+              </button>
+            </motion.div>
           </div>
         </div>
 
@@ -69,62 +59,52 @@ export default function ManagerEvents() {
                   key={event.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05, duration: 0.4 }}
-                  whileHover={{ scale: 1.01 }}
-                  className="card-elevated p-5 flex gap-5"
+                  transition={{ delay: index * 0.1, duration: 0.4 }}
+                  className="card-elevated p-4 flex gap-4"
                 >
-                  <div className="relative shrink-0">
+                  <div className="relative">
                     <img
                       src={event.image}
                       alt={event.title}
-                      className="w-32 h-32 lg:w-40 lg:h-32 rounded-2xl object-cover shadow-lg"
+                      className="w-28 h-28 lg:w-36 lg:h-28 rounded-2xl object-cover shrink-0"
                     />
-                    <div className={`absolute top-2 left-2 px-3 py-1.5 rounded-xl bg-gradient-to-r ${genreGradients[event.genre]} text-white text-xs font-bold shadow-lg`}>
+                    <div className={`absolute top-2 left-2 px-2 py-1 rounded-lg bg-gradient-to-r ${genreColors[event.genre]} text-white text-[10px] font-bold`}>
                       {genreLabels[event.genre]}
                     </div>
                   </div>
                   
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between mb-3">
-                      <h3 className="font-bold text-foreground text-lg truncate pr-4">{event.title}</h3>
-                      <button className="p-2 hover:bg-muted rounded-xl shrink-0 transition-colors">
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className="font-bold text-foreground truncate pr-2">{event.title}</h3>
+                      <button className="p-1.5 hover:bg-muted rounded-xl shrink-0 transition-colors">
                         <MoreVertical className="w-5 h-5 text-muted-foreground" />
                       </button>
                     </div>
 
-                    <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground mb-4">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                          <Calendar className="w-4 h-4 text-primary" />
-                        </div>
+                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground mb-3">
+                      <div className="flex items-center gap-1">
+                        <Calendar className="w-4 h-4 text-primary" />
                         <span>{formattedDate}</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center">
-                          <MapPin className="w-4 h-4 text-accent" />
-                        </div>
+                      <div className="flex items-center gap-1">
+                        <MapPin className="w-4 h-4 text-accent" />
                         <span>{event.venue}</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg bg-highlight/10 flex items-center justify-center">
-                          <Users className="w-4 h-4 text-highlight" />
-                        </div>
+                      <div className="flex items-center gap-1">
+                        <Users className="w-4 h-4 text-highlight" />
                         <span>{event.availableTickets} left</span>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-4">
                       <div>
                         <span className="text-xs text-muted-foreground">Price</span>
-                        <p className="font-bold text-gradient text-xl">${event.price}</p>
+                        <p className="font-bold text-gradient-warm text-lg">${event.price}</p>
                       </div>
-                      <div className="h-10 border-r border-border" />
+                      <div className="h-8 border-r border-border" />
                       <div>
                         <span className="text-xs text-muted-foreground">Resale</span>
-                        <p className="font-bold text-success text-xl flex items-center gap-1">
-                          {event.resaleTickets.length}
-                          {event.resaleTickets.length > 0 && <Sparkles className="w-4 h-4" />}
-                        </p>
+                        <p className="font-bold text-success">{event.resaleTickets.length}</p>
                       </div>
                     </div>
                   </div>
