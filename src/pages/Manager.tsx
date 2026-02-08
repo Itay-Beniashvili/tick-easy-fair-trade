@@ -1,36 +1,57 @@
 import { motion } from 'framer-motion';
-import { TrendingUp, Users, Repeat, DollarSign, Ticket, Sparkles } from 'lucide-react';
+import { TrendingUp, Users, Repeat, DollarSign, Ticket, LayoutDashboard } from 'lucide-react';
 import { ManagerSidebar } from '@/components/ManagerSidebar';
 import { MobileManagerNav } from '@/components/MobileManagerNav';
 import { salesData } from '@/data/mockData';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const stats = [
-  { label: 'Total Revenue', value: '$155,400', change: '+12%', icon: DollarSign, gradient: 'from-primary to-accent' },
-  { label: 'Tickets Sold', value: '444', change: '+8%', icon: Ticket, gradient: 'from-success to-teal-400' },
-  { label: 'Resale Activity', value: '23', change: '+15%', icon: Repeat, gradient: 'from-highlight to-purple-400' },
-  { label: 'Active Users', value: '1,234', change: '+5%', icon: Users, gradient: 'from-warning to-amber-400' },
+  { label: 'Total Revenue', value: '$155,400', change: '+12%', icon: DollarSign, color: 'primary' },
+  { label: 'Tickets Sold', value: '444', change: '+8%', icon: Ticket, color: 'success' },
+  { label: 'Resale Activity', value: '23', change: '+15%', icon: Repeat, color: 'highlight' },
+  { label: 'Active Users', value: '1,234', change: '+5%', icon: Users, color: 'warning' },
 ];
+
+const colorClasses: Record<string, string> = {
+  primary: 'bg-primary/15 text-primary',
+  success: 'bg-success/15 text-success',
+  highlight: 'bg-highlight/15 text-highlight',
+  warning: 'bg-warning/15 text-warning',
+};
+
+const iconBgClasses: Record<string, string> = {
+  primary: 'bg-primary',
+  success: 'bg-success',
+  highlight: 'bg-highlight',
+  warning: 'bg-warning',
+};
 
 export default function Manager() {
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen bg-mesh flex">
       <ManagerSidebar />
       
       <main className="flex-1 pb-20 lg:pb-0">
         {/* Header */}
-        <div className="bg-gradient-hero p-6 pt-12 lg:pt-6">
-          <div className="max-w-5xl mx-auto">
+        <div className="bg-gradient-manager p-6 pt-12 lg:pt-8 relative overflow-hidden">
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl" />
+            <div className="absolute -bottom-20 -left-20 w-48 h-48 rounded-full bg-highlight/10 blur-3xl" />
+          </div>
+
+          <div className="max-w-5xl mx-auto relative z-10">
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="flex items-center gap-3"
+              className="flex items-center gap-4"
             >
-              <Sparkles className="w-8 h-8 text-warning" />
+              <div className="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center border border-white/10">
+                <LayoutDashboard className="w-7 h-7 text-white" />
+              </div>
               <div>
                 <h1 className="text-2xl font-bold text-white mb-1">Dashboard</h1>
-                <p className="text-white/80">Welcome back to your manager panel</p>
+                <p className="text-white/60 font-medium">Welcome back to your manager panel</p>
               </div>
             </motion.div>
           </div>
@@ -47,19 +68,19 @@ export default function Manager() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1, duration: 0.4 }}
-                  className="card-elevated p-4"
+                  className="card-elevated p-5"
                 >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${stat.gradient} flex items-center justify-center`}>
+                  <div className="flex items-start justify-between mb-4">
+                    <div className={`w-12 h-12 rounded-xl ${iconBgClasses[stat.color]} flex items-center justify-center shadow-lg`}>
                       <Icon className="w-6 h-6 text-white" />
                     </div>
-                    <span className="text-xs text-success font-bold flex items-center gap-0.5 bg-success/10 px-2 py-1 rounded-full">
+                    <span className={`text-xs font-bold flex items-center gap-1 ${colorClasses[stat.color]} px-2.5 py-1 rounded-full`}>
                       <TrendingUp className="w-3 h-3" />
                       {stat.change}
                     </span>
                   </div>
-                  <p className="text-2xl font-bold text-foreground mb-0.5">{stat.value}</p>
-                  <p className="text-xs text-muted-foreground">{stat.label}</p>
+                  <p className="text-2xl font-extrabold text-foreground mb-1">{stat.value}</p>
+                  <p className="text-sm text-muted-foreground font-medium">{stat.label}</p>
                 </motion.div>
               );
             })}
@@ -90,6 +111,7 @@ export default function Manager() {
                       backgroundColor: 'hsl(var(--card))',
                       border: '1px solid hsl(var(--border))',
                       borderRadius: '1rem',
+                      boxShadow: 'var(--shadow-lg)',
                     }}
                     formatter={(value: number) => [`${value} tickets`, 'Sales']}
                   />
