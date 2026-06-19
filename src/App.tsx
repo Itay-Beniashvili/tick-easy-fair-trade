@@ -22,6 +22,7 @@ import NotFound from "./pages/NotFound";
  import ManagerRegister from "./pages/ManagerRegister";
  import Marketplace from "./pages/Marketplace";
  import GroupPurchaseStatus from "./pages/GroupPurchaseStatus";
+ import { ManagerRoute } from "./components/ManagerRoute";
 
 const queryClient = new QueryClient();
 
