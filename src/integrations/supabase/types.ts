@@ -133,14 +133,55 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      tickets_for_sale: {
+        Row: {
+          created_at: string | null
+          event_city: string | null
+          event_date: string | null
+          event_id: string | null
+          event_image: string | null
+          event_time: string | null
+          event_title: string | null
+          event_venue: string | null
+          id: string | null
+          sale_price: number | null
+          seat_info: string | null
+          ticket_type: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          event_city?: string | null
+          event_date?: string | null
+          event_id?: string | null
+          event_image?: string | null
+          event_time?: string | null
+          event_title?: string | null
+          event_venue?: string | null
+          id?: string | null
+          sale_price?: number | null
+          seat_info?: string | null
+          ticket_type?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          event_city?: string | null
+          event_date?: string | null
+          event_id?: string | null
+          event_image?: string | null
+          event_time?: string | null
+          event_title?: string | null
+          event_venue?: string | null
+          id?: string | null
+          sale_price?: number | null
+          seat_info?: string | null
+          ticket_type?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {
-        Args: {
-          _role: Database["public"]["Enums"]["app_role"]
-          _user_id: string
-        }
+        Args: { _role: Database["public"]["Enums"]["app_role"] }
         Returns: boolean
       }
     }
