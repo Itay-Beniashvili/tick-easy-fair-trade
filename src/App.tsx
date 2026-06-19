@@ -46,11 +46,11 @@ const App = () => (
             <Route path="/event/:id" element={<EventDetails />} />
            <Route path="/marketplace" element={<Marketplace />} />
            <Route path="/group-purchase/:id" element={<GroupPurchaseStatus />} />
-            <Route path="/manager" element={<Manager />} />
-            <Route path="/manager/inbox" element={<ManagerInbox />} />
-            <Route path="/manager/analytics" element={<ManagerAnalytics />} />
-            <Route path="/manager/events" element={<ManagerEvents />} />
-            <Route path="/manager/events/new" element={<CreateEvent />} />
+            <Route path="/manager" element={<ManagerRoute><Manager /></ManagerRoute>} />
+            <Route path="/manager/inbox" element={<ManagerRoute><ManagerInbox /></ManagerRoute>} />
+            <Route path="/manager/analytics" element={<ManagerRoute><ManagerAnalytics /></ManagerRoute>} />
+            <Route path="/manager/events" element={<ManagerRoute><ManagerEvents /></ManagerRoute>} />
+            <Route path="/manager/events/new" element={<ManagerRoute><CreateEvent /></ManagerRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
