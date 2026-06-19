@@ -133,53 +133,26 @@ export type Database = {
       }
     }
     Views: {
-      tickets_for_sale: {
-        Row: {
-          created_at: string | null
-          event_city: string | null
-          event_date: string | null
-          event_id: string | null
-          event_image: string | null
-          event_time: string | null
-          event_title: string | null
-          event_venue: string | null
-          id: string | null
-          sale_price: number | null
-          seat_info: string | null
-          ticket_type: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          event_city?: string | null
-          event_date?: string | null
-          event_id?: string | null
-          event_image?: string | null
-          event_time?: string | null
-          event_title?: string | null
-          event_venue?: string | null
-          id?: string | null
-          sale_price?: number | null
-          seat_info?: string | null
-          ticket_type?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          event_city?: string | null
-          event_date?: string | null
-          event_id?: string | null
-          event_image?: string | null
-          event_time?: string | null
-          event_title?: string | null
-          event_venue?: string | null
-          id?: string | null
-          sale_price?: number | null
-          seat_info?: string | null
-          ticket_type?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
+      get_tickets_for_sale: {
+        Args: never
+        Returns: {
+          created_at: string
+          event_city: string
+          event_date: string
+          event_id: string
+          event_image: string
+          event_time: string
+          event_title: string
+          event_venue: string
+          id: string
+          sale_price: number
+          seat_info: string
+          ticket_type: string
+        }[]
+      }
       has_role: {
         Args: { _role: Database["public"]["Enums"]["app_role"] }
         Returns: boolean
