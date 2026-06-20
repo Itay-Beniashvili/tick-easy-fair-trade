@@ -4,6 +4,7 @@ import { ArrowLeft, Calendar, MapPin, Clock, DollarSign, Users, Image, FileText,
 import { useNavigate } from 'react-router-dom';
 import { ManagerSidebar } from '@/components/ManagerSidebar';
 import { MobileManagerNav } from '@/components/MobileManagerNav';
+import { createEvent } from '@/api/events';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
@@ -43,16 +44,36 @@ export default function CreateEvent() {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false);
+
+    const totalTickets = Number(formData.availableTickets);
+    const price = Number(formData.price);
+
+    try {
+      await createEvent({
+        title: formData.title,
+        artist: formData.artist,
+        venue: formData.venue,
+        city: formData.city,
+        event_date: formData.date, // 'YYYY-MM-DD' from <input type="date" />
+        event_time: formData.time,
+        price,
+        original_price: price,
+        image: formData.image,
+        genre: formData.genre as 'music' | 'sports' | 'theater',
+        description: formData.description,
+        total_tickets: totalTickets,
+        available_tickets: totalTickets,
+      });
       toast.success('Event created successfully!');
       navigate('/manager/events');
-    }, 1500);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to create event');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -215,7 +236,7 @@ export default function CreateEvent() {
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-foreground mb-2 block">Ticket Price ($)</label>
+                  <label className="text-sm font-medium text-foreground mb-2 block">Ticket Price (₪)</label>
                   <Input
                     type="number"
                     placeholder="0.00"

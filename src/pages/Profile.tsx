@@ -1,7 +1,11 @@
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { User, Settings, Shield, HelpCircle, LogOut, ChevronRight, Bell, CreditCard, Star } from 'lucide-react';
 import { BottomNav } from '@/components/BottomNav';
-import { useApp } from '@/context/AppContext';
+import { useAuth } from '@/context/AuthContext';
+import { getProfile } from '@/api/profile';
+import type { ProfileRow } from '@/api/client';
+import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 
 const menuItems = [
@@ -14,13 +18,29 @@ const menuItems = [
 ];
 
 export default function Profile() {
-  const { setRole, selectedGenres } = useApp();
+  const { signOut, user } = useAuth();
   const navigate = useNavigate();
+  const [profile, setProfile] = useState<ProfileRow | null>(null);
 
-  const handleLogout = () => {
-    setRole(null);
-    navigate('/');
+  useEffect(() => {
+    getProfile()
+      .then(setProfile)
+      .catch((err) => toast.error(err instanceof Error ? err.message : 'Failed to load profile'));
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      navigate('/');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Sign out failed');
+    }
   };
+
+  const fullName = profile?.full_name || 'User';
+  const email = profile?.email || user?.email || '';
+  const genres = profile?.preferred_genres ?? [];
+  const artists = profile?.preferred_artists ?? [];
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -35,8 +55,8 @@ export default function Profile() {
           <div className="w-24 h-24 rounded-full bg-white/20 backdrop-blur-sm mx-auto mb-4 flex items-center justify-center ring-4 ring-white/30">
             <User className="w-12 h-12 text-white" />
           </div>
-          <h1 className="text-xl font-bold text-white mb-1">Guest User</h1>
-          <p className="text-white/80 text-sm">demo@tickeasy.com</p>
+          <h1 className="text-xl font-bold text-white mb-1">{fullName}</h1>
+          <p className="text-white/80 text-sm">{email}</p>
         </motion.div>
       </div>
 
@@ -58,11 +78,46 @@ export default function Profile() {
               <p className="text-xs text-muted-foreground">Sales</p>
             </div>
             <div className="text-center">
-              <p className="text-2xl font-bold text-gradient-warm">{selectedGenres.length}</p>
+              <p className="text-2xl font-bold text-gradient-warm">{genres.length}</p>
               <p className="text-xs text-muted-foreground">Interests</p>
             </div>
           </div>
         </motion.div>
+
+        {/* Preferences */}
+        {(genres.length > 0 || artists.length > 0) && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+            className="card-elevated p-4 mb-6 space-y-3"
+          >
+            {genres.length > 0 && (
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground mb-2">Preferred Genres</p>
+                <div className="flex flex-wrap gap-2">
+                  {genres.map((g) => (
+                    <span key={g} className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium capitalize">
+                      {g}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            {artists.length > 0 && (
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground mb-2">Preferred Artists</p>
+                <div className="flex flex-wrap gap-2">
+                  {artists.map((a) => (
+                    <span key={a} className="px-3 py-1 rounded-full bg-accent/10 text-accent text-xs font-medium">
+                      {a}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </motion.div>
+        )}
 
         {/* Menu */}
         <div className="space-y-2">
