@@ -33,11 +33,12 @@ export function EventCard({ event, index = 0, compact = false }: EventCardProps)
         transition={{ delay: index * 0.05, duration: 0.3 }}
         onClick={go}
         style={gelStyle(event.genre)}
-        className="card-elevated overflow-hidden cursor-pointer transition-transform duration-200 hover:-translate-y-1"
+        className="group card-elevated overflow-hidden cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:ring-1 hover:ring-[hsl(var(--c)/0.35)] hover:shadow-[0_18px_38px_-18px_hsl(var(--c)/0.5)]"
       >
         <div className="relative h-24 overflow-hidden">
-          <img src={event.image ?? ''} alt={event.title} className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-card via-card/30 to-transparent" />
+          <img src={event.image ?? ''} alt={event.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+          <div className="absolute inset-0 bg-gradient-to-t from-card via-card/20 to-transparent" />
+          <div className="absolute inset-x-0 top-0 h-2/3 bg-gradient-to-b from-[hsl(var(--c)/0.18)] to-transparent" />
           <span className="absolute top-2 left-2 w-2 h-2 rounded-full bg-[hsl(var(--c))] shadow-[0_0_10px_1px_hsl(var(--c))]" />
         </div>
         <div className="p-3 stub-edge">
@@ -58,15 +59,16 @@ export function EventCard({ event, index = 0, compact = false }: EventCardProps)
       transition={{ delay: index * 0.08, duration: 0.4 }}
       onClick={go}
       style={gelStyle(event.genre)}
-      className="card-elevated overflow-hidden cursor-pointer transition-transform duration-200 hover:-translate-y-1 hover:shadow-elevated"
+      className="group card-elevated overflow-hidden cursor-pointer transition-all duration-200 hover:-translate-y-1.5 hover:ring-1 hover:ring-[hsl(var(--c)/0.35)] hover:shadow-[0_22px_46px_-20px_hsl(var(--c)/0.55)]"
     >
       <div className="relative h-44 overflow-hidden">
         <img
           src={event.image ?? ''}
           alt={event.title}
-          className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-card via-card/30 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-card via-card/20 to-transparent" />
+        <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-[hsl(var(--c)/0.2)] to-transparent" />
         <span className="absolute top-3 left-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-mono text-[10px] tracking-widest uppercase font-bold text-primary-foreground bg-[hsl(var(--c))]">
           <span className="w-1.5 h-1.5 rounded-full bg-current opacity-80" />
           {genreLabels[event.genre] ?? event.genre}

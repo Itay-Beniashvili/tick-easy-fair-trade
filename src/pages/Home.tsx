@@ -113,6 +113,8 @@ export default function Home() {
     (e) => category === 'all' || e.genre === category,
   );
   const featured = forYou[0] ?? visible[0];
+  // Don't repeat the featured event inside the grid (it already headlines the hero).
+  const gridEvents = search ? visible : visible.filter((e) => e.id !== featured?.id);
 
   return (
     <div className="min-h-screen bg-background pb-28 lg:pb-10 lg:pt-20">
@@ -187,7 +189,7 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="max-w-lg lg:max-w-7xl 2xl:max-w-[1600px] mx-auto px-5 lg:px-12 space-y-7">
+      <div className="max-w-lg lg:max-w-7xl 2xl:max-w-[1600px] mx-auto px-5 lg:px-12 space-y-10 lg:space-y-14 pt-2">
         {loading ? (
           <p className="text-center text-muted-foreground py-16">Loading the lineup…</p>
         ) : (
@@ -200,9 +202,14 @@ export default function Home() {
             {/* For you rail */}
             {forYou.length > 1 && !search && (
               <section>
-                <div className="flex items-baseline justify-between mb-3">
-                  <h3 className="font-display font-bold text-xl">For you</h3>
-                  <Link to="/marketplace" className="text-[13px] text-muted-foreground">See all</Link>
+                <div className="flex items-end justify-between mb-5">
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-1.5 h-7 rounded-full bg-gel" />
+                    <h3 className="font-display font-bold text-2xl">For you</h3>
+                  </div>
+                  <Link to="/marketplace" className="flex items-center gap-1 text-sm font-semibold text-gel hover:gap-1.5 transition-all">
+                    See all <ArrowRight className="w-4 h-4" />
+                  </Link>
                 </div>
                 <div className="flex gap-3.5 overflow-x-auto scrollbar-hide -mx-5 px-5 lg:-mx-12 lg:px-12 pb-1">
                   {forYou.slice(1, 9).map((event, i) => (
@@ -216,14 +223,20 @@ export default function Home() {
 
             {/* Full list (also the search results surface) */}
             <section>
-              <h3 className="font-display font-bold text-xl mb-3">
-                {search ? 'Results' : category === 'all' ? 'All events' : `${category} tonight`}
-              </h3>
-              {visible.length === 0 ? (
+              <div className="flex items-center gap-2.5 mb-5">
+                <span className="w-1.5 h-7 rounded-full bg-gel" />
+                <h3 className="font-display font-bold text-2xl capitalize">
+                  {search ? 'Results' : category === 'all' ? 'All events' : `${category} tonight`}
+                </h3>
+                <span className="font-mono text-xs text-muted-foreground bg-card border border-white/[0.06] px-2.5 py-0.5 rounded-full">
+                  {gridEvents.length}
+                </span>
+              </div>
+              {gridEvents.length === 0 ? (
                 <p className="text-center py-12 text-muted-foreground">Nothing here yet.</p>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
-                  {visible.map((event, i) => <EventCard key={event.id} event={event} index={i} />)}
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 lg:gap-5">
+                  {gridEvents.map((event, i) => <EventCard key={event.id} event={event} index={i} />)}
                 </div>
               )}
             </section>
