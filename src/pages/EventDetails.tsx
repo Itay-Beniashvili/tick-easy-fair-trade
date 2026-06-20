@@ -13,6 +13,7 @@ import { getProfile } from '@/api/profile';
 import { useAuth } from '@/context/AuthContext';
 import { formatILS } from '@/lib/currency';
 import { ContactManagerModal } from '@/components/ContactManagerModal';
+import { Skeleton } from '@/components/Skeletons';
 import type { EventRow } from '@/api/client';
 
 interface Listing {
@@ -49,7 +50,20 @@ export default function EventDetails() {
     })();
   }, [id]);
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center bg-background"><p className="text-muted-foreground">Loading…</p></div>;
+  if (loading) return (
+    <div className="min-h-screen bg-background lg:pt-16">
+      <Skeleton className="h-80 lg:h-96 rounded-none" />
+      <div className="relative -mt-24 px-4 lg:px-8 max-w-lg lg:max-w-6xl mx-auto lg:grid lg:grid-cols-[1.5fr_1fr] lg:gap-8">
+        <div className="card-elevated p-6 space-y-4">
+          <Skeleton className="h-9 w-2/3" />
+          <Skeleton className="h-4 w-1/2" /><Skeleton className="h-4 w-2/5" /><Skeleton className="h-4 w-1/3" />
+        </div>
+        <div className="hidden lg:block card-elevated p-5 space-y-4 mt-0">
+          <Skeleton className="h-8 w-full" /><Skeleton className="h-12 w-full" /><Skeleton className="h-12 w-full" />
+        </div>
+      </div>
+    </div>
+  );
   if (!event) return <div className="min-h-screen flex items-center justify-center bg-background"><p className="text-muted-foreground">Event not found</p></div>;
 
   const formattedDate = format(new Date(event.event_date), 'EEEE, MMMM d, yyyy');
@@ -84,26 +98,27 @@ export default function EventDetails() {
 
   return (
     <div className="min-h-screen bg-background lg:pt-16">
-      <div className="relative h-80">
+      <div className="relative h-80 lg:h-96">
         <img src={event.image ?? ''} alt={event.title} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-        <button onClick={() => navigate(-1)} className="absolute top-12 lg:top-4 left-4 w-10 h-10 rounded-full bg-white/90 shadow-lg flex items-center justify-center hover:bg-white transition-colors">
+        <button onClick={() => navigate(-1)} className="absolute top-12 lg:top-20 left-4 lg:left-8 w-10 h-10 rounded-full glass-effect flex items-center justify-center hover:bg-popover transition-colors">
           <ArrowLeft className="w-5 h-5 text-foreground" />
         </button>
       </div>
 
-      <div className="relative -mt-24 px-4 pb-32">
-        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="max-w-lg lg:max-w-3xl mx-auto">
-          <div className="card-elevated p-6 mb-4">
-            <h1 className="text-2xl font-bold text-foreground mb-4">{event.title}</h1>
+      <div className="relative -mt-24 px-4 lg:px-8 pb-32 lg:pb-16">
+        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="max-w-lg lg:max-w-6xl mx-auto lg:grid lg:grid-cols-[1.5fr_1fr] lg:gap-8 lg:items-start">
+          <div className="card-elevated p-6 lg:p-8 mb-4 lg:mb-0">
+            <h1 className="font-display font-extrabold text-3xl lg:text-4xl text-foreground mb-5">{event.title}</h1>
             <div className="space-y-3">
               <div className="flex items-center gap-3 text-muted-foreground"><MapPin className="w-5 h-5 text-primary" /><span>{event.venue}, {event.city}</span></div>
               <div className="flex items-center gap-3 text-muted-foreground"><Calendar className="w-5 h-5 text-accent" /><span>{formattedDate}</span></div>
               <div className="flex items-center gap-3 text-muted-foreground"><Clock className="w-5 h-5 text-highlight" /><span>{event.event_time}</span></div>
             </div>
-            {event.description && <p className="mt-4 text-muted-foreground leading-relaxed">{event.description}</p>}
+            {event.description && <p className="mt-5 text-muted-foreground leading-relaxed">{event.description}</p>}
           </div>
 
+          <div className="lg:sticky lg:top-24">
           <div className="flex gap-2 mb-4">
             <button onClick={() => setSelectedTab('primary')} className={cn('flex-1 py-3 rounded-2xl font-semibold transition-all', selectedTab === 'primary' ? 'btn-primary-gradient' : 'bg-muted text-muted-foreground hover:bg-muted/80')}>Buy Now</button>
             <button onClick={() => setSelectedTab('resale')} className={cn('flex-1 py-3 rounded-2xl font-semibold transition-all relative', selectedTab === 'resale' ? 'btn-primary-gradient' : 'bg-muted text-muted-foreground hover:bg-muted/80')}>
@@ -166,6 +181,7 @@ export default function EventDetails() {
               )}
             </motion.div>
           )}
+          </div>
         </motion.div>
       </div>
 

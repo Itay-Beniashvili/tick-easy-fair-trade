@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, RefreshCcw, Shield, CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { BottomNav } from '@/components/BottomNav';
+import { EventCardSkeleton } from '@/components/Skeletons';
 import { listForSaleMarketplace, buyResale } from '@/api/resale';
 import { getProfile } from '@/api/profile';
 import { useAuth } from '@/context/AuthContext';
@@ -93,7 +94,9 @@ export default function Marketplace() {
 
       <div className="max-w-lg lg:max-w-6xl mx-auto px-4 py-4">
         {loading ? (
-          <p className="text-center text-muted-foreground py-12">Loading listings…</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {Array.from({ length: 6 }).map((_, i) => <EventCardSkeleton key={i} />)}
+          </div>
         ) : visible.length === 0 ? (
           <div className="card-elevated p-8 text-center">
             <p className="text-muted-foreground">No resale tickets available right now</p>

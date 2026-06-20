@@ -2,7 +2,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { motion, MotionConfig } from "framer-motion";
 import { AppProvider } from "./context/AppContext";
 import { AuthProvider } from "./context/AuthContext";
 import { RoleSelection } from "./components/RoleSelection";
@@ -29,15 +30,17 @@ import { ManagerRoute } from "./components/ManagerRoute";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <AuthProvider>
-        <AppProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
+/** Fades + lifts each page in on navigation for a smoother, premium feel. */
+function AnimatedRoutes() {
+  const location = useLocation();
+  return (
+    <motion.div
+      key={location.pathname}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+    >
+      <Routes location={location}>
               <Route path="/" element={<RoleSelection />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
@@ -57,10 +60,25 @@ const App = () => (
               <Route path="/manager/events" element={<ManagerRoute><ManagerEvents /></ManagerRoute>} />
               <Route path="/manager/events/new" element={<ManagerRoute><CreateEvent /></ManagerRoute>} />
               <Route path="*" element={<NotFound />} />
-            </Routes>
+      </Routes>
+    </motion.div>
+  );
+}
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <MotionConfig reducedMotion="user">
+      <AuthProvider>
+        <AppProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <AnimatedRoutes />
           </BrowserRouter>
         </AppProvider>
       </AuthProvider>
+      </MotionConfig>
     </TooltipProvider>
   </QueryClientProvider>
 );

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Search, RefreshCcw, ArrowRight } from 'lucide-react';
 import { SearchBar } from '@/components/SearchBar';
 import { EventCard } from '@/components/EventCard';
+import { CompactCardSkeleton, EventGridSkeleton } from '@/components/Skeletons';
 import { BottomNav } from '@/components/BottomNav';
 import { Link, useNavigate } from 'react-router-dom';
 import { listEvents } from '@/api/events';
@@ -191,7 +192,12 @@ export default function Home() {
 
       <div className="max-w-lg lg:max-w-7xl 2xl:max-w-[1600px] mx-auto px-5 lg:px-12 space-y-10 lg:space-y-14 pt-2">
         {loading ? (
-          <p className="text-center text-muted-foreground py-16">Loading the lineup…</p>
+          <>
+            <div className="flex gap-3.5 overflow-hidden">
+              {Array.from({ length: 6 }).map((_, i) => <CompactCardSkeleton key={i} />)}
+            </div>
+            <EventGridSkeleton count={8} />
+          </>
         ) : (
           <>
             {/* Featured — shown at the top of the feed on mobile (it sits beside the hero on desktop) */}

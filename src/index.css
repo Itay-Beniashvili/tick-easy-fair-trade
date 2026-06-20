@@ -146,6 +146,19 @@
   .bg-gradient-sunset { background: var(--gradient-primary); }
   .bg-gradient-manager { background: var(--gradient-manager); }
 
+  /* Shimmer skeleton for loading states */
+  .skeleton {
+    @apply relative overflow-hidden rounded-xl bg-card;
+  }
+  .skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, hsl(var(--foreground) / 0.07), transparent);
+    animation: shimmer 1.6s ease-in-out infinite;
+  }
+
   /* Perforated ticket-stub divider — the signature seam */
   .stub-edge {
     position: relative;
@@ -176,6 +189,7 @@
 @keyframes pulseSlow { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
 @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 @keyframes breathe { 0%, 100% { opacity: 0.5; } 50% { opacity: 0.9; } }
+@keyframes shimmer { 100% { transform: translateX(100%); } }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; }

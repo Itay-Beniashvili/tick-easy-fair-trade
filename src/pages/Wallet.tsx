@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Ticket } from 'lucide-react';
 import { BottomNav } from '@/components/BottomNav';
 import { TicketCard } from '@/components/TicketCard';
+import { EventCardSkeleton } from '@/components/Skeletons';
 import { listMyTickets } from '@/api/tickets';
 import type { TicketRow } from '@/api/client';
 import { toast } from 'sonner';
@@ -42,7 +43,9 @@ export default function Wallet() {
 
       <div className="max-w-lg lg:max-w-5xl mx-auto px-4 py-6">
         {loading ? (
-          <p className="text-center text-muted-foreground py-16">Loading your tickets…</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => <EventCardSkeleton key={i} />)}
+          </div>
         ) : tickets.length === 0 ? (
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
