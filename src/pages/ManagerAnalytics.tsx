@@ -20,9 +20,9 @@ interface EventStats {
 }
 
 const genreColorMap: Record<string, string> = {
-  music: 'hsl(24, 95%, 53%)',
-  sports: 'hsl(168, 75%, 42%)',
-  theater: 'hsl(280, 70%, 55%)',
+  music: 'hsl(330, 100%, 62%)',   // magenta gel
+  sports: 'hsl(180, 80%, 49%)',   // cyan gel
+  theater: 'hsl(40, 100%, 65%)',  // amber gel
 };
 
 const genreLabelMap: Record<string, string> = {
@@ -282,15 +282,9 @@ export default function ManagerAnalytics() {
                           />
                           <Bar
                             dataKey="revenue"
-                            fill="url(#revenueGradient)"
+                            fill="hsl(var(--success))"
                             radius={[8, 8, 0, 0]}
                           />
-                          <defs>
-                            <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor="hsl(var(--success))" />
-                              <stop offset="100%" stopColor="hsl(168, 75%, 50%)" />
-                            </linearGradient>
-                          </defs>
                         </BarChart>
                       </ResponsiveContainer>
                     </div>

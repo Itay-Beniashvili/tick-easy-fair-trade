@@ -42,10 +42,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setRole(null);
       }
     });
-    supabase.auth.getSession().then(({ data: { session: s } }) => {
+    supabase.auth.getSession().then(async ({ data: { session: s } }) => {
       setSession(s);
       setUser(s?.user ?? null);
-      if (s?.user) fetchRole(s.user.id).then(setRole);
+      // Resolve the role BEFORE clearing loading, so role-gated routes don't
+      // briefly see (loading=false, role=null) on reload and bounce to login.
+      if (s?.user) setRole(await fetchRole(s.user.id));
       setLoading(false);
     });
     return () => subscription.unsubscribe();

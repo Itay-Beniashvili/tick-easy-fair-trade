@@ -59,7 +59,7 @@ export default function Manager() {
             >
               <Sparkles className="w-8 h-8 text-warning" />
               <div>
-                <h1 className="text-2xl font-bold text-white mb-1">Dashboard</h1>
+                <h1 className="font-display font-extrabold text-3xl text-white mb-1">Dashboard</h1>
                 <p className="text-white/80">Welcome back to your manager panel</p>
               </div>
             </motion.div>
@@ -128,15 +128,9 @@ export default function Manager() {
                         />
                         <Bar
                           dataKey="sales"
-                          fill="url(#barGradient)"
+                          fill="hsl(var(--gel))"
                           radius={[0, 8, 8, 0]}
                         />
-                        <defs>
-                          <linearGradient id="barGradient" x1="0" y1="0" x2="1" y2="0">
-                            <stop offset="0%" stopColor="hsl(var(--primary))" />
-                            <stop offset="100%" stopColor="hsl(var(--accent))" />
-                          </linearGradient>
-                        </defs>
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
