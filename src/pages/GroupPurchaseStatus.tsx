@@ -129,7 +129,7 @@ export default function GroupPurchaseStatus() {
   // --- Loading state ---
   if (loading) {
     return (
-      <div className="min-h-screen bg-background pb-24 flex items-center justify-center">
+      <div className="min-h-screen bg-background pb-24 lg:pt-16 flex items-center justify-center">
         <div className="flex flex-col items-center gap-3 text-muted-foreground">
           <motion.div
             animate={{ rotate: 360 }}
@@ -146,7 +146,7 @@ export default function GroupPurchaseStatus() {
   // --- Not found state ---
   if (notFound || !group) {
     return (
-      <div className="min-h-screen bg-background pb-24">
+      <div className="min-h-screen bg-background pb-24 lg:pt-16">
         <div className="bg-gradient-hero pt-12 pb-6 px-4">
           <div className="max-w-lg mx-auto">
             <button
@@ -191,7 +191,7 @@ export default function GroupPurchaseStatus() {
     : 0;
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background pb-24 lg:pt-16">
       {/* Header */}
       <div className="bg-gradient-hero pt-12 pb-6 px-4">
         <div className="max-w-lg mx-auto">

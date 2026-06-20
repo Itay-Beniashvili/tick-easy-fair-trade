@@ -28,6 +28,7 @@ import GroupPurchaseStatus from "./pages/GroupPurchaseStatus";
 import Community from "./pages/Community";
 import { ManagerRoute } from "./components/ManagerRoute";
 import { CommandPalette } from "./components/CommandPalette";
+import { LightsUp } from "./components/LightsUp";
 
 const queryClient = new QueryClient();
 
@@ -74,6 +75,7 @@ const App = () => (
         <AppProvider>
           <Toaster />
           <Sonner />
+          <LightsUp />
           <BrowserRouter>
             <CommandPalette />
             <AnimatedRoutes />

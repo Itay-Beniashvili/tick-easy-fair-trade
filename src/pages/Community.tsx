@@ -51,20 +51,20 @@ export default function Community() {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-24">
-      <div className="bg-gradient-hero pt-12 pb-6 px-4">
-        <div className="max-w-lg mx-auto flex items-center gap-3">
+    <div className="min-h-screen bg-background pb-24 lg:pb-10 lg:pt-16">
+      <div className="bg-gradient-hero pt-12 pb-6 px-4 lg:px-8">
+        <div className="max-w-lg lg:max-w-3xl mx-auto flex items-center gap-3">
           <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center">
             <Users className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-white">Community</h1>
+            <h1 className="font-display font-extrabold text-3xl text-white">Community</h1>
             <p className="text-white/80 text-sm">Find partners & rides for events</p>
           </div>
         </div>
       </div>
 
-      <div className="max-w-lg mx-auto px-4 py-6 space-y-6">
+      <div className="max-w-lg lg:max-w-3xl mx-auto px-4 lg:px-8 py-6 space-y-6">
         {/* New post */}
         <div className="card-elevated p-4 space-y-3">
           <div className="flex gap-2">
