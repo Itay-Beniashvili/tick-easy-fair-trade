@@ -1,7 +1,9 @@
-import { Home, Wallet, User, Users } from 'lucide-react';
+import { Home, Wallet, User, Users, Search } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
+
+const openCommand = () => window.dispatchEvent(new Event('tickeasy:command'));
 
 const navItems = [
   { path: '/home', icon: Home, label: 'Home' },
@@ -18,12 +20,20 @@ export function BottomNav() {
       {/* Desktop: sticky top nav bar */}
       <nav className="hidden lg:flex fixed top-0 inset-x-0 z-50 h-16 items-center
         glass-effect border-b border-white/[0.06]">
-        <div className="w-full max-w-6xl mx-auto px-6 flex items-center justify-between">
+        <div className="w-full max-w-7xl 2xl:max-w-[1600px] mx-auto px-12 flex items-center justify-between">
           <div className="flex items-center gap-2 font-display font-extrabold text-xl">
             <span className="w-2.5 h-2.5 rounded-full bg-gel shadow-[0_0_12px_2px_hsl(var(--gel))]" />
             TickEasy
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={openCommand}
+              className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-muted-foreground bg-card border border-white/[0.06] hover:text-foreground transition-colors"
+            >
+              <Search className="w-4 h-4" />
+              <span>Search</span>
+              <kbd className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-muted border border-white/[0.06]">⌘K</kbd>
+            </button>
             {navItems.map(({ path, icon: Icon, label }) => {
               const isActive = location.pathname === path;
               return (

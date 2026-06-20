@@ -27,6 +27,7 @@ import Marketplace from "./pages/Marketplace";
 import GroupPurchaseStatus from "./pages/GroupPurchaseStatus";
 import Community from "./pages/Community";
 import { ManagerRoute } from "./components/ManagerRoute";
+import { CommandPalette } from "./components/CommandPalette";
 
 const queryClient = new QueryClient();
 
@@ -74,6 +75,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <CommandPalette />
             <AnimatedRoutes />
           </BrowserRouter>
         </AppProvider>
