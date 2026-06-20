@@ -1,6 +1,7 @@
-// Centralised currency formatting. TickEasy is an Israeli product, so money is ILS (₪),
-// even while the UI copy is still in English (Hebrew/RTL is a later phase).
-const ils = new Intl.NumberFormat('he-IL', {
+// Centralised currency formatting. TickEasy is an Israeli product, so money is ILS (₪).
+// While the UI copy is still English/LTR we format symbol-first ("₪350") for clean
+// rendering; the he-IL trailing-symbol form returns when the UI moves to Hebrew/RTL.
+const ils = new Intl.NumberFormat('en-US', {
   style: 'currency',
   currency: 'ILS',
   maximumFractionDigits: 0,

@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 
 const navItems = [
   { path: '/home', icon: Home, label: 'Home' },
-  { path: '/wallet', icon: Wallet, label: 'My Tickets' },
+  { path: '/wallet', icon: Wallet, label: 'Tickets' },
   { path: '/community', icon: Users, label: 'Community' },
   { path: '/profile', icon: User, label: 'Profile' },
 ];
@@ -14,34 +14,34 @@ export function BottomNav() {
   const location = useLocation();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-lg border-t border-border z-50">
-      <div className="flex items-center justify-around py-2 px-4 max-w-md mx-auto">
+    <nav className="fixed bottom-3.5 left-1/2 -translate-x-1/2 z-50 w-[min(420px,calc(100%-28px))]
+      glass-effect rounded-[22px] shadow-lg">
+      <div className="flex items-center justify-around px-2 py-2">
         {navItems.map(({ path, icon: Icon, label }) => {
           const isActive = location.pathname === path;
-
           return (
             <NavLink
               key={path}
               to={path}
-              className="flex flex-col items-center py-2 px-5 relative"
+              className="relative flex flex-col items-center gap-1 px-4 py-1.5 rounded-2xl"
             >
               {isActive && (
                 <motion.div
                   layoutId="activeTab"
-                  className="absolute inset-0 bg-gradient-to-r from-primary/15 to-accent/15 rounded-2xl"
+                  className="absolute inset-0 bg-gel/10 rounded-2xl"
                   transition={{ type: 'spring', duration: 0.4 }}
                 />
               )}
               <Icon
                 className={cn(
-                  'w-6 h-6 transition-colors relative z-10',
-                  isActive ? 'text-primary' : 'text-muted-foreground'
+                  'w-[22px] h-[22px] transition-colors relative z-10',
+                  isActive ? 'text-gel drop-shadow-[0_0_8px_hsl(var(--gel))]' : 'text-muted-foreground',
                 )}
               />
               <span
                 className={cn(
-                  'text-xs mt-1 font-medium transition-colors relative z-10',
-                  isActive ? 'text-primary' : 'text-muted-foreground'
+                  'text-[10px] font-semibold transition-colors relative z-10',
+                  isActive ? 'text-gel' : 'text-muted-foreground',
                 )}
               >
                 {label}

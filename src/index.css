@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,121 +6,79 @@
 
 @layer base {
   :root {
-    /* TickEasy Design System - Warm & Vibrant */
-    --background: 30 40% 98%;
-    --foreground: 20 30% 15%;
+    /* TickEasy — "House Lights": a darkened venue lit by colored stage gels */
+    --background: 252 16% 6%;       /* #0E0D12 auditorium */
+    --foreground: 270 20% 96%;      /* #F5F3F7 */
 
-    --card: 0 0% 100%;
-    --card-foreground: 20 30% 15%;
+    --card: 255 16% 10%;            /* #17151D raised surface */
+    --card-foreground: 270 20% 96%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 20 30% 15%;
+    --popover: 256 15% 14%;         /* #211E29 */
+    --popover-foreground: 270 20% 96%;
 
-    /* Warm Orange Primary */
-    --primary: 24 95% 53%;
-    --primary-foreground: 0 0% 100%;
+    /* Magenta stage gel — the brand spark */
+    --primary: 330 100% 62%;        /* #FF3D9A */
+    --primary-foreground: 252 16% 6%;
 
-    /* Light Cream */
-    --secondary: 35 40% 95%;
-    --secondary-foreground: 20 30% 20%;
+    --secondary: 256 15% 14%;
+    --secondary-foreground: 270 20% 96%;
 
-    --muted: 30 30% 95%;
-    --muted-foreground: 20 15% 45%;
+    --muted: 256 15% 14%;
+    --muted-foreground: 258 9% 62%; /* #9A95A6 */
 
-    /* Coral Accent */
-    --accent: 12 85% 60%;
-    --accent-foreground: 0 0% 100%;
+    /* Violet accent for secondary moments */
+    --accent: 252 100% 68%;         /* #7C5CFF */
+    --accent-foreground: 252 16% 6%;
 
-    /* Teal Success */
-    --success: 168 75% 42%;
-    --success-foreground: 0 0% 100%;
+    --success: 162 74% 52%;         /* #2BE0A8 mint */
+    --success-foreground: 252 16% 6%;
 
-    /* Amber Warning */
-    --warning: 45 100% 51%;
-    --warning-foreground: 20 30% 15%;
+    --warning: 40 100% 65%;         /* #FFC24B */
+    --warning-foreground: 252 16% 6%;
 
-    /* Rose Destructive */
-    --destructive: 350 85% 60%;
+    --destructive: 354 100% 65%;    /* #FF4D5E */
     --destructive-foreground: 0 0% 100%;
 
-    /* Purple Highlight */
-    --highlight: 280 70% 55%;
-    --highlight-foreground: 0 0% 100%;
+    --highlight: 270 90% 70%;
+    --highlight-foreground: 252 16% 6%;
 
-    --border: 30 25% 88%;
-    --input: 30 25% 88%;
-    --ring: 24 95% 53%;
+    --border: 255 15% 16%;
+    --input: 255 15% 16%;
+    --ring: 330 100% 62%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
 
-    /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(24 95% 53%) 0%, hsl(12 85% 55%) 50%, hsl(350 80% 58%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(24 90% 50%) 0%, hsl(350 75% 55%) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(30 40% 98%) 100%);
-    --gradient-success: linear-gradient(135deg, hsl(168 75% 42%) 0%, hsl(160 65% 50%) 100%);
-    --gradient-warm: linear-gradient(135deg, hsl(45 100% 55%) 0%, hsl(24 95% 53%) 50%, hsl(350 80% 55%) 100%);
-    --gradient-sunset: linear-gradient(180deg, hsl(24 90% 55%) 0%, hsl(350 70% 50%) 100%);
-   --gradient-manager: linear-gradient(135deg, hsl(220 30% 15%) 0%, hsl(220 25% 20%) 50%, hsl(220 20% 12%) 100%);
+    /* Category stage gels (music / sports / theater) */
+    --music: 330 100% 62%;          /* #FF3D9A */
+    --sports: 180 80% 49%;          /* #19E0E0 */
+    --theater: 40 100% 65%;         /* #FFC24B */
+    /* Active gel — re-themed per category on the home screen */
+    --gel: var(--music);
 
-    /* Shadows */
-    --shadow-sm: 0 1px 2px 0 hsl(20 30% 15% / 0.05);
-    --shadow-md: 0 4px 6px -1px hsl(20 30% 15% / 0.08), 0 2px 4px -2px hsl(20 30% 15% / 0.08);
-    --shadow-lg: 0 10px 15px -3px hsl(20 30% 15% / 0.1), 0 4px 6px -4px hsl(20 30% 15% / 0.1);
-    --shadow-xl: 0 20px 25px -5px hsl(20 30% 15% / 0.1), 0 8px 10px -6px hsl(20 30% 15% / 0.1);
-    --shadow-card: 0 4px 20px -2px hsl(24 95% 53% / 0.1);
-    --shadow-elevated: 0 12px 40px -8px hsl(24 95% 53% / 0.2);
-    --shadow-glow: 0 0 30px hsl(24 95% 53% / 0.3);
+    /* Gradients (dark, stage-lit) */
+    --gradient-primary: linear-gradient(135deg, hsl(330 100% 62%) 0%, hsl(300 90% 60%) 55%, hsl(266 100% 68%) 100%);
+    --gradient-hero: radial-gradient(120% 80% at 50% -20%, hsl(var(--gel) / 0.28), transparent 60%), linear-gradient(180deg, hsl(255 16% 11%) 0%, hsl(252 16% 6%) 100%);
+    --gradient-card: linear-gradient(160deg, hsl(255 16% 12%) 0%, hsl(255 16% 9%) 100%);
+    --gradient-success: linear-gradient(135deg, hsl(162 74% 52%) 0%, hsl(174 70% 48%) 100%);
+    --gradient-manager: linear-gradient(160deg, hsl(256 18% 13%) 0%, hsl(252 16% 7%) 100%);
 
-    --sidebar-background: 20 30% 15%;
-    --sidebar-foreground: 30 40% 98%;
-    --sidebar-primary: 24 95% 53%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 20 25% 22%;
-    --sidebar-accent-foreground: 30 40% 98%;
-    --sidebar-border: 20 20% 25%;
-    --sidebar-ring: 24 95% 53%;
-  }
+    /* Shadows + glows */
+    --shadow-sm: 0 1px 2px 0 hsl(252 40% 2% / 0.4);
+    --shadow-md: 0 6px 16px -6px hsl(252 60% 2% / 0.5);
+    --shadow-lg: 0 16px 36px -12px hsl(252 60% 2% / 0.6);
+    --shadow-xl: 0 28px 60px -18px hsl(252 60% 2% / 0.7);
+    --shadow-card: 0 12px 30px -14px hsl(252 60% 2% / 0.6);
+    --shadow-elevated: 0 22px 48px -20px hsl(var(--gel) / 0.45);
+    --shadow-glow: 0 0 28px -2px hsl(var(--gel) / 0.6);
 
-  .dark {
-    --background: 20 30% 8%;
-    --foreground: 30 40% 98%;
-
-    --card: 20 25% 12%;
-    --card-foreground: 30 40% 98%;
-
-    --popover: 20 25% 12%;
-    --popover-foreground: 30 40% 98%;
-
-    --primary: 24 95% 58%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 20 20% 18%;
-    --secondary-foreground: 30 40% 98%;
-
-    --muted: 20 20% 18%;
-    --muted-foreground: 30 20% 65%;
-
-    --accent: 12 85% 60%;
-    --accent-foreground: 0 0% 100%;
-
-    --success: 168 75% 45%;
-    --success-foreground: 0 0% 100%;
-
-    --destructive: 350 80% 55%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 20 20% 22%;
-    --input: 20 20% 22%;
-    --ring: 24 95% 58%;
-
-    --sidebar-background: 20 30% 6%;
-    --sidebar-foreground: 30 40% 98%;
-    --sidebar-primary: 24 95% 58%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 20 25% 12%;
-    --sidebar-accent-foreground: 30 40% 98%;
-    --sidebar-border: 20 20% 15%;
-    --sidebar-ring: 24 95% 58%;
+    --sidebar-background: 255 16% 8%;
+    --sidebar-foreground: 270 20% 96%;
+    --sidebar-primary: 330 100% 62%;
+    --sidebar-primary-foreground: 252 16% 6%;
+    --sidebar-accent: 256 15% 14%;
+    --sidebar-accent-foreground: 270 20% 96%;
+    --sidebar-border: 255 15% 16%;
+    --sidebar-ring: 330 100% 62%;
   }
 }
 
@@ -136,18 +94,26 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
+    /* faint room vignette in the active gel */
+    background-image: radial-gradient(120% 55% at 50% -8%, hsl(var(--gel) / 0.07), transparent 60%);
   }
+
+  /* Display headings carry the poster personality */
+  .font-display { font-family: 'Syne', sans-serif; letter-spacing: -0.02em; }
+  .font-mono { font-family: 'Space Mono', monospace; }
 }
 
 @layer components {
   .card-elevated {
-    @apply bg-card rounded-2xl shadow-card border border-border/50;
+    @apply bg-card rounded-2xl border border-white/[0.06];
     background: var(--gradient-card);
+    box-shadow: var(--shadow-card);
   }
 
   .btn-primary-gradient {
-    background: var(--gradient-primary);
-    @apply text-primary-foreground font-semibold rounded-2xl px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98];
+    @apply text-primary-foreground font-semibold rounded-2xl px-6 py-3 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98];
+    background: hsl(var(--gel));
+    box-shadow: 0 10px 28px -10px hsl(var(--gel) / 0.7);
   }
 
   .btn-success-gradient {
@@ -156,7 +122,7 @@
   }
 
   .btn-warm-gradient {
-    background: var(--gradient-warm);
+    background: var(--gradient-primary);
     @apply text-white font-semibold rounded-2xl px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98];
   }
 
@@ -165,84 +131,52 @@
   }
 
   .glass-effect {
-    @apply backdrop-blur-md bg-white/80 border border-white/20;
+    @apply backdrop-blur-xl bg-popover/70 border border-white/[0.08];
   }
 
   .text-gradient-warm {
-    background: var(--gradient-warm);
+    background: var(--gradient-primary);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  .bg-gradient-warm {
-    background: var(--gradient-warm);
+  .bg-gradient-warm { background: var(--gradient-primary); }
+  .bg-gradient-hero { background: var(--gradient-hero); }
+  .bg-gradient-sunset { background: var(--gradient-primary); }
+  .bg-gradient-manager { background: var(--gradient-manager); }
+
+  /* Perforated ticket-stub divider — the signature seam */
+  .stub-edge {
+    position: relative;
+  }
+  .stub-edge::before {
+    content: "";
+    position: absolute;
+    top: -10px; left: 0; right: 0; height: 20px;
+    background: radial-gradient(circle 10px at 10px 50%, hsl(var(--background)) 96%, transparent) left / 24px 100% repeat-x;
   }
 
-  .bg-gradient-hero {
-    background: var(--gradient-hero);
-  }
-
-  .bg-gradient-sunset {
-    background: var(--gradient-sunset);
-  }
- 
-   .bg-gradient-manager {
-     background: var(--gradient-manager);
-   }
-
-  .animate-fade-in {
-    animation: fadeIn 0.5s ease-out forwards;
-  }
-
-  .animate-slide-up {
-    animation: slideUp 0.4s ease-out forwards;
-  }
-
-  .animate-scale-in {
-    animation: scaleIn 0.3s ease-out forwards;
-  }
-
-  .animate-pulse-slow {
-    animation: pulseSlow 2s ease-in-out infinite;
-  }
-
-  .animate-float {
-    animation: float 3s ease-in-out infinite;
-  }
+  .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+  .animate-slide-up { animation: slideUp 0.4s ease-out forwards; }
+  .animate-scale-in { animation: scaleIn 0.3s ease-out forwards; }
+  .animate-pulse-slow { animation: pulseSlow 2s ease-in-out infinite; }
+  .animate-float { animation: float 3s ease-in-out infinite; }
+  .animate-breathe { animation: breathe 6s ease-in-out infinite; }
 }
 
 @layer utilities {
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+@keyframes pulseSlow { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+@keyframes breathe { 0%, 100% { opacity: 0.5; } 50% { opacity: 0.9; } }
 
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.9); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-@keyframes pulseSlow {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; }
 }

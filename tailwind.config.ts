@@ -15,8 +15,14 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Plus Jakarta Sans', 'sans-serif'],
+        display: ['Syne', 'sans-serif'],
+        mono: ['Space Mono', 'monospace'],
       },
       colors: {
+        music: "hsl(var(--music))",
+        sports: "hsl(var(--sports))",
+        theater: "hsl(var(--theater))",
+        gel: "hsl(var(--gel))",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
