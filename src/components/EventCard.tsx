@@ -57,9 +57,10 @@ export function EventCard({ event, index = 0, compact = false }: EventCardProps)
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.08, duration: 0.4 }}
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-40px' }}
+      transition={{ delay: (index % 8) * 0.06, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
       onClick={go}
       style={gelStyle(event.genre)}
       className="group card-elevated overflow-hidden cursor-pointer transition-all duration-200 hover:-translate-y-1.5 hover:ring-1 hover:ring-[hsl(var(--c)/0.35)] hover:shadow-[0_22px_46px_-20px_hsl(var(--c)/0.55)]"

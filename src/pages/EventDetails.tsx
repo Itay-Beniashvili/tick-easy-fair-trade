@@ -122,11 +122,27 @@ export default function EventDetails() {
 
           <div className="lg:sticky lg:top-24">
           <div className="flex gap-2 mb-4">
-            <button onClick={() => setSelectedTab('primary')} className={cn('flex-1 py-3 rounded-2xl font-semibold transition-all', selectedTab === 'primary' ? 'btn-primary-gradient' : 'bg-muted text-muted-foreground hover:bg-muted/80')}>Buy Now</button>
-            <button onClick={() => setSelectedTab('resale')} className={cn('flex-1 py-3 rounded-2xl font-semibold transition-all relative', selectedTab === 'resale' ? 'btn-primary-gradient' : 'bg-muted text-muted-foreground hover:bg-muted/80')}>
-              Resale
-              {resale.length > 0 && <span className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-success text-white text-xs flex items-center justify-center font-bold">{resale.length}</span>}
-            </button>
+            {(['primary', 'resale'] as const).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setSelectedTab(tab)}
+                className="relative flex-1 py-3 rounded-2xl font-semibold bg-muted"
+              >
+                {selectedTab === tab && (
+                  <motion.span
+                    layoutId="buyResaleIndicator"
+                    transition={{ type: 'spring', stiffness: 400, damping: 32 }}
+                    className="absolute inset-0 rounded-2xl bg-gel shadow-[0_8px_24px_-10px_hsl(var(--gel))]"
+                  />
+                )}
+                <span className={cn('relative z-10 transition-colors', selectedTab === tab ? 'text-primary-foreground' : 'text-muted-foreground')}>
+                  {tab === 'primary' ? 'Buy Now' : 'Resale'}
+                </span>
+                {tab === 'resale' && resale.length > 0 && (
+                  <span className="absolute -top-1 -right-1 z-20 w-6 h-6 rounded-full bg-success text-success-foreground text-xs flex items-center justify-center font-bold">{resale.length}</span>
+                )}
+              </button>
+            ))}
           </div>
 
           {selectedTab === 'primary' && (

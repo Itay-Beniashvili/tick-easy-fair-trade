@@ -8,6 +8,7 @@ import { listEventsByManager } from '@/api/events';
 import type { EventRow } from '@/api/client';
 import { formatILS } from '@/lib/currency';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { CountUp } from '@/components/CountUp';
 
 export default function Manager() {
   const { user } = useAuth();
@@ -31,10 +32,10 @@ export default function Manager() {
   const availableTickets = events.reduce((sum, e) => sum + e.available_tickets, 0);
 
   const stats = [
-    { label: 'Total Revenue', value: formatILS(totalRevenue), icon: DollarSign, gradient: 'from-primary to-accent' },
-    { label: 'Tickets Sold', value: String(ticketsSold), icon: Ticket, gradient: 'from-success to-teal-400' },
-    { label: 'Active Events', value: String(totalEvents), icon: CalendarDays, gradient: 'from-highlight to-purple-400' },
-    { label: 'Tickets Available', value: String(availableTickets), icon: Repeat, gradient: 'from-warning to-amber-400' },
+    { label: 'Total Revenue', num: totalRevenue, format: formatILS, icon: DollarSign, gradient: 'from-primary to-accent' },
+    { label: 'Tickets Sold', num: ticketsSold, icon: Ticket, gradient: 'from-success to-teal-400' },
+    { label: 'Active Events', num: totalEvents, icon: CalendarDays, gradient: 'from-highlight to-purple-400' },
+    { label: 'Tickets Available', num: availableTickets, icon: Repeat, gradient: 'from-warning to-amber-400' },
   ];
 
   // Per-event sales derived from real data for the overview chart.
@@ -88,7 +89,9 @@ export default function Manager() {
                           <Icon className="w-6 h-6 text-white" />
                         </div>
                       </div>
-                      <p className="text-2xl font-bold text-foreground mb-0.5">{stat.value}</p>
+                      <p className="font-display text-3xl font-extrabold text-foreground mb-0.5">
+                        <CountUp value={stat.num} format={stat.format} />
+                      </p>
                       <p className="text-xs text-muted-foreground">{stat.label}</p>
                     </motion.div>
                   );

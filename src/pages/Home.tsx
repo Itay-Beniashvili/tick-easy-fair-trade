@@ -177,14 +177,18 @@ export default function Home() {
               key={c}
               onClick={() => setCategory(c)}
               style={{ ['--c' as string]: gelFor[c] }}
-              className={
-                'flex-none px-4 py-2 rounded-full text-sm font-semibold capitalize transition-all ' +
-                (category === c
-                  ? 'text-primary-foreground bg-[hsl(var(--c))] shadow-[0_0_18px_-2px_hsl(var(--c))]'
-                  : 'text-muted-foreground bg-card border border-white/[0.06]')
-              }
+              className="relative flex-none px-4 py-2 rounded-full text-sm font-semibold capitalize bg-card border border-white/[0.06]"
             >
-              {c === 'all' ? 'All' : c}
+              {category === c && (
+                <motion.span
+                  layoutId="chipIndicator"
+                  transition={{ type: 'spring', stiffness: 400, damping: 32 }}
+                  className="absolute inset-0 rounded-full bg-[hsl(var(--c))] shadow-[0_0_18px_-2px_hsl(var(--c))]"
+                />
+              )}
+              <span className={category === c ? 'relative z-10 text-primary-foreground' : 'relative z-10 text-muted-foreground'}>
+                {c === 'all' ? 'All' : c}
+              </span>
             </button>
           ))}
         </div>
