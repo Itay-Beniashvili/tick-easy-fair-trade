@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, AlertTriangle, Check, Tag, Shield } from 'lucide-react';
-import { useApp } from '@/context/AppContext';
+import { listForResale } from '@/api/resale';
+import { formatILS } from '@/lib/currency';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
@@ -11,16 +12,18 @@ interface ResaleModalProps {
   ticketId: string;
   originalPrice: number;
   eventTitle: string;
+  /** Called after the ticket is successfully listed, so the wallet can refresh. */
+  onListed?: () => void;
 }
 
-export function ResaleModal({ isOpen, onClose, ticketId, originalPrice, eventTitle }: ResaleModalProps) {
+export function ResaleModal({ isOpen, onClose, ticketId, originalPrice, eventTitle, onListed }: ResaleModalProps) {
   const [price, setPrice] = useState('');
   const [error, setError] = useState('');
-  const { updateTicketForSale } = useApp();
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const numPrice = parseFloat(price);
-    
+
     if (!price || isNaN(numPrice)) {
       setError('Please enter a valid price');
       return;
@@ -32,17 +35,26 @@ export function ResaleModal({ isOpen, onClose, ticketId, originalPrice, eventTit
     }
 
     if (numPrice <= 0) {
-      setError('Price must be greater than $0');
+      setError('Price must be greater than ₪0');
       return;
     }
 
-    updateTicketForSale(ticketId, true, numPrice);
-    toast.success('Ticket listed for sale!', {
-      description: `Listed at $${numPrice}`,
-    });
-    onClose();
-    setPrice('');
-    setError('');
+    setSubmitting(true);
+    try {
+      // The RPC re-checks the cap server-side, so a tampered client can't bypass it.
+      await listForResale(ticketId, numPrice, originalPrice);
+      toast.success('Ticket listed for sale!', {
+        description: `Listed at ${formatILS(numPrice)}`,
+      });
+      onListed?.();
+      onClose();
+      setPrice('');
+      setError('');
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handlePriceChange = (value: string) => {
@@ -89,7 +101,7 @@ export function ResaleModal({ isOpen, onClose, ticketId, originalPrice, eventTit
             <div className="flex items-center gap-2 mt-2 text-sm">
               <Tag className="w-4 h-4 text-primary" />
               <span className="text-muted-foreground">Original price:</span>
-              <span className="font-bold text-primary">${originalPrice}</span>
+              <span className="font-bold text-primary">{formatILS(originalPrice)}</span>
             </div>
           </div>
 
@@ -115,7 +127,7 @@ export function ResaleModal({ isOpen, onClose, ticketId, originalPrice, eventTit
             </label>
             <div className="relative">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground text-lg font-bold">
-                $
+                ₪
               </span>
               <input
                 type="number"
@@ -145,16 +157,16 @@ export function ResaleModal({ isOpen, onClose, ticketId, originalPrice, eventTit
           {/* Submit Button */}
           <button
             onClick={handleSubmit}
-            disabled={!!error || !price}
+            disabled={!!error || !price || submitting}
             className={cn(
               "w-full py-4 rounded-2xl font-semibold text-lg flex items-center justify-center gap-2 transition-all",
-              error || !price
+              error || !price || submitting
                 ? 'bg-muted text-muted-foreground cursor-not-allowed'
                 : 'btn-success-gradient'
             )}
           >
             <Check className="w-5 h-5" />
-            List for Sale
+            {submitting ? 'Listing…' : 'List for Sale'}
           </button>
         </motion.div>
       </motion.div>

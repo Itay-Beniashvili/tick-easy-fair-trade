@@ -1,11 +1,27 @@
+import { useCallback, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Ticket } from 'lucide-react';
 import { BottomNav } from '@/components/BottomNav';
 import { TicketCard } from '@/components/TicketCard';
-import { useApp } from '@/context/AppContext';
+import { listMyTickets } from '@/api/tickets';
+import type { TicketRow } from '@/api/client';
+import { toast } from 'sonner';
 
 export default function Wallet() {
-  const { userTickets } = useApp();
+  const [tickets, setTickets] = useState<TicketRow[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const load = useCallback(async () => {
+    try {
+      setTickets(await listMyTickets());
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -19,13 +35,15 @@ export default function Wallet() {
         >
           <h1 className="text-2xl font-bold text-white mb-1">My Tickets</h1>
           <p className="text-white/80">
-            {userTickets.length} {userTickets.length === 1 ? 'ticket' : 'tickets'} in your wallet
+            {tickets.length} {tickets.length === 1 ? 'ticket' : 'tickets'} in your wallet
           </p>
         </motion.div>
       </div>
 
       <div className="max-w-lg mx-auto px-4 py-6">
-        {userTickets.length === 0 ? (
+        {loading ? (
+          <p className="text-center text-muted-foreground py-16">Loading your tickets…</p>
+        ) : tickets.length === 0 ? (
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -41,8 +59,8 @@ export default function Wallet() {
           </motion.div>
         ) : (
           <div className="space-y-4">
-            {userTickets.map((ticket, index) => (
-              <TicketCard key={ticket.id} ticket={ticket} index={index} />
+            {tickets.map((ticket, index) => (
+              <TicketCard key={ticket.id} ticket={ticket} index={index} onChanged={load} />
             ))}
           </div>
         )}

@@ -1,24 +1,43 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { QrCode, MapPin, Calendar, Clock, Tag, Repeat } from 'lucide-react';
-import { UserTicket, events } from '@/data/mockData';
+import { QrCode, MapPin, Calendar, Clock, Repeat } from 'lucide-react';
 import { format } from 'date-fns';
 import { ResaleModal } from './ResaleModal';
 import { cn } from '@/lib/utils';
+import { formatILS } from '@/lib/currency';
+import type { TicketRow } from '@/api/client';
 
 interface TicketCardProps {
-  ticket: UserTicket;
+  ticket: TicketRow;
   index?: number;
+  /** Called after a successful resale listing so the parent can refresh. */
+  onChanged?: () => void;
 }
 
-export function TicketCard({ ticket, index = 0 }: TicketCardProps) {
+/** Deterministic 8x8 "QR" pattern derived from the ticket's qr_code.
+ *  Using a stable hash (not Math.random()) keeps the rendered code from
+ *  flickering on every paint and makes each ticket's pattern unique & repeatable. */
+function qrPattern(seed: string): boolean[] {
+  return Array.from({ length: 64 }, (_, i) => {
+    let h = 2166136261 ^ i; // FNV-1a-ish, mixed with the cell index
+    for (let c = 0; c < seed.length; c++) {
+      h ^= seed.charCodeAt(c);
+      h = Math.imul(h, 16777619);
+    }
+    return ((h >>> 0) & 1) === 1;
+  });
+}
+
+export function TicketCard({ ticket, index = 0, onChanged }: TicketCardProps) {
   const [showQR, setShowQR] = useState(false);
   const [showResaleModal, setShowResaleModal] = useState(false);
 
-  const event = events.find(e => e.id === ticket.eventId);
-  if (!event) return null;
+  const formattedDate = (() => {
+    const d = new Date(ticket.event_date);
+    return isNaN(d.getTime()) ? ticket.event_date : format(d, 'EEEE, MMMM d');
+  })();
 
-  const formattedDate = format(new Date(event.date), 'EEEE, MMMM d');
+  const cells = qrPattern(ticket.qr_code ?? ticket.id);
 
   return (
     <>
@@ -30,21 +49,23 @@ export function TicketCard({ ticket, index = 0 }: TicketCardProps) {
       >
         {/* Ticket Header */}
         <div className="relative">
-          <img
-            src={event.image}
-            alt={event.title}
-            className="w-full h-36 object-cover"
-          />
+          {ticket.event_image && (
+            <img
+              src={ticket.event_image}
+              alt={ticket.event_title}
+              className="w-full h-36 object-cover"
+            />
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
           <div className="absolute bottom-3 left-4 right-4">
-            <h3 className="text-white font-bold text-lg drop-shadow-lg">{event.title}</h3>
+            <h3 className="text-white font-bold text-lg drop-shadow-lg">{ticket.event_title}</h3>
           </div>
-          
+
           {/* Sale Badge */}
-          {ticket.isForSale && (
+          {ticket.is_for_sale && (
             <div className="absolute top-3 left-3">
               <span className="px-3 py-1.5 rounded-full bg-success text-white text-xs font-bold shadow-lg">
-                Listed - ${ticket.salePrice}
+                Listed - {formatILS(ticket.sale_price ?? ticket.price)}
               </span>
             </div>
           )}
@@ -63,7 +84,7 @@ export function TicketCard({ ticket, index = 0 }: TicketCardProps) {
           <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
             <div className="flex items-center gap-1.5">
               <MapPin className="w-4 h-4 text-primary" />
-              <span>{event.venue}</span>
+              <span>{ticket.event_venue}, {ticket.event_city}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <Calendar className="w-4 h-4 text-accent" />
@@ -71,24 +92,14 @@ export function TicketCard({ ticket, index = 0 }: TicketCardProps) {
             </div>
             <div className="flex items-center gap-1.5">
               <Clock className="w-4 h-4 text-highlight" />
-              <span>{event.time}</span>
+              <span>{ticket.event_time}</span>
             </div>
           </div>
 
           {/* Seat Info */}
-          <div className="grid grid-cols-3 gap-2 p-3 bg-gradient-to-r from-primary/5 to-accent/5 rounded-2xl">
-            <div className="text-center">
-              <p className="text-xs text-muted-foreground mb-0.5">Section</p>
-              <p className="font-bold text-foreground text-lg">{ticket.section}</p>
-            </div>
-            <div className="text-center border-x border-border">
-              <p className="text-xs text-muted-foreground mb-0.5">Row</p>
-              <p className="font-bold text-foreground text-lg">{ticket.row}</p>
-            </div>
-            <div className="text-center">
-              <p className="text-xs text-muted-foreground mb-0.5">Seat</p>
-              <p className="font-bold text-foreground text-lg">{ticket.seat}</p>
-            </div>
+          <div className="p-3 bg-gradient-to-r from-primary/5 to-accent/5 rounded-2xl text-center">
+            <p className="text-xs text-muted-foreground mb-0.5">Seat</p>
+            <p className="font-bold text-foreground text-lg">{ticket.seat_info || 'General Admission'}</p>
           </div>
 
           {/* QR Code Section */}
@@ -105,21 +116,21 @@ export function TicketCard({ ticket, index = 0 }: TicketCardProps) {
                 animate={{ opacity: 1, scale: 1 }}
                 className="flex flex-col items-center"
               >
-                {/* Simulated QR Code */}
+                {/* Deterministic QR rendering (stable across renders) */}
                 <div className="w-48 h-48 bg-white p-2 rounded-xl shadow-inner mb-3">
                   <div className="w-full h-full grid grid-cols-8 gap-0.5">
-                    {Array.from({ length: 64 }).map((_, i) => (
+                    {cells.map((on, i) => (
                       <div
                         key={i}
                         className={cn(
                           "aspect-square rounded-sm",
-                          Math.random() > 0.5 ? 'bg-foreground' : 'bg-white'
+                          on ? 'bg-foreground' : 'bg-white'
                         )}
                       />
                     ))}
                   </div>
                 </div>
-                <p className="text-xs text-muted-foreground font-mono">{ticket.qrCode}</p>
+                <p className="text-xs text-muted-foreground font-mono">{ticket.qr_code}</p>
                 <p className="text-xs text-muted-foreground mt-2">Tap to hide</p>
               </motion.div>
             ) : (
@@ -131,7 +142,7 @@ export function TicketCard({ ticket, index = 0 }: TicketCardProps) {
           </div>
 
           {/* Actions */}
-          {!ticket.isForSale && (
+          {!ticket.is_for_sale && (
             <button
               onClick={() => setShowResaleModal(true)}
               className="w-full py-3 rounded-2xl border-2 border-primary text-primary font-semibold flex items-center justify-center gap-2 hover:bg-primary hover:text-white transition-all"
@@ -147,8 +158,9 @@ export function TicketCard({ ticket, index = 0 }: TicketCardProps) {
         isOpen={showResaleModal}
         onClose={() => setShowResaleModal(false)}
         ticketId={ticket.id}
-        originalPrice={ticket.originalPrice}
-        eventTitle={event.title}
+        originalPrice={ticket.price}
+        eventTitle={ticket.event_title}
+        onListed={onChanged}
       />
     </>
   );

@@ -1,9 +1,11 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { userTickets as initialUserTickets, UserTicket } from '@/data/mockData';
+import { createContext, useContext, useState, ReactNode } from 'react';
 
 type UserRole = 'user' | 'manager' | null;
 type Genre = 'music' | 'sports' | 'theater';
 
+// UI-only preferences. Authoritative ticket/auth state lives in Supabase
+// (see AuthContext + the src/api data layer); this context holds only
+// ephemeral client-side UI state not persisted to the database.
 interface AppContextType {
   role: UserRole;
   setRole: (role: UserRole) => void;
@@ -11,10 +13,6 @@ interface AppContextType {
   setSelectedGenres: (genres: Genre[]) => void;
   hasCompletedOnboarding: boolean;
   setHasCompletedOnboarding: (value: boolean) => void;
-  userTickets: UserTicket[];
-  setUserTickets: React.Dispatch<React.SetStateAction<UserTicket[]>>;
-  addTicket: (ticket: UserTicket) => void;
-  updateTicketForSale: (ticketId: string, isForSale: boolean, salePrice?: number) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -23,21 +21,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<UserRole>(null);
   const [selectedGenres, setSelectedGenres] = useState<Genre[]>([]);
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
-  const [userTickets, setUserTickets] = useState<UserTicket[]>(initialUserTickets);
-
-  const addTicket = (ticket: UserTicket) => {
-    setUserTickets(prev => [...prev, ticket]);
-  };
-
-  const updateTicketForSale = (ticketId: string, isForSale: boolean, salePrice?: number) => {
-    setUserTickets(prev =>
-      prev.map(ticket =>
-        ticket.id === ticketId
-          ? { ...ticket, isForSale, salePrice }
-          : ticket
-      )
-    );
-  };
 
   return (
     <AppContext.Provider
@@ -48,10 +31,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setSelectedGenres,
         hasCompletedOnboarding,
         setHasCompletedOnboarding,
-        userTickets,
-        setUserTickets,
-        addTicket,
-        updateTicketForSale
       }}
     >
       {children}
