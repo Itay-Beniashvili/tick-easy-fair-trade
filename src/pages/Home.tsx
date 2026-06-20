@@ -19,48 +19,57 @@ const gelFor: Record<Category, string> = {
   all: 'var(--music)', music: 'var(--music)', sports: 'var(--sports)', theater: 'var(--theater)',
 };
 
-/** The lit-poster featured event card. Reused beside the hero (desktop) and
- *  at the top of the feed (mobile) so the markup isn't duplicated. */
-function FeaturedCard({ event, onOpen, className = '' }: { event: EventRow; onOpen: () => void; className?: string }) {
+/** A continuously-moving "conveyor belt" of show posters under a breathing stage
+ *  spotlight. The whole app relights (--gel) as it cycles through the shows'
+ *  category colours — like house lights changing. Pauses on hover. */
+function HeroMarquee({ events, onOpen }: { events: EventRow[]; onOpen: (id: string) => void }) {
+  const [gelIdx, setGelIdx] = useState(0);
+
+  useEffect(() => {
+    if (events.length < 2) return;
+    const t = setInterval(() => setGelIdx((p) => p + 1), 3200);
+    return () => clearInterval(t);
+  }, [events.length]);
+
+  useEffect(() => {
+    const ev = events[gelIdx % (events.length || 1)];
+    if (ev) document.documentElement.style.setProperty('--gel', gelFor[(ev.genre as Category)] ?? 'var(--music)');
+  }, [gelIdx, events]);
+
+  if (!events.length) return null;
+  const loop = [...events, ...events]; // duplicated for a seamless belt
+
   return (
-    <motion.div
-      key={event.id}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      onClick={onOpen}
-      style={{ ['--c' as string]: gelFor[(event.genre as Category)] ?? 'var(--music)' }}
-      className={`relative rounded-3xl overflow-hidden cursor-pointer card-elevated ${className}`}
-    >
-      <div className="relative h-72 lg:h-[24rem]">
-        <img src={event.image ?? ''} alt={event.title} className="absolute inset-0 w-full h-full object-cover" />
-        <div
-          className="absolute -top-1/3 left-1/2 -translate-x-1/2 w-80 h-80 rounded-full blur-md animate-breathe pointer-events-none"
-          style={{ background: 'radial-gradient(closest-side, hsl(var(--c)/0.45), transparent 70%)' }}
-        />
-        <div className="absolute inset-0" style={{
-          background:
-            'linear-gradient(180deg, hsl(var(--c)/0.5) 0%, transparent 42%), linear-gradient(0deg, hsl(var(--card)) 6%, hsl(var(--card)/0.2) 55%, transparent 80%)',
-        }} />
-        <div className="absolute left-5 right-5 bottom-5">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-mono text-[10px] tracking-widest uppercase font-bold text-primary-foreground bg-[hsl(var(--c))]">
-            ✦ Featured
-          </span>
-          <h2 className="font-display font-extrabold text-3xl lg:text-4xl leading-none mt-3">{event.title}</h2>
-          <p className="text-sm text-foreground/85 mt-1">
-            {event.artist ? `${event.artist} · ` : ''}{event.venue}
-          </p>
-        </div>
+    <div className="relative overflow-hidden py-3 lg:py-5">
+      {/* breathing stage spotlight behind the belt */}
+      <div
+        className="pointer-events-none absolute left-1/2 -translate-x-1/2 -top-28 w-[760px] h-[520px] rounded-full blur-3xl animate-breathe"
+        style={{ background: 'radial-gradient(closest-side, hsl(var(--gel) / 0.4), transparent 70%)' }}
+      />
+      <div className="relative flex w-max gap-5 px-5 lg:px-12 animate-[marquee_44s_linear_infinite] hover:[animation-play-state:paused]">
+        {loop.map((ev, i) => (
+          <button
+            key={`${ev.id}-${i}`}
+            onClick={() => onOpen(ev.id)}
+            style={{ ['--c' as string]: gelFor[(ev.genre as Category)] ?? 'var(--music)' }}
+            className="group relative flex-none w-[250px] lg:w-[300px] h-[330px] lg:h-[380px] rounded-3xl overflow-hidden cursor-pointer card-elevated transition-transform duration-300 hover:scale-[1.03] hover:ring-1 hover:ring-[hsl(var(--c)/0.5)]"
+          >
+            <img src={ev.image ?? ''} alt={ev.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+            <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, hsl(var(--c)/0.5) 0%, transparent 38%), linear-gradient(0deg, hsl(var(--card)) 3%, transparent 62%)' }} />
+            <span className="absolute top-3 left-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-mono text-[10px] tracking-widest uppercase font-bold text-primary-foreground bg-[hsl(var(--c))]">
+              <span className="w-1.5 h-1.5 rounded-full bg-current opacity-80" /> {ev.genre}
+            </span>
+            <div className="absolute left-4 right-4 bottom-4">
+              <h3 className="font-display font-extrabold text-2xl leading-[0.95] mb-1.5 drop-shadow">{ev.title}</h3>
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs text-foreground/75 truncate">{ev.venue}</span>
+                <span className="font-mono font-bold text-sm whitespace-nowrap">{formatILS(ev.price)}</span>
+              </div>
+            </div>
+          </button>
+        ))}
       </div>
-      <div className="flex items-center justify-between px-5 py-4 stub-edge">
-        <div className="font-mono">
-          <span className="text-[11px] text-muted-foreground block leading-none">from</span>
-          <span className="font-bold text-xl">{formatILS(event.price)}</span>
-        </div>
-        <span className="btn-primary-gradient text-[15px] inline-flex items-center gap-1.5 py-3">
-          Get tickets <ArrowRight className="w-4 h-4" />
-        </span>
-      </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -91,11 +100,8 @@ export default function Home() {
     })();
   }, []);
 
-  // The signature: relight the whole app in the selected category's stage gel.
-  useEffect(() => {
-    document.documentElement.style.setProperty('--gel', gelFor[category]);
-    return () => { document.documentElement.style.setProperty('--gel', 'var(--music)'); };
-  }, [category]);
+  // The hero carousel drives --gel per show; reset to the brand gel when leaving Home.
+  useEffect(() => () => { document.documentElement.style.setProperty('--gel', 'var(--music)'); }, []);
 
   const visible = useMemo(() => {
     const q = search.toLowerCase();
@@ -113,15 +119,15 @@ export default function Home() {
   const forYou = (recommended.length ? recommended : events).filter(
     (e) => category === 'all' || e.genre === category,
   );
-  const featured = forYou[0] ?? visible[0];
-  // Don't repeat the featured event inside the grid (it already headlines the hero).
-  const gridEvents = search ? visible : visible.filter((e) => e.id !== featured?.id);
+  // The rotating hero showcase — cycles through a few shows (and their colours).
+  const showcase = (forYou.length ? forYou : visible).slice(0, 6);
+  const gridEvents = visible;
 
   return (
     <div className="min-h-screen bg-background pb-28 lg:pb-10 lg:pt-20">
-      {/* Hero — stacked on mobile; text + featured card side-by-side on desktop */}
-      <header className="bg-gradient-hero px-5 pt-12 pb-6 lg:rounded-3xl lg:mt-2 lg:px-12 lg:pt-12 lg:pb-12">
-        <div className="max-w-lg lg:max-w-7xl 2xl:max-w-[1600px] mx-auto lg:grid lg:grid-cols-2 lg:gap-12 lg:items-center">
+      {/* Hero title band */}
+      <header className="bg-gradient-hero px-5 pt-12 pb-5 lg:rounded-3xl lg:mt-2 lg:px-12 lg:pt-12 lg:pb-6">
+        <div className="max-w-lg lg:max-w-7xl 2xl:max-w-[1600px] mx-auto">
           <div>
             {/* Mobile-only brand row — on desktop the sticky top nav carries the brand + profile */}
             <div className="flex items-center justify-between mb-7 lg:hidden">
@@ -161,13 +167,13 @@ export default function Home() {
               </motion.div>
             )}
           </div>
-
-          {/* Featured card — beside the hero on desktop */}
-          {featured && !search && (
-            <FeaturedCard event={featured} onOpen={() => navigate(`/event/${featured.id}`)} className="hidden lg:block" />
-          )}
         </div>
       </header>
+
+      {/* Conveyor-belt showcase — full width */}
+      {showcase.length > 0 && !search && (
+        <HeroMarquee events={showcase} onOpen={(id) => navigate(`/event/${id}`)} />
+      )}
 
       {/* Category chips */}
       <div className="max-w-lg lg:max-w-7xl 2xl:max-w-[1600px] mx-auto">
@@ -204,11 +210,6 @@ export default function Home() {
           </>
         ) : (
           <>
-            {/* Featured — shown at the top of the feed on mobile (it sits beside the hero on desktop) */}
-            {featured && !search && (
-              <FeaturedCard event={featured} onOpen={() => navigate(`/event/${featured.id}`)} className="lg:hidden" />
-            )}
-
             {/* For you rail */}
             {forYou.length > 1 && !search && (
               <section>
@@ -222,7 +223,7 @@ export default function Home() {
                   </Link>
                 </div>
                 <div className="flex gap-3.5 overflow-x-auto scrollbar-hide -mx-5 px-5 lg:-mx-12 lg:px-12 pb-1">
-                  {forYou.slice(1, 9).map((event, i) => (
+                  {forYou.slice(0, 9).map((event, i) => (
                     <div key={event.id} className="flex-none w-44 lg:w-52">
                       <EventCard event={event} index={i} compact />
                     </div>
