@@ -1,73 +1,75 @@
-# Welcome to your tickeasy project
+# TickEasy
 
-## Project info
+TickEasy is a mobile-first event ticketing and resale platform. Buyers discover live music, sports, and theater events through a personalised recommendation feed, purchase tickets, and keep them in an in-app wallet with a unique QR code. The platform's core mission is anti-scalping: when a buyer resells a ticket, the price is capped at face value and enforced on the server, so tickets can never be flipped for profit. On top of buying and reselling, TickEasy supports group purchases (organise and split a block of tickets via a shareable link), an inquiry inbox that routes buyer questions straight to the right event manager, and a community board for finding partners, sharing rides, and coordinating around an event. Event managers get their own side of the app: they create and manage events, watch a live sales dashboard, and answer inquiries.
 
-**URL**: https://tickeasy.dev/projects/REPLACE_WITH_PROJECT_ID
+Live: https://tick-easy-fair-trade.vercel.app
 
-## How can I edit this code?
+## Tech stack
 
-There are several ways of editing your application.
+- **React 18** with **TypeScript**
+- **Vite** for build and dev tooling
+- **Tailwind CSS** with **shadcn/ui** components
+- **Supabase** — Postgres database, Auth, and Row Level Security (RLS)
+- **React Router** for routing and **TanStack Query** for data fetching
+- **Recharts** for manager analytics and **Framer Motion** for animation
 
-**Use tickeasy**
+## Getting started
 
-Simply visit the [tickeasy Project](https://tickeasy.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
-
-Changes made via tickeasy will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in tickeasy.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+Prerequisites: Node.js 18+ and npm.
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+# 1. Install dependencies
+npm install
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# 2. Configure environment
+#    Copy the example env file and fill in your Supabase project values.
+cp .env.example .env
+```
 
-# Step 3: Install the necessary dependencies.
-npm i
+Set the three Supabase variables in `.env`:
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+```
+VITE_SUPABASE_PROJECT_ID=your-project-ref
+VITE_SUPABASE_URL=https://your-project-ref.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=your-publishable-anon-key
+```
+
+The publishable (anon) key is safe to ship in the browser bundle — access is enforced by Row Level Security. Never commit the service-role key or database password.
+
+```sh
+# 3. Start the dev server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The app runs at http://localhost:8080.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Scripts
 
-**Use GitHub Codespaces**
+| Script | Description |
+|---|---|
+| `npm run dev` | Start the Vite dev server with hot reload |
+| `npm run build` | Production build |
+| `npm run build:dev` | Build using development mode settings |
+| `npm run preview` | Preview the production build locally |
+| `npm run lint` | Run ESLint over the project |
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Project structure
 
-## What technologies are used for this project?
+```
+src/
+  api/                 Typed data-access layer (events, tickets, resale, groups, …)
+  components/          Reusable UI and app components (BottomNav, TicketCard, …)
+  context/             React context providers (AuthContext, AppContext)
+  integrations/        Supabase client and generated database types
+  lib/                 Helpers (recommendation scoring, currency, utils)
+  pages/               Route-level screens (Home, Wallet, Manager, …)
+supabase/
+  migrations/          SQL schema, RLS policies, and SECURITY DEFINER functions
+docs/                  Architecture and review documentation
+```
 
-This project is built with:
+See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for a full walkthrough of the technical, design, and UX architecture.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Deployment
 
-## How can I deploy this project?
-
-Simply open [tickeasy](https://tickeasy.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my tickeasy project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.tickeasy.dev/features/custom-domain#custom-domain)
+The app is a static Vite single-page application hosted on Vercel. The build command is `npm run build` (output in `dist/`). The three `VITE_SUPABASE_*` environment variables must be set in the hosting environment, and an SPA rewrite (all paths to `index.html`) is required so client-side routes resolve on refresh.
