@@ -1,4 +1,4 @@
-import { Home, Wallet, User } from 'lucide-react';
+import { Home, Wallet, User, Users } from 'lucide-react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 const navItems = [
   { path: '/home', icon: Home, label: 'Home' },
   { path: '/wallet', icon: Wallet, label: 'My Tickets' },
+  { path: '/community', icon: Users, label: 'Community' },
   { path: '/profile', icon: User, label: 'Profile' },
 ];
 

@@ -1,9 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Inbox, Reply, Check, AlertCircle, HelpCircle, RotateCcw, MessageSquare, Filter } from 'lucide-react';
 import { ManagerSidebar } from '@/components/ManagerSidebar';
 import { MobileManagerNav } from '@/components/MobileManagerNav';
-import { inquiries, Inquiry, events } from '@/data/mockData';
+import { listInquiriesForManager, resolveInquiry } from '@/api/inquiries';
+import { listEventsByManager } from '@/api/events';
+import { useAuth } from '@/context/AuthContext';
+import type { InquiryRow, EventRow } from '@/api/client';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -34,33 +37,52 @@ const typeColors = {
 };
 
 export default function ManagerInbox() {
-  const [localInquiries, setLocalInquiries] = useState<Inquiry[]>(inquiries);
+  const { user } = useAuth();
+  const [inquiries, setInquiries] = useState<InquiryRow[]>([]);
+  const [events, setEvents] = useState<EventRow[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState<string>('all');
 
-  const handleReply = (id: string) => {
-    setLocalInquiries(prev =>
-      prev.map(inq =>
-        inq.id === id ? { ...inq, status: 'resolved' as const } : inq
-      )
-    );
-    toast.success('Reply sent successfully');
+  useEffect(() => {
+    if (!user) return;
+    let active = true;
+    setLoading(true);
+    Promise.all([listInquiriesForManager(), listEventsByManager(user.id)])
+      .then(([inqs, evts]) => {
+        if (!active) return;
+        setInquiries(inqs);
+        setEvents(evts);
+      })
+      .catch(() => { if (active) { setInquiries([]); setEvents([]); } })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [user]);
+
+  const eventTitles = new Map(events.map((e) => [e.id, e.title]));
+  const getEventTitle = (eventId: string) => eventTitles.get(eventId) || 'Unknown Event';
+
+  const handleReply = async (id: string) => {
+    try {
+      await resolveInquiry(id);
+      setInquiries((prev) =>
+        prev.map((inq) => (inq.id === id ? { ...inq, status: 'resolved' } : inq))
+      );
+      toast.success('Reply sent successfully');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to send reply');
+    }
   };
 
-  const filteredInquiries = selectedEvent === 'all' 
-    ? localInquiries 
-    : localInquiries.filter(inq => inq.eventId === selectedEvent);
+  const filteredInquiries = selectedEvent === 'all'
+    ? inquiries
+    : inquiries.filter((inq) => inq.event_id === selectedEvent);
 
-  const pendingCount = filteredInquiries.filter(i => i.status === 'pending').length;
-
-  const getEventTitle = (eventId: string) => {
-    const event = events.find(e => e.id === eventId);
-    return event?.title || 'Unknown Event';
-  };
+  const pendingCount = filteredInquiries.filter((i) => i.status === 'pending').length;
 
   return (
     <div className="min-h-screen bg-background flex">
       <ManagerSidebar />
-      
+
       <main className="flex-1 pb-20 lg:pb-0">
         {/* Header */}
         <div className="bg-gradient-hero p-6 pt-12 lg:pt-6">
@@ -99,7 +121,7 @@ export default function ManagerInbox() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Events</SelectItem>
-                  {events.map(event => (
+                  {events.map((event) => (
                     <SelectItem key={event.id} value={event.id}>
                       {event.title}
                     </SelectItem>
@@ -109,7 +131,9 @@ export default function ManagerInbox() {
             </div>
           </motion.div>
 
-          {filteredInquiries.length === 0 ? (
+          {loading ? (
+            <p className="text-muted-foreground">Loading…</p>
+          ) : filteredInquiries.length === 0 ? (
             <div className="card-elevated p-12 text-center">
               <MessageSquare className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
               <p className="text-muted-foreground">No inquiries {selectedEvent !== 'all' ? 'for this event' : ''}</p>
@@ -118,7 +142,7 @@ export default function ManagerInbox() {
             <div className="space-y-4">
               {filteredInquiries.map((inquiry, index) => {
                 const TypeIcon = typeIcons[inquiry.type];
-                const formattedDate = format(new Date(inquiry.date), 'MMM d, yyyy');
+                const formattedDate = format(new Date(inquiry.created_at), 'MMM d, yyyy');
 
                 return (
                   <motion.div
@@ -138,18 +162,18 @@ export default function ManagerInbox() {
                           inquiry.status === 'pending' ? typeColors[inquiry.type] : 'from-success to-teal-400',
                           'text-white'
                         )}>
-                          {inquiry.userName.charAt(0)}
+                          {inquiry.user_name.charAt(0)}
                         </div>
                         <div>
-                          <p className="font-semibold text-foreground">{inquiry.userName}</p>
+                          <p className="font-semibold text-foreground">{inquiry.user_name}</p>
                           <p className="text-xs text-muted-foreground">{formattedDate}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2 flex-wrap justify-end">
                         <span className={cn(
                           "px-3 py-1 rounded-full text-xs font-bold",
-                          inquiry.status === 'pending' 
-                            ? 'bg-warning/15 text-warning' 
+                          inquiry.status === 'pending'
+                            ? 'bg-warning/15 text-warning'
                             : 'bg-success/15 text-success'
                         )}>
                           {inquiry.status === 'pending' ? 'Pending' : 'Resolved'}
@@ -166,7 +190,7 @@ export default function ManagerInbox() {
                     {/* Event Badge */}
                     <div className="mb-3">
                       <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-lg font-medium">
-                        {getEventTitle(inquiry.eventId)}
+                        {getEventTitle(inquiry.event_id)}
                       </span>
                     </div>
 
