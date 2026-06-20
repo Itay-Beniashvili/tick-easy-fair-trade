@@ -41,7 +41,6 @@ The publishable (anon) key is safe to ship in the browser bundle — access is e
 npm run dev
 ```
 
-The app runs at http://localhost:8080.
 
 ## Scripts
 
