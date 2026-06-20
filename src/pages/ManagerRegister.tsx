@@ -2,24 +2,37 @@
  import { motion } from 'framer-motion';
  import { Mail, Lock, User, Building2, Settings, ArrowRight, Eye, EyeOff } from 'lucide-react';
  import { Link, useNavigate } from 'react-router-dom';
- import { useApp } from '@/context/AppContext';
+ import { useAuth } from '@/context/AuthContext';
+ import { toast } from 'sonner';
  import { Input } from '@/components/ui/input';
  import { Button } from '@/components/ui/button';
- 
+
  export default function ManagerRegister() {
    const [name, setName] = useState('');
    const [company, setCompany] = useState('');
    const [email, setEmail] = useState('');
    const [password, setPassword] = useState('');
    const [showPassword, setShowPassword] = useState(false);
-   const { setRole } = useApp();
+   const [submitting, setSubmitting] = useState(false);
+   const [verificationSent, setVerificationSent] = useState(false);
+   const { signUp } = useAuth();
    const navigate = useNavigate();
- 
-   const handleRegister = (e: React.FormEvent) => {
+
+   const handleRegister = async (e: React.FormEvent) => {
      e.preventDefault();
-     // Mock registration - just set the role and navigate
-     setRole('manager');
-     navigate('/manager');
+     setSubmitting(true);
+     try {
+       const { needsVerification } = await signUp(email, password, name, 'manager');
+       if (needsVerification) {
+         setVerificationSent(true);
+       } else {
+         navigate('/manager');
+       }
+     } catch (err) {
+       toast.error(err instanceof Error ? err.message : 'Sign up failed');
+     } finally {
+       setSubmitting(false);
+     }
    };
  
    return (
@@ -103,12 +116,19 @@
  
            <Button
              type="submit"
+             disabled={submitting}
              className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 text-lg font-semibold"
            >
-             Sign Up
+             {submitting ? 'Signing up...' : 'Sign Up'}
              <ArrowRight className="w-5 h-5 mr-2" />
            </Button>
          </form>
+
+         {verificationSent && (
+           <div className="mt-4 p-4 rounded-xl bg-white/10 border border-white/20 text-center text-white text-sm">
+             Check your email to confirm your account
+           </div>
+         )}
  
          <div className="mt-6 text-center">
            <p className="text-white/70">

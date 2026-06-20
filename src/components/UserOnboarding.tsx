@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
  import { Music, Trophy, Mic, ArrowRight, Check } from 'lucide-react';
-import { useApp } from '@/context/AppContext';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { upsertPreferences } from '@/api/profile';
+import { toast } from 'sonner';
+import type { Genre } from '@/lib/recommend';
 
  type Category = 'music' | 'sports' | 'standup';
  type Artist = string;
@@ -55,7 +57,7 @@ import { cn } from '@/lib/utils';
 export function UserOnboarding() {
    const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
    const [selectedArtists, setSelectedArtists] = useState<Artist[]>([]);
-  const { setSelectedGenres, setHasCompletedOnboarding } = useApp();
+  const [saving, setSaving] = useState(false);
   const navigate = useNavigate();
 
    const toggleArtist = (artistId: string) => {
@@ -66,13 +68,20 @@ export function UserOnboarding() {
     );
   };
 
-  const handleContinue = () => {
-     // Map selected category to genres for compatibility
-     if (selectedCategory) {
-       setSelectedGenres([selectedCategory === 'standup' ? 'theater' : selectedCategory] as any);
-     }
-    setHasCompletedOnboarding(true);
-    navigate('/home');
+  const handleContinue = async () => {
+    // Map the chosen category to a genre: music/sports as-is, standup -> theater.
+    const selectedGenres: Genre[] = selectedCategory
+      ? [(selectedCategory === 'standup' ? 'theater' : selectedCategory) as Genre]
+      : [];
+    setSaving(true);
+    try {
+      await upsertPreferences(selectedGenres, selectedArtists);
+      navigate('/home');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to save preferences');
+    } finally {
+      setSaving(false);
+    }
   };
 
    const currentCategory = categories.find(c => c.id === selectedCategory);
@@ -205,7 +214,7 @@ export function UserOnboarding() {
              animate={{ opacity: 1, y: 0 }}
              transition={{ delay: 0.4, duration: 0.4 }}
              onClick={handleContinue}
-             disabled={selectedArtists.length === 0}
+             disabled={selectedArtists.length === 0 || saving}
              className={cn(
                'w-full py-4 rounded-2xl font-semibold text-lg flex items-center justify-center gap-2 transition-all',
                selectedArtists.length > 0
@@ -219,10 +228,7 @@ export function UserOnboarding() {
          )}
  
          <button
-           onClick={() => {
-             setHasCompletedOnboarding(true);
-             navigate('/home');
-           }}
+           onClick={() => navigate('/home')}
            className="w-full mt-3 py-3 text-muted-foreground text-sm hover:text-foreground transition-colors"
          >
            Skip for now

@@ -2,23 +2,30 @@
  import { motion } from 'framer-motion';
  import { Mail, Lock, Ticket, ArrowRight, Eye, EyeOff } from 'lucide-react';
  import { Link, useNavigate } from 'react-router-dom';
- import { useApp } from '@/context/AppContext';
+ import { useAuth } from '@/context/AuthContext';
+ import { toast } from 'sonner';
  import { Input } from '@/components/ui/input';
  import { Button } from '@/components/ui/button';
- 
+
  export default function Login() {
    const [email, setEmail] = useState('');
    const [password, setPassword] = useState('');
    const [showPassword, setShowPassword] = useState(false);
-   const { setRole, setHasCompletedOnboarding } = useApp();
+   const [submitting, setSubmitting] = useState(false);
+   const { signIn } = useAuth();
    const navigate = useNavigate();
- 
-   const handleLogin = (e: React.FormEvent) => {
+
+   const handleLogin = async (e: React.FormEvent) => {
      e.preventDefault();
-     // Mock login - just set the role and navigate
-     setRole('user');
-     setHasCompletedOnboarding(true);
-     navigate('/home');
+     setSubmitting(true);
+     try {
+       await signIn(email, password);
+       navigate('/home');
+     } catch (err) {
+       toast.error(err instanceof Error ? err.message : 'Sign in failed');
+     } finally {
+       setSubmitting(false);
+     }
    };
  
    return (
@@ -80,9 +87,10 @@
  
            <Button
              type="submit"
+             disabled={submitting}
              className="w-full h-12 rounded-xl btn-primary-gradient text-lg font-semibold"
            >
-             Sign In
+             {submitting ? 'Signing in...' : 'Sign In'}
              <ArrowRight className="w-5 h-5 mr-2" />
            </Button>
          </form>
