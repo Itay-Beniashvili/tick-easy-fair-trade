@@ -118,13 +118,17 @@ create policy gp_read on public.group_purchases for select using (true);
 drop policy if exists gp_insert on public.group_purchases;
 create policy gp_insert on public.group_purchases for insert with check (auth.uid() = organizer_id);
 drop policy if exists gp_update on public.group_purchases;
-create policy gp_update on public.group_purchases for update using (true);
+create policy gp_update on public.group_purchases for update
+  using (auth.uid() = organizer_id) with check (auth.uid() = organizer_id);
+-- group_participants: list is readable within the demo (only low-sensitivity
+-- name/paid/ticket_count is shown; the app does not store participant emails),
+-- but each user may only add or modify THEIR OWN row.
 drop policy if exists gpart_read on public.group_participants;
 create policy gpart_read on public.group_participants for select using (true);
 drop policy if exists gpart_write on public.group_participants;
-create policy gpart_write on public.group_participants for insert with check (true);
+create policy gpart_write on public.group_participants for insert with check (auth.uid() = user_id);
 drop policy if exists gpart_update on public.group_participants;
-create policy gpart_update on public.group_participants for update using (true);
+create policy gpart_update on public.group_participants for update using (auth.uid() = user_id);
 
 drop policy if exists cp_read on public.community_posts;
 create policy cp_read on public.community_posts for select using (true);

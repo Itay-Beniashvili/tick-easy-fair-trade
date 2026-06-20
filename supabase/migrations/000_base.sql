@@ -87,8 +87,12 @@ begin
   insert into public.profiles (user_id, email, full_name)
     values (new.id, new.email, new.raw_user_meta_data->>'full_name')
     on conflict (user_id) do nothing;
+  -- Only 'user' or 'manager' may be self-selected at signup; never 'admin'.
   insert into public.user_roles (user_id, role)
-    values (new.id, coalesce((new.raw_user_meta_data->>'role')::public.app_role, 'user'))
+    values (new.id, case
+      when (new.raw_user_meta_data->>'role') in ('user','manager')
+        then (new.raw_user_meta_data->>'role')::public.app_role
+      else 'user' end)
     on conflict (user_id, role) do nothing;
   return new;
 end $$;
