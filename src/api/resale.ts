@@ -1,15 +1,18 @@
 import { supabase, unwrap, type TicketRow } from './client';
 
-/** Seller lists their own ticket for resale. Server still enforces the cap on purchase. */
+/** Seller lists their own ticket for resale via a SECURITY DEFINER RPC that
+ *  enforces the price cap server-side against the ticket's true face value. */
 export async function listForResale(ticketId: string, price: number, originalPrice: number): Promise<TicketRow> {
   if (price > originalPrice) throw new Error('Selling above face value is prohibited');
-  return unwrap(await supabase.from('tickets')
-    .update({ is_for_sale: true, sale_price: price }).eq('id', ticketId).select().single());
+  const { data, error } = await supabase.rpc('list_ticket_for_resale', {
+    p_ticket_id: ticketId, p_price: price,
+  });
+  if (error) throw new Error(error.message);
+  return data as unknown as TicketRow;
 }
 
 export async function unlistResale(ticketId: string): Promise<void> {
-  const { error } = await supabase.from('tickets')
-    .update({ is_for_sale: false, sale_price: null }).eq('id', ticketId);
+  const { error } = await supabase.rpc('unlist_ticket', { p_ticket_id: ticketId });
   if (error) throw new Error(error.message);
 }
 

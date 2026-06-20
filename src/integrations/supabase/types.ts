@@ -416,8 +416,95 @@ export type Database = {
         Args: { _role: Database["public"]["Enums"]["app_role"] }
         Returns: boolean
       }
+      list_ticket_for_resale: {
+        Args: { p_price: number; p_ticket_id: string }
+        Returns: {
+          created_at: string
+          event_city: string
+          event_date: string
+          event_id: string
+          event_image: string | null
+          event_time: string
+          event_title: string
+          event_venue: string
+          id: string
+          is_for_sale: boolean | null
+          price: number
+          purchase_date: string
+          qr_code: string | null
+          sale_price: number | null
+          seat_info: string | null
+          ticket_type: string
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "tickets"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      purchase_ticket: {
+        Args: { p_event_id: string; p_seat_info: string }
+        Returns: {
+          created_at: string
+          event_city: string
+          event_date: string
+          event_id: string
+          event_image: string | null
+          event_time: string
+          event_title: string
+          event_venue: string
+          id: string
+          is_for_sale: boolean | null
+          price: number
+          purchase_date: string
+          qr_code: string | null
+          sale_price: number | null
+          seat_info: string | null
+          ticket_type: string
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "tickets"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       transfer_ticket_ownership: {
         Args: { p_buyer_name: string; p_ticket_id: string }
+        Returns: {
+          created_at: string
+          event_city: string
+          event_date: string
+          event_id: string
+          event_image: string | null
+          event_time: string
+          event_title: string
+          event_venue: string
+          id: string
+          is_for_sale: boolean | null
+          price: number
+          purchase_date: string
+          qr_code: string | null
+          sale_price: number | null
+          seat_info: string | null
+          ticket_type: string
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "tickets"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      unlist_ticket: {
+        Args: { p_ticket_id: string }
         Returns: {
           created_at: string
           event_city: string
