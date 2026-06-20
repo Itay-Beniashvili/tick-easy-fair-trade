@@ -67,6 +67,19 @@ export function ResaleModal({ isOpen, onClose, ticketId, originalPrice, eventTit
     }
   };
 
+  const numPrice = parseFloat(price) || 0;
+  const hasPrice = price !== '' && !isNaN(parseFloat(price));
+  const ratio = originalPrice > 0 ? numPrice / originalPrice : 0;
+  const pctBelow = Math.max(0, Math.round((1 - ratio) * 100));
+  // Live "fairness" feedback: green well below face value → amber near it → red over the cap.
+  const { tone, status } =
+    !hasPrice ? { tone: 'muted-foreground', status: 'Drag to set your price' }
+    : ratio > 1 ? { tone: 'destructive', status: 'Above the cap — not allowed' }
+    : ratio >= 0.9 ? { tone: 'warning', status: 'At face value' }
+    : ratio >= 0.7 ? { tone: 'warning', status: `${pctBelow}% below face value` }
+    : { tone: 'success', status: `Great deal · ${pctBelow}% below face value` };
+  const toneColor = `hsl(var(--${tone}))`;
+
   if (!isOpen) return null;
 
   return (
@@ -83,7 +96,7 @@ export function ResaleModal({ isOpen, onClose, ticketId, originalPrice, eventTit
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 100, opacity: 0 }}
           onClick={(e) => e.stopPropagation()}
-          className="bg-card w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 shadow-elevated"
+          className="bg-card w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 shadow-elevated max-h-[92vh] overflow-y-auto scrollbar-hide"
         >
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
@@ -95,49 +108,63 @@ export function ResaleModal({ isOpen, onClose, ticketId, originalPrice, eventTit
           </div>
 
           {/* Event Info */}
-          <div className="bg-muted/50 rounded-2xl p-4 mb-6">
-            <p className="text-sm text-muted-foreground mb-1">Event:</p>
-            <p className="font-semibold text-foreground">{eventTitle}</p>
-            <div className="flex items-center gap-2 mt-2 text-sm">
-              <Tag className="w-4 h-4 text-primary" />
-              <span className="text-muted-foreground">Original price:</span>
-              <span className="font-bold text-primary">{formatILS(originalPrice)}</span>
-            </div>
+          <div className="bg-muted/50 rounded-2xl px-4 py-3 mb-5 flex items-center gap-2">
+            <Tag className="w-4 h-4 text-gel shrink-0" />
+            <p className="font-semibold text-foreground truncate">{eventTitle}</p>
           </div>
 
-          {/* Anti-Scalping Notice */}
-          <div className="bg-gradient-to-r from-warning/10 to-amber-500/10 border border-warning/20 rounded-2xl p-4 mb-6">
-            <div className="flex items-start gap-3">
-              <Shield className="w-5 h-5 text-warning shrink-0 mt-0.5" />
-              <div>
-                <p className="text-sm font-semibold text-foreground mb-1">
-                  Anti-Scalping Protection
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  TickEasy prevents ticket scalping. You cannot sell tickets above the original face value.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Price Input */}
+          {/* Price control with live anti-scalping feedback */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-foreground mb-2">
-              Your selling price
-            </label>
-            <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground text-lg font-bold">
-                ₪
+            <div className="flex items-baseline justify-between mb-1">
+              <label className="text-sm font-medium text-foreground">Your selling price</label>
+              <span className="font-mono text-xs text-muted-foreground flex items-center gap-1">
+                <Shield className="w-3.5 h-3.5" /> Cap {formatILS(originalPrice)}
               </span>
+            </div>
+
+            {/* Big colour-shifting readout */}
+            <div className="text-center py-3">
+              <span
+                className="font-mono font-bold text-5xl transition-colors duration-200"
+                style={{ color: toneColor }}
+              >
+                {hasPrice ? formatILS(numPrice) : '₪0'}
+              </span>
+            </div>
+
+            {/* Slider — physically capped at face value; colour tracks fairness */}
+            <input
+              type="range"
+              min={0}
+              max={originalPrice}
+              step={1}
+              value={hasPrice ? Math.min(numPrice, originalPrice) : 0}
+              onChange={(e) => handlePriceChange(e.target.value)}
+              style={{ accentColor: hasPrice ? toneColor : 'hsl(var(--gel))' }}
+              className="w-full cursor-pointer accent-current"
+            />
+
+            {/* Status line */}
+            <div
+              className="flex items-center justify-center gap-2 mt-3 text-sm font-semibold transition-colors duration-200"
+              style={{ color: toneColor }}
+            >
+              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: toneColor, boxShadow: `0 0 8px ${toneColor}` }} />
+              {status}
+            </div>
+
+            {/* Exact entry */}
+            <div className="relative mt-4">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground text-lg font-bold">₪</span>
               <input
                 type="number"
                 value={price}
                 onChange={(e) => handlePriceChange(e.target.value)}
-                placeholder="0"
+                placeholder="Enter exact amount"
                 className={cn(
-                  "w-full py-4 px-4 pl-10 rounded-2xl border text-2xl font-bold text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 transition-all",
+                  "w-full py-3.5 px-4 pl-10 rounded-2xl border bg-card text-xl font-bold text-foreground placeholder:text-muted-foreground/60 placeholder:text-base placeholder:font-normal focus:outline-none focus:ring-2 transition-all",
                   error
-                    ? 'border-destructive focus:ring-destructive/20 focus:border-destructive'
+                    ? 'border-destructive focus:ring-destructive/20'
                     : 'border-border focus:ring-primary/20 focus:border-primary'
                 )}
               />

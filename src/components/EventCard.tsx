@@ -1,7 +1,9 @@
 import { motion } from 'framer-motion';
+import { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { formatILS } from '@/lib/currency';
+import { navigateWithImageMorph } from '@/lib/viewTransition';
 import { cn } from '@/lib/utils';
 import type { EventRow } from '@/api/client';
 import type { CSSProperties } from 'react';
@@ -22,8 +24,9 @@ function gelStyle(genre: string): CSSProperties {
 
 export function EventCard({ event, index = 0, compact = false }: EventCardProps) {
   const navigate = useNavigate();
+  const imgRef = useRef<HTMLImageElement>(null);
   const shortDate = format(new Date(event.event_date), 'EEE, MMM d');
-  const go = () => navigate(`/event/${event.id}`);
+  const go = () => navigateWithImageMorph(navigate, `/event/${event.id}`, imgRef.current);
 
   if (compact) {
     return (
@@ -36,7 +39,7 @@ export function EventCard({ event, index = 0, compact = false }: EventCardProps)
         className="group card-elevated overflow-hidden cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:ring-1 hover:ring-[hsl(var(--c)/0.35)] hover:shadow-[0_18px_38px_-18px_hsl(var(--c)/0.5)]"
       >
         <div className="relative h-24 overflow-hidden">
-          <img src={event.image ?? ''} alt={event.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+          <img ref={imgRef} src={event.image ?? ''} alt={event.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
           <div className="absolute inset-0 bg-gradient-to-t from-card via-card/20 to-transparent" />
           <div className="absolute inset-x-0 top-0 h-2/3 bg-gradient-to-b from-[hsl(var(--c)/0.18)] to-transparent" />
           <span className="absolute top-2 left-2 w-2 h-2 rounded-full bg-[hsl(var(--c))] shadow-[0_0_10px_1px_hsl(var(--c))]" />
@@ -63,6 +66,7 @@ export function EventCard({ event, index = 0, compact = false }: EventCardProps)
     >
       <div className="relative h-44 overflow-hidden">
         <img
+          ref={imgRef}
           src={event.image ?? ''}
           alt={event.title}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"

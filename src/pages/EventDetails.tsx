@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, MapPin, Calendar, Clock, Users, Tag, Shield, CheckCircle, AlertCircle, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -13,6 +13,7 @@ import { getProfile } from '@/api/profile';
 import { useAuth } from '@/context/AuthContext';
 import { formatILS } from '@/lib/currency';
 import { ContactManagerModal } from '@/components/ContactManagerModal';
+import { PurchaseSuccess } from '@/components/PurchaseSuccess';
 import { Skeleton } from '@/components/Skeletons';
 import type { EventRow } from '@/api/client';
 
@@ -30,6 +31,7 @@ export default function EventDetails() {
   const [selectedTab, setSelectedTab] = useState<'primary' | 'resale'>('primary');
   const [showContactManager, setShowContactManager] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [success, setSuccess] = useState(false);
   const [name, setName] = useState('You');
 
   useEffect(() => {
@@ -73,18 +75,18 @@ export default function EventDetails() {
     try {
       const seat = `Sec A · Row ${Math.floor(Math.random() * 20) + 1} · Seat ${Math.floor(Math.random() * 30) + 1}`;
       await purchaseTicket(event, seat);
-      toast.success('Ticket purchased!', { description: 'Check your wallet.' });
-      navigate('/wallet');
-    } catch (e) { toast.error((e as Error).message); } finally { setBusy(false); }
+      setSuccess(true);
+      setTimeout(() => navigate('/wallet'), 2000);
+    } catch (e) { toast.error((e as Error).message); setBusy(false); }
   };
 
   const handleResaleBuy = async (listing: Listing) => {
     setBusy(true);
     try {
       await buyResale(listing.id, name);
-      toast.success('Verified resale ticket purchased!', { description: 'A new barcode was issued to you.' });
-      navigate('/wallet');
-    } catch (e) { toast.error((e as Error).message); } finally { setBusy(false); }
+      setSuccess(true);
+      setTimeout(() => navigate('/wallet'), 2000);
+    } catch (e) { toast.error((e as Error).message); setBusy(false); }
   };
 
   const handleCreateGroup = async () => {
@@ -99,7 +101,7 @@ export default function EventDetails() {
   return (
     <div className="min-h-screen bg-background lg:pt-16">
       <div className="relative h-80 lg:h-96">
-        <img src={event.image ?? ''} alt={event.title} className="w-full h-full object-cover" />
+        <img src={event.image ?? ''} alt={event.title} className="w-full h-full object-cover" style={{ viewTransitionName: 'event-hero' }} />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
         <button onClick={() => navigate(-1)} className="absolute top-12 lg:top-20 left-4 lg:left-8 w-10 h-10 rounded-full glass-effect flex items-center justify-center hover:bg-popover transition-colors">
           <ArrowLeft className="w-5 h-5 text-foreground" />
@@ -186,6 +188,7 @@ export default function EventDetails() {
       </div>
 
       <ContactManagerModal isOpen={showContactManager} onClose={() => setShowContactManager(false)} eventId={event.id} eventTitle={event.title} senderName={name} />
+      <AnimatePresence>{success && <PurchaseSuccess title={event.title} />}</AnimatePresence>
     </div>
   );
 }
