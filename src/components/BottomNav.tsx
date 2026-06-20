@@ -28,11 +28,12 @@ export function BottomNav() {
           <div className="flex items-center gap-2">
             <button
               onClick={openCommand}
-              className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-muted-foreground bg-card border border-white/[0.06] hover:text-foreground transition-colors"
+              aria-label="Search"
+              className="group flex items-center gap-2.5 w-52 xl:w-60 pl-3.5 pr-2 py-2 rounded-full text-sm text-muted-foreground bg-card/60 border border-white/[0.06] hover:border-gel/40 transition-colors"
             >
-              <Search className="w-4 h-4" />
-              <span>Search</span>
-              <kbd className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-muted border border-white/[0.06]">⌘K</kbd>
+              <Search className="w-[18px] h-[18px] text-muted-foreground group-hover:text-gel transition-colors" />
+              <span className="flex-1 text-left">Search shows…</span>
+              <kbd className="font-mono text-[10px] px-1.5 py-0.5 rounded-md bg-muted/80 text-muted-foreground/80">⌘K</kbd>
             </button>
             {navItems.map(({ path, icon: Icon, label }) => {
               const isActive = location.pathname === path;

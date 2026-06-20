@@ -153,7 +153,7 @@ export default function Home() {
               <p className="font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground mb-2">
                 Tonight · <span className="text-gel">{events.length} shows live</span>
               </p>
-              <h1 className="font-display font-extrabold text-[clamp(2.6rem,4.5vw+1rem,5rem)] leading-[0.92] mb-1">
+              <h1 className="font-display font-extrabold text-[clamp(2.6rem,4.5vw+1rem,5rem)] leading-[1.04] pb-1 mb-2">
                 The lights<br /><span className="text-muted-foreground">are going</span> down.
               </h1>
               <p className="hidden lg:block text-muted-foreground mt-4 max-w-md">
