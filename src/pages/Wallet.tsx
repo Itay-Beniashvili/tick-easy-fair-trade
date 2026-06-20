@@ -24,14 +24,14 @@ export default function Wallet() {
   useEffect(() => { load(); }, [load]);
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background pb-24 lg:pb-10 lg:pt-16">
       {/* Header */}
       <div className="bg-gradient-hero pt-12 pb-8 px-4">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="max-w-lg mx-auto"
+          className="max-w-lg lg:max-w-5xl mx-auto"
         >
           <h1 className="font-display font-extrabold text-3xl text-white mb-1">My Tickets</h1>
           <p className="text-white/70 font-mono text-xs uppercase tracking-[0.14em]">
@@ -40,7 +40,7 @@ export default function Wallet() {
         </motion.div>
       </div>
 
-      <div className="max-w-lg mx-auto px-4 py-6">
+      <div className="max-w-lg lg:max-w-5xl mx-auto px-4 py-6">
         {loading ? (
           <p className="text-center text-muted-foreground py-16">Loading your tickets…</p>
         ) : tickets.length === 0 ? (
@@ -58,7 +58,7 @@ export default function Wallet() {
             </p>
           </motion.div>
         ) : (
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {tickets.map((ticket, index) => (
               <TicketCard key={ticket.id} ticket={ticket} index={index} onChanged={load} />
             ))}

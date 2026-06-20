@@ -83,17 +83,17 @@ export default function EventDetails() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background lg:pt-16">
       <div className="relative h-80">
         <img src={event.image ?? ''} alt={event.title} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-        <button onClick={() => navigate(-1)} className="absolute top-12 left-4 w-10 h-10 rounded-full bg-white/90 shadow-lg flex items-center justify-center hover:bg-white transition-colors">
+        <button onClick={() => navigate(-1)} className="absolute top-12 lg:top-4 left-4 w-10 h-10 rounded-full bg-white/90 shadow-lg flex items-center justify-center hover:bg-white transition-colors">
           <ArrowLeft className="w-5 h-5 text-foreground" />
         </button>
       </div>
 
       <div className="relative -mt-24 px-4 pb-32">
-        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="max-w-lg mx-auto">
+        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="max-w-lg lg:max-w-3xl mx-auto">
           <div className="card-elevated p-6 mb-4">
             <h1 className="text-2xl font-bold text-foreground mb-4">{event.title}</h1>
             <div className="space-y-3">

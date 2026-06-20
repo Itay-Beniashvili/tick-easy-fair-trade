@@ -43,14 +43,14 @@ export default function Profile() {
   const artists = profile?.preferred_artists ?? [];
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background pb-24 lg:pb-10 lg:pt-16">
       {/* Header */}
       <div className="bg-gradient-hero pt-12 pb-20 px-4">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="max-w-lg mx-auto text-center"
+          className="max-w-lg lg:max-w-3xl mx-auto text-center"
         >
           <div className="w-24 h-24 rounded-full bg-white/20 backdrop-blur-sm mx-auto mb-4 flex items-center justify-center ring-4 ring-white/30">
             <User className="w-12 h-12 text-white" />
@@ -60,7 +60,7 @@ export default function Profile() {
         </motion.div>
       </div>
 
-      <div className="max-w-lg mx-auto px-4 -mt-10">
+      <div className="max-w-lg lg:max-w-3xl mx-auto px-4 -mt-10">
         {/* Stats Card */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -120,7 +120,7 @@ export default function Profile() {
         )}
 
         {/* Menu */}
-        <div className="space-y-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           {menuItems.map((item, index) => {
             const Icon = item.icon;
             return (
@@ -149,7 +149,7 @@ export default function Profile() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: menuItems.length * 0.05, duration: 0.3 }}
             onClick={handleLogout}
-            className="w-full card-elevated p-4 flex items-center gap-4 hover:shadow-lg transition-all mt-4"
+            className="w-full card-elevated p-4 flex items-center gap-4 hover:shadow-lg transition-all mt-4 md:col-span-2"
           >
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-destructive to-rose-400 flex items-center justify-center shrink-0">
               <LogOut className="w-6 h-6 text-white" />

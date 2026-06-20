@@ -35,7 +35,7 @@ export function RoleSelection() {
       </motion.div>
 
       {/* Role Cards */}
-      <div className="w-full max-w-md space-y-4 relative z-10">
+      <div className="w-full max-w-md lg:max-w-3xl grid grid-cols-1 lg:grid-cols-2 gap-4 relative z-10">
          <motion.div
           initial={{ opacity: 0, x: -50 }}
           animate={{ opacity: 1, x: 0 }}
@@ -43,7 +43,7 @@ export function RoleSelection() {
         >
            <Link
              to="/login"
-             className="block w-full p-6 rounded-3xl bg-white shadow-elevated text-left transition-all hover:scale-[1.02] hover:shadow-glow active:scale-[0.98]"
+             className="block w-full h-full p-6 rounded-3xl card-elevated border border-gel/30 text-left transition-all hover:scale-[1.02] hover:shadow-glow active:scale-[0.98]"
            >
              <div className="flex items-center gap-4">
                <div className="w-14 h-14 rounded-2xl bg-gradient-warm flex items-center justify-center shrink-0">
@@ -66,7 +66,7 @@ export function RoleSelection() {
         >
            <Link
              to="/manager/login"
-             className="block w-full p-6 rounded-3xl bg-white/10 backdrop-blur-sm border border-white/20 text-left transition-all hover:scale-[1.02] hover:bg-white/20 active:scale-[0.98]"
+             className="block w-full h-full p-6 rounded-3xl bg-white/10 backdrop-blur-sm border border-white/20 text-left transition-all hover:scale-[1.02] hover:bg-white/20 active:scale-[0.98]"
            >
              <div className="flex items-center gap-4">
                <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center shrink-0">

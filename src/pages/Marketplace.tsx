@@ -66,9 +66,9 @@ export default function Marketplace() {
   const visible = listings;
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background pb-24 lg:pb-10 lg:pt-16">
       <div className="bg-gradient-success pt-12 pb-6 px-4">
-        <div className="max-w-lg mx-auto">
+        <div className="max-w-lg lg:max-w-6xl mx-auto">
           <button onClick={() => navigate(-1)} className="mb-4 flex items-center gap-2 text-white/80 hover:text-white transition-colors">
             <ArrowLeft className="w-5 h-5" /> <span>Back</span>
           </button>
@@ -84,14 +84,14 @@ export default function Marketplace() {
         </div>
       </div>
 
-      <div className="max-w-lg mx-auto px-4 -mt-3">
+      <div className="max-w-lg lg:max-w-6xl mx-auto px-4 -mt-3">
         <div className="bg-success/10 border border-success/20 rounded-2xl p-3 flex items-center gap-3">
           <Shield className="w-5 h-5 text-success shrink-0" />
           <p className="text-xs text-foreground">All tickets are verified. Prices cannot exceed the original face value.</p>
         </div>
       </div>
 
-      <div className="max-w-lg mx-auto px-4 py-4 space-y-4">
+      <div className="max-w-lg lg:max-w-6xl mx-auto px-4 py-4">
         {loading ? (
           <p className="text-center text-muted-foreground py-12">Loading listings…</p>
         ) : visible.length === 0 ? (
@@ -99,7 +99,8 @@ export default function Marketplace() {
             <p className="text-muted-foreground">No resale tickets available right now</p>
           </div>
         ) : (
-          visible.map((listing, i) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {visible.map((listing, i) => (
             <motion.div
               key={listing.id}
               initial={{ opacity: 0, y: 20 }}
@@ -134,7 +135,8 @@ export default function Marketplace() {
                 </div>
               </div>
             </motion.div>
-          ))
+          ))}
+          </div>
         )}
       </div>
 
