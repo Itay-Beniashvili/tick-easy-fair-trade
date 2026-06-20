@@ -33,8 +33,8 @@ export default function Wallet() {
           transition={{ duration: 0.5 }}
           className="max-w-lg mx-auto"
         >
-          <h1 className="text-2xl font-bold text-white mb-1">My Tickets</h1>
-          <p className="text-white/80">
+          <h1 className="font-display font-extrabold text-3xl text-white mb-1">My Tickets</h1>
+          <p className="text-white/70 font-mono text-xs uppercase tracking-[0.14em]">
             {tickets.length} {tickets.length === 1 ? 'ticket' : 'tickets'} in your wallet
           </p>
         </motion.div>

@@ -63,7 +63,7 @@
                placeholder="Email address"
                value={email}
                onChange={(e) => setEmail(e.target.value)}
-               className="pl-10 h-12 bg-white/90 border-0 rounded-xl"
+               className="pl-10 h-12 bg-card/70 border border-white/10 text-foreground placeholder:text-muted-foreground rounded-xl"
              />
            </div>
            
@@ -74,7 +74,7 @@
                placeholder="Password"
                value={password}
                onChange={(e) => setPassword(e.target.value)}
-               className="pl-10 pr-10 h-12 bg-white/90 border-0 rounded-xl"
+               className="pl-10 pr-10 h-12 bg-card/70 border border-white/10 text-foreground placeholder:text-muted-foreground rounded-xl"
              />
              <button
                type="button"
