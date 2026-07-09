@@ -172,7 +172,7 @@ export default function Landing() {
             TickEasy
           </span>
           {!user && (
-            <Link to="/login" className="hidden sm:block text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <Link to="/login" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Sign in
             </Link>
           )}
@@ -251,6 +251,11 @@ export default function Landing() {
             <Link to={primaryCta.to} className="btn-primary-gradient pressable inline-flex items-center gap-2 text-lg !px-8 !py-4">
               {primaryCta.label} <ArrowRight className="w-5 h-5" />
             </Link>
+            {!user && (
+              <Link to="/register" className="glass-effect pressable inline-flex items-center gap-2 rounded-2xl px-6 py-4 text-sm font-semibold text-foreground hover:bg-popover transition-colors">
+                Create account
+              </Link>
+            )}
             <Link to="/manager/login" className="text-sm text-muted-foreground hover:text-foreground transition-colors underline underline-offset-4">
               I'm an event manager
             </Link>
@@ -345,6 +350,7 @@ export default function Landing() {
         <p className="text-xs text-muted-foreground">Built for fair-trade ticketing.</p>
         <div className="flex items-center gap-5 text-xs text-muted-foreground">
           <Link to="/login" className="hover:text-foreground transition-colors">Sign in</Link>
+          <Link to="/register" className="hover:text-foreground transition-colors">Create account</Link>
           <Link to="/manager/login" className="hover:text-foreground transition-colors">Event managers</Link>
         </div>
       </footer>
