@@ -276,7 +276,7 @@
 @supports (animation-timeline: scroll()) {
   .hero-parallax {
     animation: heroParallax linear both;
-    animation-timeline: scroll();
+    animation-timeline: scroll(root);
     animation-range: 0 60vh;
   }
 }
