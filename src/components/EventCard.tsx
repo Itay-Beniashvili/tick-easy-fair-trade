@@ -6,7 +6,7 @@ import { formatILS } from '@/lib/currency';
 import { navigateWithImageMorph } from '@/lib/viewTransition';
 import { cn } from '@/lib/utils';
 import type { EventRow } from '@/api/client';
-import type { CSSProperties } from 'react';
+import { gelStyle } from '@/lib/gel';
 
 interface EventCardProps {
   event: EventRow;
@@ -15,12 +15,6 @@ interface EventCardProps {
 }
 
 const genreLabels: Record<string, string> = { music: 'Music', sports: 'Sports', theater: 'Theater' };
-
-/** Each category is lit by its own stage gel; expose it as --c for the card. */
-function gelStyle(genre: string): CSSProperties {
-  const v = genre === 'sports' ? 'var(--sports)' : genre === 'theater' ? 'var(--theater)' : 'var(--music)';
-  return { ['--c' as string]: v } as CSSProperties;
-}
 
 export function EventCard({ event, index = 0, compact = false }: EventCardProps) {
   const navigate = useNavigate();

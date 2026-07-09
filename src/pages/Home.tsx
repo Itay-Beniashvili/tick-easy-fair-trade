@@ -12,12 +12,10 @@ import { rankEvents } from '@/lib/recommend';
 import { formatILS } from '@/lib/currency';
 import type { EventRow } from '@/api/client';
 import { toast } from 'sonner';
+import { gelVar, resetGel } from '@/lib/gel';
 
 type Category = 'all' | 'music' | 'sports' | 'theater';
 const categories: Category[] = ['all', 'music', 'sports', 'theater'];
-const gelFor: Record<Category, string> = {
-  all: 'var(--music)', music: 'var(--music)', sports: 'var(--sports)', theater: 'var(--theater)',
-};
 
 /** A continuously-moving "conveyor belt" of show posters under a breathing stage
  *  spotlight. The whole app relights (--gel) as it cycles through the shows'
@@ -33,7 +31,7 @@ function HeroMarquee({ events, onOpen }: { events: EventRow[]; onOpen: (id: stri
 
   useEffect(() => {
     const ev = events[gelIdx % (events.length || 1)];
-    if (ev) document.documentElement.style.setProperty('--gel', gelFor[(ev.genre as Category)] ?? 'var(--music)');
+    if (ev) document.documentElement.style.setProperty('--gel', gelVar(ev.genre));
   }, [gelIdx, events]);
 
   if (!events.length) return null;
@@ -51,7 +49,7 @@ function HeroMarquee({ events, onOpen }: { events: EventRow[]; onOpen: (id: stri
           <button
             key={`${ev.id}-${i}`}
             onClick={() => onOpen(ev.id)}
-            style={{ ['--c' as string]: gelFor[(ev.genre as Category)] ?? 'var(--music)' }}
+            style={{ ['--c' as string]: gelVar(ev.genre) }}
             className="group relative flex-none w-[250px] lg:w-[300px] h-[330px] lg:h-[380px] rounded-3xl overflow-hidden cursor-pointer card-elevated transition-transform duration-300 hover:scale-[1.03] hover:ring-1 hover:ring-[hsl(var(--c)/0.5)]"
           >
             <img src={ev.image ?? ''} alt={ev.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
@@ -101,7 +99,7 @@ export default function Home() {
   }, []);
 
   // The hero carousel drives --gel per show; reset to the brand gel when leaving Home.
-  useEffect(() => () => { document.documentElement.style.setProperty('--gel', 'var(--music)'); }, []);
+  useEffect(() => () => { resetGel(); }, []);
 
   const visible = useMemo(() => {
     const q = search.toLowerCase();
@@ -182,7 +180,7 @@ export default function Home() {
             <button
               key={c}
               onClick={() => setCategory(c)}
-              style={{ ['--c' as string]: gelFor[c] }}
+              style={{ ['--c' as string]: gelVar(c) }}
               className="relative flex-none px-4 py-2 rounded-full text-sm font-semibold capitalize bg-card border border-white/[0.06]"
             >
               {category === c && (
