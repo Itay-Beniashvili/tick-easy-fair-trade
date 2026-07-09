@@ -191,6 +191,15 @@ export default function Landing() {
         {/* hero video — fades in over the stage when playable */}
         {!reduced && !videoFailed && (
           <video
+            /* React doesn't render `muted` as a DOM attribute, which trips
+               mobile autoplay policies — set it imperatively and kick play. */
+            ref={(el) => {
+              if (el) {
+                el.muted = true;
+                el.setAttribute('muted', '');
+                el.play().catch(() => {});
+              }
+            }}
             autoPlay
             muted
             loop
@@ -203,6 +212,7 @@ export default function Landing() {
             style={{ opacity: videoReady ? 1 : 0 }}
           >
             <source src={HERO_VIDEO} type="video/webm" />
+            <source src="/landing/hero.mp4" type="video/mp4" />
           </video>
         )}
         {/* legibility scrim */}
