@@ -236,6 +236,11 @@
   }
   .ambient-dust--md { background-size: 320px 320px; opacity: 0.05; }
   .ambient-dust--sm { background-size: 220px 220px; opacity: 0.04; filter: blur(0.5px); }
+
+  /* Press depth for touch targets that are NOT framer-motion-driven
+     (framer elements use whileTap — inline transforms would override this). */
+  .pressable { transition: transform var(--motion-fast) var(--ease-swift); }
+  .pressable:active { transform: scale(0.97); }
 }
 
 @layer utilities {

@@ -99,7 +99,7 @@ export function TicketCard({ ticket, index = 0, onChanged }: TicketCardProps) {
           <div
             onClick={() => setShowQR(!showQR)}
             className={cn(
-              "cursor-pointer transition-all duration-300 overflow-hidden rounded-2xl",
+              "cursor-pointer transition-all duration-300 overflow-hidden rounded-2xl pressable",
               showQR ? 'bg-white p-4 shadow-glow' : 'bg-muted p-3'
             )}
           >

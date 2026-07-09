@@ -42,7 +42,7 @@ export function BottomNav() {
                   key={path}
                   to={path}
                   className={cn(
-                    'flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-colors',
+                    'flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-colors pressable',
                     isActive ? 'text-gel bg-gel/10' : 'text-muted-foreground hover:text-foreground',
                   )}
                 >
@@ -65,7 +65,7 @@ export function BottomNav() {
               <NavLink
                 key={path}
                 to={path}
-                className="relative flex flex-col items-center gap-1 px-4 py-1.5 rounded-2xl"
+                className="relative flex flex-col items-center gap-1 px-4 py-1.5 rounded-2xl pressable"
               >
                 {isActive && (
                   <motion.div
