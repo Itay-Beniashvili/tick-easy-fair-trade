@@ -16,6 +16,8 @@ import { ContactManagerModal } from '@/components/ContactManagerModal';
 import { PurchaseSuccess } from '@/components/PurchaseSuccess';
 import { Skeleton } from '@/components/Skeletons';
 import type { EventRow } from '@/api/client';
+import { setGel, resetGel } from '@/lib/gel';
+import { easeOutExpo } from '@/lib/motion';
 
 interface Listing {
   id: string; event_id: string; seat_info: string | null; sale_price: number;
@@ -51,6 +53,13 @@ export default function EventDetails() {
       }
     })();
   }, [id]);
+
+  // Relight the whole venue (StageAmbience, buttons, nav) in this event's gel.
+  // resetGel on unmount mirrors Home's convention of restoring the brand gel.
+  useEffect(() => {
+    if (event) setGel(event.genre);
+    return () => resetGel();
+  }, [event]);
 
   if (loading) return (
     <div className="min-h-screen lg:pt-16">
@@ -100,8 +109,8 @@ export default function EventDetails() {
 
   return (
     <div className="min-h-screen lg:pt-16">
-      <div className="relative h-80 lg:h-96">
-        <img src={event.image ?? ''} alt={event.title} className="w-full h-full object-cover" style={{ viewTransitionName: 'event-hero' }} />
+      <div className="relative h-80 lg:h-96 overflow-hidden">
+        <img src={event.image ?? ''} alt={event.title} className="w-full h-full object-cover hero-parallax" style={{ viewTransitionName: 'event-hero' }} />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
         <button onClick={() => navigate(-1)} className="absolute top-12 lg:top-20 left-4 lg:left-8 w-10 h-10 rounded-full glass-effect flex items-center justify-center hover:bg-popover transition-colors">
           <ArrowLeft className="w-5 h-5 text-foreground" />
@@ -111,7 +120,19 @@ export default function EventDetails() {
       <div className="relative -mt-24 px-4 lg:px-8 pb-32 lg:pb-16">
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="max-w-lg lg:max-w-6xl mx-auto lg:grid lg:grid-cols-[1.5fr_1fr] lg:gap-8 lg:items-start">
           <div className="card-elevated p-6 lg:p-8 mb-4 lg:mb-0">
-            <h1 className="font-display font-extrabold text-3xl lg:text-4xl text-foreground mb-5">{event.title}</h1>
+            <h1 aria-label={event.title} className="font-display font-extrabold text-3xl lg:text-4xl text-foreground mb-5">
+              {event.title.split(' ').map((word, i) => (
+                <motion.span
+                  key={i}
+                  className="inline-block whitespace-pre"
+                  initial={{ opacity: 0, y: '0.5em' }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 + i * 0.05, duration: 0.5, ease: easeOutExpo }}
+                >
+                  {word}{i < event.title.split(' ').length - 1 ? ' ' : ''}
+                </motion.span>
+              ))}
+            </h1>
             <div className="space-y-3">
               <div className="flex items-center gap-3 text-muted-foreground"><MapPin className="w-5 h-5 text-primary" /><span>{event.venue}, {event.city}</span></div>
               <div className="flex items-center gap-3 text-muted-foreground"><Calendar className="w-5 h-5 text-accent" /><span>{formattedDate}</span></div>

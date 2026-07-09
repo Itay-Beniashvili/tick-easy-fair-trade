@@ -270,3 +270,14 @@
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; }
 }
+
+/* EventDetails hero: drifts slower than scroll (parallax). Progressive
+   enhancement — Firefox (no animation-timeline) gets a static image. */
+@supports (animation-timeline: scroll()) {
+  .hero-parallax {
+    animation: heroParallax linear both;
+    animation-timeline: scroll();
+    animation-range: 0 60vh;
+  }
+}
+@keyframes heroParallax { to { transform: translateY(12%) scale(1.06); } }
