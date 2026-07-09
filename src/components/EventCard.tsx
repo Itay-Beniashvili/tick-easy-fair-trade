@@ -7,6 +7,7 @@ import { navigateWithImageMorph } from '@/lib/viewTransition';
 import { cn } from '@/lib/utils';
 import type { EventRow } from '@/api/client';
 import { gelStyle } from '@/lib/gel';
+import { useTilt } from '@/lib/useTilt';
 
 interface EventCardProps {
   event: EventRow;
@@ -21,6 +22,7 @@ export function EventCard({ event, index = 0, compact = false }: EventCardProps)
   const imgRef = useRef<HTMLImageElement>(null);
   const shortDate = format(new Date(event.event_date), 'EEE, MMM d');
   const go = () => navigateWithImageMorph(navigate, `/event/${event.id}`, imgRef.current);
+  const tilt = useTilt();
 
   if (compact) {
     return (
@@ -53,11 +55,19 @@ export function EventCard({ event, index = 0, compact = false }: EventCardProps)
     <motion.div
       initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
+      whileTap={{ scale: 0.97 }}
       viewport={{ once: true, margin: '-40px' }}
       transition={{ delay: (index % 8) * 0.06, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
       onClick={go}
-      style={gelStyle(event.genre)}
-      className="group card-elevated overflow-hidden cursor-pointer transition-all duration-200 hover:-translate-y-1.5 hover:ring-1 hover:ring-[hsl(var(--c)/0.35)] hover:shadow-[0_22px_46px_-20px_hsl(var(--c)/0.55)]"
+      onPointerMove={tilt.enabled ? tilt.onPointerMove : undefined}
+      onPointerLeave={tilt.enabled ? tilt.onPointerLeave : undefined}
+      style={{
+        ...gelStyle(event.genre),
+        ...(tilt.enabled
+          ? { rotateX: tilt.rotateX, rotateY: tilt.rotateY, transformPerspective: 800 }
+          : {}),
+      }}
+      className="group card-elevated relative overflow-hidden cursor-pointer transition-shadow duration-200 hover:ring-1 hover:ring-[hsl(var(--c)/0.35)] hover:shadow-[0_22px_46px_-20px_hsl(var(--c)/0.55)]"
     >
       <div className="relative h-44 overflow-hidden">
         <img
@@ -95,6 +105,14 @@ export function EventCard({ event, index = 0, compact = false }: EventCardProps)
           </span>
         </div>
       </div>
+
+      {tilt.enabled && (
+        <motion.div
+          aria-hidden
+          className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          style={{ background: tilt.glare }}
+        />
+      )}
     </motion.div>
   );
 }
