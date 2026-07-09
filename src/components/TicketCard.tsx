@@ -5,6 +5,7 @@ import { format } from 'date-fns';
 import { ResaleModal } from './ResaleModal';
 import { cn } from '@/lib/utils';
 import { formatILS } from '@/lib/currency';
+import { springSnappy } from '@/lib/motion';
 import type { TicketRow } from '@/api/client';
 
 interface TicketCardProps {
@@ -95,21 +96,23 @@ export function TicketCard({ ticket, index = 0, onChanged }: TicketCardProps) {
             <p className="font-bold text-foreground text-lg">{ticket.seat_info || 'General Admission'}</p>
           </div>
 
-          {/* QR Code Section — glows under the "scanner" light */}
-          <div
-            onClick={() => setShowQR(!showQR)}
-            className={cn(
-              "cursor-pointer transition-all duration-300 overflow-hidden rounded-2xl pressable",
-              showQR ? 'bg-white p-4 shadow-glow' : 'bg-muted p-3'
-            )}
-          >
-            {showQR ? (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="flex flex-col items-center"
-              >
-                {/* Deterministic QR rendering (stable across renders) */}
+          {/* QR Code Section — flips over like a physical ticket; the back face
+              glows under the "scanner" light. Under reduced motion, MotionConfig
+              (App.tsx) suppresses the transform animation → instant face swap. */}
+          <div className="[perspective:1200px]">
+            <motion.div
+              onClick={() => setShowQR(!showQR)}
+              animate={{ rotateY: showQR ? 180 : 0 }}
+              transition={springSnappy}
+              className="relative grid cursor-pointer [transform-style:preserve-3d] pressable"
+            >
+              {/* front */}
+              <div className="[grid-area:1/1] [backface-visibility:hidden] bg-muted p-3 rounded-2xl flex items-center justify-center gap-2">
+                <QrCode className="w-5 h-5 text-gel" />
+                <span className="text-sm font-medium text-foreground">Tap to show QR code</span>
+              </div>
+              {/* back */}
+              <div className="[grid-area:1/1] [backface-visibility:hidden] [transform:rotateY(180deg)] bg-white p-4 rounded-2xl shadow-glow flex flex-col items-center">
                 <div className="w-48 h-48 bg-white p-2 rounded-xl shadow-inner mb-3">
                   <div className="w-full h-full grid grid-cols-8 gap-0.5">
                     {cells.map((on, i) => (
@@ -124,14 +127,9 @@ export function TicketCard({ ticket, index = 0, onChanged }: TicketCardProps) {
                   </div>
                 </div>
                 <p className="text-xs text-[#0E0D12]/70 font-mono">{ticket.qr_code}</p>
-                <p className="text-xs text-[#0E0D12]/50 mt-2">Tap to hide</p>
-              </motion.div>
-            ) : (
-              <div className="flex items-center justify-center gap-2">
-                <QrCode className="w-5 h-5 text-gel" />
-                <span className="text-sm font-medium text-foreground">Tap to show QR code</span>
+                <p className="text-xs text-[#0E0D12]/50 mt-2">Tap to flip back</p>
               </div>
-            )}
+            </motion.div>
           </div>
 
           {/* Actions */}
