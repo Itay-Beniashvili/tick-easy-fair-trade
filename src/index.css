@@ -48,6 +48,13 @@
 
     --radius: 1rem;
 
+    /* Motion tokens — one timing vocabulary for the whole app */
+    --motion-fast: 150ms;   /* hovers, presses */
+    --motion-base: 300ms;   /* reveals, toggles */
+    --motion-slow: 600ms;   /* page-level, showpiece */
+    --ease-swift: cubic-bezier(0.32, 0.72, 0, 1);     /* iOS-feel, primary */
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);   /* long decelerations */
+
     /* Category stage gels (music / sports / theater) */
     --music: 330 100% 62%;          /* #FF3D9A */
     --sports: 180 80% 49%;          /* #19E0E0 */
@@ -184,9 +191,9 @@
     background: radial-gradient(circle 10px at 10px 50%, hsl(var(--background)) 96%, transparent) left / 24px 100% repeat-x;
   }
 
-  .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
-  .animate-slide-up { animation: slideUp 0.4s ease-out forwards; }
-  .animate-scale-in { animation: scaleIn 0.3s ease-out forwards; }
+  .animate-fade-in { animation: fadeIn var(--motion-base) ease-out forwards; }
+  .animate-slide-up { animation: slideUp var(--motion-base) ease-out forwards; }
+  .animate-scale-in { animation: scaleIn var(--motion-base) ease-out forwards; }
   .animate-pulse-slow { animation: pulseSlow 2s ease-in-out infinite; }
   .animate-float { animation: float 3s ease-in-out infinite; }
   .animate-breathe { animation: breathe 6s ease-in-out infinite; }
