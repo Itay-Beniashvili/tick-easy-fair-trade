@@ -78,7 +78,7 @@ export default function Marketplace() {
               <RefreshCcw className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-white">Resale Marketplace</h1>
+              <h1 className="font-display font-extrabold text-3xl text-white">Second <span className="font-serif-accent font-normal">chances.</span></h1>
               <p className="text-white/80 text-sm">Verified second-hand tickets</p>
             </div>
           </div>

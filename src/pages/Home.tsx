@@ -152,7 +152,7 @@ export default function Home() {
                 Tonight · <span className="text-gel">{events.length} shows live</span>
               </p>
               <h1 className="font-display font-extrabold text-[clamp(2.6rem,4.5vw+1rem,5rem)] leading-[1.04] pb-1 mb-2">
-                The lights<br /><span className="text-muted-foreground">are going</span> down.
+                The lights<br /><span className="text-muted-foreground">are going</span> <span className="font-serif-accent font-normal">down.</span>
               </h1>
               <p className="hidden lg:block text-muted-foreground mt-4 max-w-md">
                 Discover live shows and buy or resell tickets at fair, capped prices — no scalping.

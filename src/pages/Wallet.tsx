@@ -34,7 +34,7 @@ export default function Wallet() {
           transition={{ duration: 0.5 }}
           className="max-w-lg lg:max-w-5xl mx-auto"
         >
-          <h1 className="font-display font-extrabold text-3xl text-white mb-1">My Tickets</h1>
+          <h1 className="font-display font-extrabold text-4xl text-white mb-1">My <span className="font-serif-accent font-normal">tickets.</span></h1>
           <p className="text-white/70 font-mono text-xs uppercase tracking-[0.14em]">
             {tickets.length} {tickets.length === 1 ? 'ticket' : 'tickets'} in your wallet
           </p>

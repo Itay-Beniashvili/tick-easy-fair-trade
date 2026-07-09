@@ -60,7 +60,7 @@ export default function Manager() {
             >
               <Sparkles className="w-8 h-8 text-warning" />
               <div>
-                <h1 className="font-display font-extrabold text-3xl text-white mb-1">Dashboard</h1>
+                <h1 className="font-display font-extrabold text-4xl text-white mb-1">The <span className="font-serif-accent font-normal">house.</span></h1>
                 <p className="text-white/80">Welcome back to your manager panel</p>
               </div>
             </motion.div>

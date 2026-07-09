@@ -58,7 +58,7 @@ export default function Community() {
             <Users className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="font-display font-extrabold text-3xl text-white">Community</h1>
+            <h1 className="font-display font-extrabold text-4xl text-white">Going <span className="font-serif-accent font-normal">together.</span></h1>
             <p className="text-white/80 text-sm">Find partners & rides for events</p>
           </div>
         </div>
