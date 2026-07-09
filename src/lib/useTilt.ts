@@ -9,7 +9,7 @@ import type { PointerEvent } from 'react';
  *  touch, and callers must skip wiring handlers/transforms when it is.
  *  The glare uses a softer spring than the tilt on purpose: the light lags
  *  the card (follow-through), which is what makes it feel physical. */
-export function useTilt(maxDeg = 6) {
+export function useTilt(maxDeg = 10) {
   const enabled = useMemo(
     () => typeof window !== 'undefined'
       && window.matchMedia('(hover: hover) and (pointer: fine)').matches,
@@ -24,7 +24,7 @@ export function useTilt(maxDeg = 6) {
 
   const glareX = useSpring(useTransform(px, [0, 1], [10, 90]), { stiffness: 120, damping: 20 });
   const glareY = useSpring(useTransform(py, [0, 1], [10, 90]), { stiffness: 120, damping: 20 });
-  const glare = useMotionTemplate`radial-gradient(240px circle at ${glareX}% ${glareY}%, hsl(var(--c) / 0.12), transparent 70%)`;
+  const glare = useMotionTemplate`radial-gradient(340px circle at ${glareX}% ${glareY}%, hsl(var(--c) / 0.22), transparent 70%)`;
 
   const onPointerMove = useCallback((e: PointerEvent<HTMLElement>) => {
     const r = e.currentTarget.getBoundingClientRect();

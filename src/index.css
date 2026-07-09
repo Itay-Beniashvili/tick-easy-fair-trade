@@ -102,7 +102,7 @@
     @apply bg-background text-foreground font-sans antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
     /* faint room vignette in the active gel */
-    background-image: radial-gradient(120% 55% at 50% -8%, hsl(var(--gel) / 0.07), transparent 60%);
+    background-image: radial-gradient(120% 55% at 50% -8%, hsl(var(--gel) / 0.12), transparent 60%);
   }
 
   /* Display headings carry the poster personality */
@@ -207,35 +207,51 @@
     height: 200vmax;
     margin-left: -100vmax;
     transform-origin: 50% 0%;
-    background: conic-gradient(from -8deg at 50% 0%,
+    background: conic-gradient(from -10deg at 50% 0%,
       transparent 0deg,
-      hsl(var(--gel) / 0.05) 7deg,
-      transparent 14deg,
-      transparent 52deg,
-      hsl(var(--gel) / 0.04) 60deg,
-      transparent 68deg);
+      hsl(var(--gel) / 0.16) 6deg,
+      hsl(var(--gel) / 0.06) 11deg,
+      transparent 16deg,
+      transparent 48deg,
+      hsl(var(--gel) / 0.12) 56deg,
+      hsl(var(--gel) / 0.05) 61deg,
+      transparent 66deg);
     animation: beamSweep 24s ease-in-out infinite alternate,
-               breathe 12s ease-in-out infinite;
+               beamBreathe 12s ease-in-out infinite;
     will-change: transform;
   }
   .ambient-beam--reverse { animation-direction: alternate-reverse, normal; }
+
+  /* Wandering follow-spot: a soft pool of gel light panning across the room */
+  .ambient-spot {
+    position: absolute;
+    top: -10vh;
+    left: 0;
+    width: 90vmax;
+    height: 90vmax;
+    border-radius: 9999px;
+    background: radial-gradient(closest-side, hsl(var(--gel) / 0.16), transparent 70%);
+    animation: spotWander 38s ease-in-out infinite alternate;
+    will-change: transform;
+  }
 
   .ambient-dust {
     position: absolute;
     left: 0; right: 0; top: 0;
     height: 200%;
     background-image:
-      radial-gradient(circle 2px at 20% 30%, hsl(var(--gel) / 0.5), transparent 60%),
-      radial-gradient(circle 1.5px at 70% 60%, hsl(var(--gel) / 0.4), transparent 60%),
-      radial-gradient(circle 2.5px at 45% 85%, hsl(0 0% 100% / 0.3), transparent 60%);
-    background-size: 480px 480px;
-    filter: blur(1px);
-    opacity: 0.06;
+      radial-gradient(circle 2.5px at 20% 30%, hsl(var(--gel) / 0.8), transparent 60%),
+      radial-gradient(circle 2px at 70% 60%, hsl(var(--gel) / 0.65), transparent 60%),
+      radial-gradient(circle 3px at 45% 85%, hsl(0 0% 100% / 0.5), transparent 60%),
+      radial-gradient(circle 1.5px at 88% 15%, hsl(0 0% 100% / 0.4), transparent 60%);
+    background-size: 440px 440px;
+    filter: blur(0.5px);
+    opacity: 0.16;
     animation: dustDrift 60s linear infinite;
     will-change: transform;
   }
-  .ambient-dust--md { background-size: 320px 320px; opacity: 0.05; }
-  .ambient-dust--sm { background-size: 220px 220px; opacity: 0.04; filter: blur(0.5px); }
+  .ambient-dust--md { background-size: 300px 300px; opacity: 0.12; }
+  .ambient-dust--sm { background-size: 200px 200px; opacity: 0.09; }
 
   /* Press depth for touch targets that are NOT framer-motion-driven
      (framer elements use whileTap — inline transforms would override this). */
@@ -256,8 +272,14 @@
 @keyframes breathe { 0%, 100% { opacity: 0.5; } 50% { opacity: 0.9; } }
 @keyframes shimmer { 100% { transform: translateX(100%); } }
 @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-@keyframes beamSweep { from { transform: rotate(-8deg); } to { transform: rotate(8deg); } }
+@keyframes beamSweep { from { transform: rotate(-10deg); } to { transform: rotate(10deg); } }
+@keyframes beamBreathe { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
 @keyframes dustDrift { from { transform: translateY(0); } to { transform: translateY(-50%); } }
+@keyframes spotWander {
+  0%   { transform: translate(-25%, -6%) scale(0.9); }
+  50%  { transform: translate(45vw, 4%) scale(1.15); }
+  100% { transform: translate(85vw, -2%) scale(0.95); }
+}
 
 /* Shared-element morph: event image (list) → detail hero */
 ::view-transition-group(event-hero) { animation-duration: 0.45s; }
