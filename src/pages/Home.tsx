@@ -122,7 +122,7 @@ export default function Home() {
   const gridEvents = visible;
 
   return (
-    <div className="min-h-screen bg-background pb-28 lg:pb-10 lg:pt-20">
+    <div className="min-h-screen pb-28 lg:pb-10 lg:pt-20">
       {/* Hero title band */}
       <header className="bg-gradient-hero px-5 pt-12 pb-5 lg:rounded-3xl lg:mt-2 lg:px-12 lg:pt-12 lg:pb-6">
         <div className="max-w-lg lg:max-w-7xl 2xl:max-w-[1600px] mx-auto">

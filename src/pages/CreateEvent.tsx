@@ -77,7 +77,7 @@ export default function CreateEvent() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen flex">
       <ManagerSidebar />
       
       <main className="flex-1 pb-20 lg:pb-0">

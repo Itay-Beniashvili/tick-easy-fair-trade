@@ -43,7 +43,7 @@ export default function Profile() {
   const artists = profile?.preferred_artists ?? [];
 
   return (
-    <div className="min-h-screen bg-background pb-24 lg:pb-10 lg:pt-16">
+    <div className="min-h-screen pb-24 lg:pb-10 lg:pt-16">
       {/* Header */}
       <div className="bg-gradient-hero pt-12 pb-20 px-4">
         <motion.div

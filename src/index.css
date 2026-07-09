@@ -197,6 +197,45 @@
   .animate-pulse-slow { animation: pulseSlow 2s ease-in-out infinite; }
   .animate-float { animation: float 3s ease-in-out infinite; }
   .animate-breathe { animation: breathe 6s ease-in-out infinite; }
+
+  /* ── StageAmbience: slow gel light beams + drifting dust (behind everything) ── */
+  .ambient-beam {
+    position: absolute;
+    left: 50%;
+    top: -20vh;
+    width: 200vmax;
+    height: 200vmax;
+    margin-left: -100vmax;
+    transform-origin: 50% 0%;
+    background: conic-gradient(from -8deg at 50% 0%,
+      transparent 0deg,
+      hsl(var(--gel) / 0.05) 7deg,
+      transparent 14deg,
+      transparent 52deg,
+      hsl(var(--gel) / 0.04) 60deg,
+      transparent 68deg);
+    animation: beamSweep 24s ease-in-out infinite alternate,
+               breathe 12s ease-in-out infinite;
+    will-change: transform;
+  }
+  .ambient-beam--reverse { animation-direction: alternate-reverse, normal; }
+
+  .ambient-dust {
+    position: absolute;
+    left: 0; right: 0; top: 0;
+    height: 200%;
+    background-image:
+      radial-gradient(circle 2px at 20% 30%, hsl(var(--gel) / 0.5), transparent 60%),
+      radial-gradient(circle 1.5px at 70% 60%, hsl(var(--gel) / 0.4), transparent 60%),
+      radial-gradient(circle 2.5px at 45% 85%, hsl(0 0% 100% / 0.3), transparent 60%);
+    background-size: 480px 480px;
+    filter: blur(1px);
+    opacity: 0.06;
+    animation: dustDrift 60s linear infinite;
+    will-change: transform;
+  }
+  .ambient-dust--md { background-size: 320px 320px; opacity: 0.05; }
+  .ambient-dust--sm { background-size: 220px 220px; opacity: 0.04; filter: blur(0.5px); }
 }
 
 @layer utilities {
@@ -212,6 +251,8 @@
 @keyframes breathe { 0%, 100% { opacity: 0.5; } 50% { opacity: 0.9; } }
 @keyframes shimmer { 100% { transform: translateX(100%); } }
 @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@keyframes beamSweep { from { transform: rotate(-8deg); } to { transform: rotate(8deg); } }
+@keyframes dustDrift { from { transform: translateY(0); } to { transform: translateY(-50%); } }
 
 /* Shared-element morph: event image (list) → detail hero */
 ::view-transition-group(event-hero) { animation-duration: 0.45s; }

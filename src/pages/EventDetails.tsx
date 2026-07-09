@@ -53,7 +53,7 @@ export default function EventDetails() {
   }, [id]);
 
   if (loading) return (
-    <div className="min-h-screen bg-background lg:pt-16">
+    <div className="min-h-screen lg:pt-16">
       <Skeleton className="h-80 lg:h-96 rounded-none" />
       <div className="relative -mt-24 px-4 lg:px-8 max-w-lg lg:max-w-6xl mx-auto lg:grid lg:grid-cols-[1.5fr_1fr] lg:gap-8">
         <div className="card-elevated p-6 space-y-4">
@@ -99,7 +99,7 @@ export default function EventDetails() {
   };
 
   return (
-    <div className="min-h-screen bg-background lg:pt-16">
+    <div className="min-h-screen lg:pt-16">
       <div className="relative h-80 lg:h-96">
         <img src={event.image ?? ''} alt={event.title} className="w-full h-full object-cover" style={{ viewTransitionName: 'event-hero' }} />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />

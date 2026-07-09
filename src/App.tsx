@@ -29,6 +29,7 @@ import Community from "./pages/Community";
 import { ManagerRoute } from "./components/ManagerRoute";
 import { CommandPalette } from "./components/CommandPalette";
 import { LightsUp } from "./components/LightsUp";
+import { StageAmbience } from "./components/StageAmbience";
 
 const queryClient = new QueryClient();
 
@@ -73,6 +74,7 @@ const App = () => (
       <MotionConfig reducedMotion="user">
       <AuthProvider>
         <AppProvider>
+          <StageAmbience />
           <Toaster />
           <Sonner />
           <LightsUp />
