@@ -78,6 +78,7 @@ export default function EventDetails() {
   if (!event) return <div className="min-h-screen flex items-center justify-center bg-background"><p className="text-muted-foreground">Event not found</p></div>;
 
   const formattedDate = format(new Date(event.event_date), 'EEEE, MMMM d, yyyy');
+  const titleWords = event.title.split(' ');
 
   const handlePurchase = async () => {
     setBusy(true);
@@ -121,7 +122,7 @@ export default function EventDetails() {
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="max-w-lg lg:max-w-6xl mx-auto lg:grid lg:grid-cols-[1.5fr_1fr] lg:gap-8 lg:items-start">
           <div className="card-elevated p-6 lg:p-8 mb-4 lg:mb-0">
             <h1 aria-label={event.title} className="font-display font-extrabold text-3xl lg:text-4xl text-foreground mb-5">
-              {event.title.split(' ').map((word, i) => (
+              {titleWords.map((word, i) => (
                 <motion.span
                   key={i}
                   className="inline-block whitespace-pre"
@@ -129,7 +130,7 @@ export default function EventDetails() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 + i * 0.05, duration: 0.5, ease: easeOutExpo }}
                 >
-                  {word}{i < event.title.split(' ').length - 1 ? ' ' : ''}
+                  {word}{i < titleWords.length - 1 ? ' ' : ''}
                 </motion.span>
               ))}
             </h1>

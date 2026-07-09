@@ -2,15 +2,17 @@ import type { CSSProperties } from 'react';
 
 export type Category = 'music' | 'sports' | 'theater';
 
+const DEFAULT_GEL = 'var(--music)';
+
 /** Each category is lit by its own stage gel. */
 export const gelFor: Record<Category, string> = {
-  music: 'var(--music)',
+  music: DEFAULT_GEL,
   sports: 'var(--sports)',
   theater: 'var(--theater)',
 };
 
 export function gelVar(genre: string): string {
-  return gelFor[genre as Category] ?? 'var(--music)';
+  return gelFor[genre as Category] ?? DEFAULT_GEL;
 }
 
 /** Expose the gel as --c for element-scoped styling (cards, chips). */
@@ -25,5 +27,5 @@ export function setGel(genre: string): void {
 
 /** Back to the brand default (magenta). */
 export function resetGel(): void {
-  document.documentElement.style.setProperty('--gel', 'var(--music)');
+  document.documentElement.style.setProperty('--gel', DEFAULT_GEL);
 }
