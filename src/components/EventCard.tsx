@@ -6,7 +6,7 @@ import { formatILS } from '@/lib/currency';
 import { navigateWithImageMorph } from '@/lib/viewTransition';
 import { cn } from '@/lib/utils';
 import type { EventRow } from '@/api/client';
-import type { CSSProperties } from 'react';
+import type { CSSProperties, KeyboardEvent as ReactKeyboardEvent } from 'react';
 
 interface EventCardProps {
   event: EventRow;
@@ -27,6 +27,10 @@ export function EventCard({ event, index = 0, compact = false }: EventCardProps)
   const imgRef = useRef<HTMLImageElement>(null);
   const shortDate = format(new Date(event.event_date), 'EEE, MMM d');
   const go = () => navigateWithImageMorph(navigate, `/event/${event.id}`, imgRef.current);
+  // Keyboard parity for the card acting as a button (Enter / Space activate).
+  const onKeyDown = (e: ReactKeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); }
+  };
 
   if (compact) {
     return (
@@ -35,8 +39,12 @@ export function EventCard({ event, index = 0, compact = false }: EventCardProps)
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: index * 0.05, duration: 0.3 }}
         onClick={go}
+        onKeyDown={onKeyDown}
+        role="button"
+        tabIndex={0}
+        aria-label={`View ${event.title}`}
         style={gelStyle(event.genre)}
-        className="group card-elevated overflow-hidden cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:ring-1 hover:ring-[hsl(var(--c)/0.35)] hover:shadow-[0_18px_38px_-18px_hsl(var(--c)/0.5)]"
+        className="group card-elevated overflow-hidden cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:ring-1 hover:ring-[hsl(var(--c)/0.35)] hover:shadow-[0_18px_38px_-18px_hsl(var(--c)/0.5)] focus-ring"
       >
         <div className="relative h-24 overflow-hidden">
           <img ref={imgRef} src={event.image ?? ''} alt={event.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
@@ -62,8 +70,12 @@ export function EventCard({ event, index = 0, compact = false }: EventCardProps)
       viewport={{ once: true, margin: '-40px' }}
       transition={{ delay: (index % 8) * 0.06, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
       onClick={go}
+      onKeyDown={onKeyDown}
+      role="button"
+      tabIndex={0}
+      aria-label={`View ${event.title}`}
       style={gelStyle(event.genre)}
-      className="group card-elevated overflow-hidden cursor-pointer transition-all duration-200 hover:-translate-y-1.5 hover:ring-1 hover:ring-[hsl(var(--c)/0.35)] hover:shadow-[0_22px_46px_-20px_hsl(var(--c)/0.55)]"
+      className="group card-elevated overflow-hidden cursor-pointer transition-all duration-200 hover:-translate-y-1.5 hover:ring-1 hover:ring-[hsl(var(--c)/0.35)] hover:shadow-[0_22px_46px_-20px_hsl(var(--c)/0.55)] focus-ring"
     >
       <div className="relative h-44 overflow-hidden">
         <img

@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { QrCode, MapPin, Calendar, Clock, Repeat } from 'lucide-react';
+import { QrCode, MapPin, Calendar, Clock, Repeat, XCircle } from 'lucide-react';
 import { format } from 'date-fns';
+import { toast } from 'sonner';
 import { ResaleModal } from './ResaleModal';
+import { unlistResale } from '@/api/resale';
 import { cn } from '@/lib/utils';
 import { formatILS } from '@/lib/currency';
 import type { TicketRow } from '@/api/client';
@@ -31,6 +33,20 @@ function qrPattern(seed: string): boolean[] {
 export function TicketCard({ ticket, index = 0, onChanged }: TicketCardProps) {
   const [showQR, setShowQR] = useState(false);
   const [showResaleModal, setShowResaleModal] = useState(false);
+  const [unlisting, setUnlisting] = useState(false);
+
+  const handleUnlist = async () => {
+    setUnlisting(true);
+    try {
+      await unlistResale(ticket.id);
+      toast.success('Listing removed', { description: 'Your ticket is no longer for sale.' });
+      onChanged?.();
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setUnlisting(false);
+    }
+  };
 
   const formattedDate = (() => {
     const d = new Date(ticket.event_date);
@@ -96,10 +112,13 @@ export function TicketCard({ ticket, index = 0, onChanged }: TicketCardProps) {
           </div>
 
           {/* QR Code Section — glows under the "scanner" light */}
-          <div
+          <button
+            type="button"
             onClick={() => setShowQR(!showQR)}
+            aria-expanded={showQR}
+            aria-label={showQR ? 'Hide QR code' : 'Show QR code'}
             className={cn(
-              "cursor-pointer transition-all duration-300 overflow-hidden rounded-2xl",
+              "w-full block cursor-pointer transition-all duration-300 overflow-hidden rounded-2xl focus-ring",
               showQR ? 'bg-white p-4 shadow-glow' : 'bg-muted p-3'
             )}
           >
@@ -132,16 +151,25 @@ export function TicketCard({ ticket, index = 0, onChanged }: TicketCardProps) {
                 <span className="text-sm font-medium text-foreground">Tap to show QR code</span>
               </div>
             )}
-          </div>
+          </button>
 
           {/* Actions */}
-          {!ticket.is_for_sale && (
+          {!ticket.is_for_sale ? (
             <button
               onClick={() => setShowResaleModal(true)}
-              className="w-full py-3 rounded-2xl border border-gel/40 text-gel font-semibold flex items-center justify-center gap-2 hover:bg-gel hover:text-primary-foreground transition-all"
+              className="w-full py-3 rounded-2xl border border-gel/40 text-gel font-semibold flex items-center justify-center gap-2 hover:bg-gel hover:text-primary-foreground transition-all focus-ring"
             >
               <Repeat className="w-5 h-5" />
               Resell Ticket
+            </button>
+          ) : (
+            <button
+              onClick={handleUnlist}
+              disabled={unlisting}
+              className="w-full py-3 rounded-2xl border border-destructive/40 text-destructive font-semibold flex items-center justify-center gap-2 hover:bg-destructive hover:text-destructive-foreground transition-all disabled:opacity-60 disabled:cursor-not-allowed focus-ring"
+            >
+              <XCircle className="w-5 h-5" />
+              {unlisting ? 'Removing…' : 'Remove listing'}
             </button>
           )}
         </div>

@@ -124,21 +124,39 @@
     box-shadow: var(--shadow-card);
   }
 
+  /* Shared visible focus ring for bespoke (non-shadcn) interactive controls —
+     category chips, tabs, nav links, icon buttons. Uses the magenta --ring token. */
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+  }
+
   .btn-primary-gradient {
-    @apply text-primary-foreground font-semibold rounded-2xl px-6 py-3 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98];
+    @apply text-primary-foreground font-semibold rounded-2xl px-6 py-3 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background;
     background: hsl(var(--gel));
     box-shadow: 0 10px 28px -10px hsl(var(--gel) / 0.7);
   }
 
   .btn-success-gradient {
     background: var(--gradient-success);
-    @apply text-success-foreground font-semibold rounded-2xl px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98];
+    @apply text-success-foreground font-semibold rounded-2xl px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background;
   }
 
   .btn-warm-gradient {
     background: var(--gradient-primary);
-    @apply text-white font-semibold rounded-2xl px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98];
+    @apply text-white font-semibold rounded-2xl px-6 py-3 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background;
   }
+
+  /* One shared page frame — kills width/padding jumps between screens. */
+  .page-container {
+    @apply max-w-7xl 2xl:max-w-[1600px] mx-auto px-5 lg:px-12;
+  }
+
+  /* Shared heading rhythm so every screen shares one type scale.
+     The hero tier reuses the Home clamp() so nothing shifts there. */
+  .text-hero { @apply font-display font-extrabold leading-[1.04]; font-size: clamp(2.6rem, 4.5vw + 1rem, 5rem); }
+  .text-display { @apply font-display font-extrabold text-3xl lg:text-4xl leading-tight; }
+  .text-title { @apply font-display font-bold text-2xl lg:text-3xl leading-tight; }
+  .text-subtitle { @apply font-display font-bold text-lg lg:text-xl; }
 
   .verified-badge {
     @apply inline-flex items-center gap-1 px-2.5 py-1 bg-success/15 text-success text-xs font-semibold rounded-full;

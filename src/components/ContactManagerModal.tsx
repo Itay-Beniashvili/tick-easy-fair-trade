@@ -90,7 +90,7 @@ export function ContactManagerModal({ isOpen, onClose, eventId, eventTitle, send
                 <CheckCircle className="w-8 h-8 text-success" />
               </div>
               <h3 className="text-lg font-bold text-foreground mb-2">Message Sent!</h3>
-              <p className="text-muted-foreground text-sm">The event manager will respond soon.</p>
+              <p className="text-muted-foreground text-sm">The event manager will see it in their inbox.</p>
             </motion.div>
           ) : (
             <>

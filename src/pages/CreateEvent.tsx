@@ -49,7 +49,9 @@ export default function CreateEvent() {
     setIsSubmitting(true);
 
     const totalTickets = Number(formData.availableTickets);
-    const price = Number(formData.price);
+    // Prices are whole shekels — currency is displayed with 0 fraction digits, so
+    // integer prices keep displayed values truthful (no rounded-away agorot).
+    const price = Math.trunc(Number(formData.price));
 
     try {
       await createEvent({
@@ -96,7 +98,7 @@ export default function CreateEvent() {
                 <ArrowLeft className="w-5 h-5" />
                 Back to Events
               </button>
-              <h1 className="text-2xl font-bold text-white">Create New Event</h1>
+              <h1 className="font-display text-2xl font-bold text-white">Create New Event</h1>
               <p className="text-white/80 mt-1">Fill in the details to create a new event</p>
             </motion.div>
           </div>
@@ -239,11 +241,11 @@ export default function CreateEvent() {
                   <label className="text-sm font-medium text-foreground mb-2 block">Ticket Price (₪)</label>
                   <Input
                     type="number"
-                    placeholder="0.00"
+                    placeholder="0"
                     value={formData.price}
                     onChange={(e) => handleChange('price', e.target.value)}
                     min="0"
-                    step="0.01"
+                    step="1"
                     required
                   />
                 </div>

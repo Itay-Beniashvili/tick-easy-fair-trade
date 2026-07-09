@@ -1,7 +1,7 @@
 import { supabase, unwrap, type GroupRow, type GroupParticipantRow } from './client';
 
 export async function createGroup(
-  eventId: string, totalTickets: number, pricePerTicket: number, expiresInSec: number, organizerName: string,
+  eventId: string, totalTickets: number, pricePerTicket: number, expiresInSec: number,
 ): Promise<GroupRow> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('not authenticated');
@@ -10,9 +10,10 @@ export async function createGroup(
     organizer_id: user.id, event_id: eventId, total_tickets: totalTickets,
     price_per_ticket: pricePerTicket, expires_at: expires, status: 'active',
   }).select().single());
-  await supabase.from('group_participants').insert({
-    group_id: group.id, user_id: user.id, name: organizerName, ticket_count: 1, has_paid: false,
-  });
+  // Organizer joins their own group as the first participant. Routed through the
+  // join_group RPC (direct participant inserts are blocked by RLS); its error is
+  // surfaced, not swallowed.
+  await joinGroup(group.id, 1);
   return group;
 }
 
@@ -25,21 +26,22 @@ export async function getGroup(id: string): Promise<{ group: GroupRow; participa
   return { group, participants };
 }
 
-export async function joinGroup(groupId: string, name: string): Promise<GroupParticipantRow> {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('not authenticated');
-  return unwrap(await supabase.from('group_participants').insert({
-    group_id: groupId, user_id: user.id, name, ticket_count: 1, has_paid: false,
-  }).select().single());
+/** Join a group via the join_group RPC, which enforces active/not-expired/capacity
+ *  server-side. Replaces the old direct .insert() into group_participants (now RLS-locked). */
+export async function joinGroup(groupId: string, ticketCount = 1): Promise<GroupParticipantRow> {
+  const { data, error } = await supabase.rpc('join_group', {
+    p_group_id: groupId, p_ticket_count: ticketCount,
+  });
+  if (error) throw new Error(error.message);
+  return data as unknown as GroupParticipantRow;
 }
 
-/** Simulated payment for the caller's own participant row, then attempt group completion. */
-export async function payParticipant(participantId: string, groupId: string): Promise<string> {
-  const { error } = await supabase.from('group_participants')
-    .update({ has_paid: true }).eq('id', participantId);
+/** Simulated payment for the caller's own participant row via the pay_participant RPC.
+ *  Sets has_paid server-side and completes the group when paid tickets ≥ total.
+ *  Returns the group's resulting status ('active' | 'completed'). */
+export async function payParticipant(groupId: string): Promise<string> {
+  const { data, error } = await supabase.rpc('pay_participant', { p_group_id: groupId });
   if (error) throw new Error(error.message);
-  const { data, error: rpcErr } = await supabase.rpc('complete_group_if_paid', { p_group_id: groupId });
-  if (rpcErr) throw new Error(rpcErr.message);
   return data as string;
 }
 

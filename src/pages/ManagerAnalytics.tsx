@@ -4,8 +4,8 @@ import { ManagerSidebar } from '@/components/ManagerSidebar';
 import { MobileManagerNav } from '@/components/MobileManagerNav';
 import { useAuth } from '@/context/AuthContext';
 import { listEventsByManager } from '@/api/events';
+import { getPrimarySalesByEvent } from '@/api/analytics';
 import type { EventRow } from '@/api/client';
-import { supabase } from '@/integrations/supabase/client';
 import { formatILS } from '@/lib/currency';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { useEffect, useState } from 'react';
@@ -45,31 +45,17 @@ export default function ManagerAnalytics() {
 
     (async () => {
       const events: EventRow[] = await listEventsByManager(user.id);
-      const eventIds = events.map((e) => e.id);
 
-      // Aggregate real sales (count + revenue) per event from transactions.
-      const revenueByEvent = new Map<string, number>();
-      const countByEvent = new Map<string, number>();
-
-      if (eventIds.length > 0) {
-        const { data: txns, error } = await supabase
-          .from('transactions')
-          .select('event_id, amount')
-          .in('event_id', eventIds);
-        if (error) throw new Error(error.message);
-        for (const t of txns ?? []) {
-          if (!t.event_id) continue;
-          revenueByEvent.set(t.event_id, (revenueByEvent.get(t.event_id) ?? 0) + Number(t.amount));
-          countByEvent.set(t.event_id, (countByEvent.get(t.event_id) ?? 0) + 1);
-        }
-      }
+      // Aggregate PRIMARY sales (count + revenue) per event — same source of truth
+      // as the dashboard, so the two screens always agree and resales are excluded.
+      const salesByEvent = await getPrimarySalesByEvent(events.map((e) => e.id));
 
       const computed: EventStats[] = events.map((e) => ({
         id: e.id,
         title: e.title,
         genre: e.genre,
-        ticketsSold: countByEvent.get(e.id) ?? 0,
-        revenue: revenueByEvent.get(e.id) ?? 0,
+        ticketsSold: salesByEvent.get(e.id)?.ticketsSold ?? 0,
+        revenue: salesByEvent.get(e.id)?.revenue ?? 0,
       }));
 
       if (active) setStats(computed);
@@ -125,7 +111,7 @@ export default function ManagerAnalytics() {
                 <BarChart3 className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-white mb-1">Analytics</h1>
+                <h1 className="font-display text-2xl font-bold text-white mb-1">Analytics</h1>
                 <p className="text-white/80">Stats and insights</p>
               </div>
             </motion.div>

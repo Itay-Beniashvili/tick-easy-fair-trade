@@ -31,16 +31,18 @@ function HeroMarquee({ events, onOpen }: { events: EventRow[]; onOpen: (id: stri
     return () => clearInterval(t);
   }, [events.length]);
 
-  useEffect(() => {
-    const ev = events[gelIdx % (events.length || 1)];
-    if (ev) document.documentElement.style.setProperty('--gel', gelFor[(ev.genre as Category)] ?? 'var(--music)');
-  }, [gelIdx, events]);
-
   if (!events.length) return null;
+  // The "house lights change" is scoped to THIS section's --gel so the rest of the
+  // app chrome (nav, rails, title) stays restful instead of strobing app-wide.
+  const activeGenre = events[gelIdx % events.length]?.genre as Category;
+  const activeGel = gelFor[activeGenre] ?? 'var(--music)';
   const loop = [...events, ...events]; // duplicated for a seamless belt
 
   return (
-    <div className="relative overflow-hidden py-3 lg:py-5">
+    <div
+      className="relative overflow-hidden py-3 lg:py-5 transition-colors duration-700"
+      style={{ ['--gel' as string]: activeGel }}
+    >
       {/* breathing stage spotlight behind the belt */}
       <div
         className="pointer-events-none absolute left-1/2 -translate-x-1/2 -top-28 w-[760px] h-[520px] rounded-full blur-3xl animate-breathe"
@@ -52,7 +54,7 @@ function HeroMarquee({ events, onOpen }: { events: EventRow[]; onOpen: (id: stri
             key={`${ev.id}-${i}`}
             onClick={() => onOpen(ev.id)}
             style={{ ['--c' as string]: gelFor[(ev.genre as Category)] ?? 'var(--music)' }}
-            className="group relative flex-none w-[250px] lg:w-[300px] h-[330px] lg:h-[380px] rounded-3xl overflow-hidden cursor-pointer card-elevated transition-transform duration-300 hover:scale-[1.03] hover:ring-1 hover:ring-[hsl(var(--c)/0.5)]"
+            className="group relative flex-none w-[250px] lg:w-[300px] h-[330px] lg:h-[380px] rounded-3xl overflow-hidden cursor-pointer card-elevated transition-transform duration-300 hover:scale-[1.03] hover:ring-1 hover:ring-[hsl(var(--c)/0.5)] focus-ring"
           >
             <img src={ev.image ?? ''} alt={ev.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
             <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, hsl(var(--c)/0.5) 0%, transparent 38%), linear-gradient(0deg, hsl(var(--card)) 3%, transparent 62%)' }} />
@@ -139,11 +141,11 @@ export default function Home() {
                 <button
                   onClick={() => setShowSearch((s) => !s)}
                   aria-label="Search"
-                  className="w-9 h-9 grid place-items-center rounded-full bg-card border border-white/[0.06] text-foreground"
+                  className="w-11 h-11 grid place-items-center rounded-full bg-card border border-white/[0.06] text-foreground focus-ring"
                 >
                   <Search className="w-[18px] h-[18px]" />
                 </button>
-                <Link to="/profile" className="w-9 h-9 rounded-full grid place-items-center font-bold text-sm text-primary-foreground bg-gradient-to-br from-gel to-accent">
+                <Link to="/profile" aria-label="Your profile" className="w-11 h-11 rounded-full grid place-items-center font-bold text-sm text-primary-foreground bg-gradient-to-br from-gel to-accent focus-ring">
                   Me
                 </Link>
               </div>
@@ -153,7 +155,7 @@ export default function Home() {
               <p className="font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground mb-2">
                 Tonight · <span className="text-gel">{events.length} shows live</span>
               </p>
-              <h1 className="font-display font-extrabold text-[clamp(2.6rem,4.5vw+1rem,5rem)] leading-[1.04] pb-1 mb-2">
+              <h1 className="text-hero pb-1 mb-2">
                 The lights<br /><span className="text-muted-foreground">are going</span> down.
               </h1>
               <p className="hidden lg:block text-muted-foreground mt-4 max-w-md">
@@ -183,7 +185,7 @@ export default function Home() {
               key={c}
               onClick={() => setCategory(c)}
               style={{ ['--c' as string]: gelFor[c] }}
-              className="relative flex-none px-4 py-2 rounded-full text-sm font-semibold capitalize bg-card border border-white/[0.06]"
+              className="relative flex-none min-h-[44px] px-5 py-2 rounded-full text-sm font-semibold capitalize bg-card border border-white/[0.06] focus-ring"
             >
               {category === c && (
                 <motion.span

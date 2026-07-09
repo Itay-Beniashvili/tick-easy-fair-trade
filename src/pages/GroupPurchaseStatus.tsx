@@ -7,7 +7,6 @@ import { GroupPurchasePayment } from '@/components/GroupPurchasePayment';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { getGroup, joinGroup, cancelExpired } from '@/api/groups';
-import { getProfile } from '@/api/profile';
 import { useAuth } from '@/context/AuthContext';
 import { formatILS } from '@/lib/currency';
 import { toast } from 'sonner';
@@ -114,9 +113,8 @@ export default function GroupPurchaseStatus() {
     if (!id) return;
     setJoining(true);
     try {
-      const profile = await getProfile();
-      const name = profile?.full_name ?? user?.email ?? 'Guest';
-      await joinGroup(id, name);
+      // Server-enforced via join_group RPC (active/not-expired/capacity checks).
+      await joinGroup(id, 1);
       toast.success('You joined the group');
       await load();
     } catch (err) {
@@ -472,7 +470,6 @@ export default function GroupPurchaseStatus() {
         <GroupPurchasePayment
           isOpen={showPayment}
           onClose={() => setShowPayment(false)}
-          participantId={currentParticipant.id}
           groupId={group.id}
           amount={myAmount}
           onPaid={load}

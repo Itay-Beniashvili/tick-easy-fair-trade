@@ -5,6 +5,7 @@ import { ManagerSidebar } from '@/components/ManagerSidebar';
 import { MobileManagerNav } from '@/components/MobileManagerNav';
 import { useAuth } from '@/context/AuthContext';
 import { listEventsByManager } from '@/api/events';
+import { getPrimarySalesByEvent, type EventSales } from '@/api/analytics';
 import type { EventRow } from '@/api/client';
 import { formatILS } from '@/lib/currency';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -13,6 +14,7 @@ import { CountUp } from '@/components/CountUp';
 export default function Manager() {
   const { user } = useAuth();
   const [events, setEvents] = useState<EventRow[]>([]);
+  const [sales, setSales] = useState<Map<string, EventSales>>(new Map());
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,15 +22,21 @@ export default function Manager() {
     let active = true;
     setLoading(true);
     listEventsByManager(user.id)
-      .then((rows) => { if (active) setEvents(rows); })
-      .catch(() => { if (active) setEvents([]); })
+      .then(async (rows) => {
+        if (!active) return;
+        setEvents(rows);
+        setSales(await getPrimarySalesByEvent(rows.map((e) => e.id)));
+      })
+      .catch(() => { if (active) { setEvents([]); setSales(new Map()); } })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, [user]);
 
   const totalEvents = events.length;
-  const ticketsSold = events.reduce((sum, e) => sum + (e.total_tickets - e.available_tickets), 0);
-  const totalRevenue = events.reduce((sum, e) => sum + (e.total_tickets - e.available_tickets) * e.price, 0);
+  // Revenue and tickets sold come from PRIMARY transactions (single source of truth),
+  // so resales don't inflate manager revenue or double-count seats.
+  const ticketsSold = events.reduce((sum, e) => sum + (sales.get(e.id)?.ticketsSold ?? 0), 0);
+  const totalRevenue = events.reduce((sum, e) => sum + (sales.get(e.id)?.revenue ?? 0), 0);
   const availableTickets = events.reduce((sum, e) => sum + e.available_tickets, 0);
 
   const stats = [
@@ -38,10 +46,10 @@ export default function Manager() {
     { label: 'Tickets Available', num: availableTickets, icon: Repeat, gradient: 'from-warning to-amber-400' },
   ];
 
-  // Per-event sales derived from real data for the overview chart.
+  // Per-event sales derived from PRIMARY transactions for the overview chart.
   const chartData = events.map((e) => ({
     title: e.title.length > 16 ? `${e.title.slice(0, 16)}…` : e.title,
-    sales: e.total_tickets - e.available_tickets,
+    sales: sales.get(e.id)?.ticketsSold ?? 0,
   }));
 
   return (

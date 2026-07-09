@@ -18,7 +18,7 @@ import { Skeleton } from '@/components/Skeletons';
 import type { EventRow } from '@/api/client';
 
 interface Listing {
-  id: string; event_id: string; seat_info: string | null; sale_price: number;
+  id: string; event_id: string; seat_info: string | null; sale_price: number; is_mine: boolean;
 }
 
 export default function EventDetails() {
@@ -32,7 +32,9 @@ export default function EventDetails() {
   const [showContactManager, setShowContactManager] = useState(false);
   const [busy, setBusy] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [name, setName] = useState('You');
+  const [groupSize, setGroupSize] = useState(2);
+  // Buyer/sender label: real full name, else the user's email (never a UI pronoun).
+  const [name, setName] = useState(user?.email ?? '');
 
   useEffect(() => {
     (async () => {
@@ -41,7 +43,8 @@ export default function EventDetails() {
         const ev = await getEvent(id);
         setEvent(ev);
         const all = (await listForSaleMarketplace()) as Listing[];
-        setResale((all ?? []).filter((t) => t.event_id === id));
+        // Only this event's listings, and never the caller's own tickets.
+        setResale((all ?? []).filter((t) => t.event_id === id && !t.is_mine));
         const p = await getProfile();
         if (p?.full_name) setName(p.full_name);
       } catch (e) {
@@ -69,6 +72,10 @@ export default function EventDetails() {
   if (!event) return <div className="min-h-screen flex items-center justify-center bg-background"><p className="text-muted-foreground">Event not found</p></div>;
 
   const formattedDate = format(new Date(event.event_date), 'EEEE, MMMM d, yyyy');
+  const eventPassed = new Date(`${event.event_date}T23:59:59`).getTime() < Date.now();
+  const soldOut = event.available_tickets <= 0;
+  const purchasable = !eventPassed && !soldOut;
+  const buyLabel = eventPassed ? 'Event Ended' : soldOut ? 'Sold Out' : '🎟️ Buy Ticket';
 
   const handlePurchase = async () => {
     setBusy(true);
@@ -92,7 +99,7 @@ export default function EventDetails() {
   const handleCreateGroup = async () => {
     setBusy(true);
     try {
-      const group = await createGroup(event.id, 4, event.price, 600, name);
+      const group = await createGroup(event.id, groupSize, event.price, 600);
       toast.success('Group created — share the link to invite friends!');
       navigate(`/group-purchase/${group.id}`);
     } catch (e) { toast.error((e as Error).message); } finally { setBusy(false); }
@@ -103,7 +110,7 @@ export default function EventDetails() {
       <div className="relative h-80 lg:h-96">
         <img src={event.image ?? ''} alt={event.title} className="w-full h-full object-cover" style={{ viewTransitionName: 'event-hero' }} />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-        <button onClick={() => navigate(-1)} className="absolute top-12 lg:top-20 left-4 lg:left-8 w-10 h-10 rounded-full glass-effect flex items-center justify-center hover:bg-popover transition-colors">
+        <button onClick={() => navigate(-1)} aria-label="Go back" className="absolute top-12 lg:top-20 left-4 lg:left-8 w-11 h-11 rounded-full glass-effect flex items-center justify-center hover:bg-popover transition-colors focus-ring">
           <ArrowLeft className="w-5 h-5 text-foreground" />
         </button>
       </div>
@@ -111,7 +118,7 @@ export default function EventDetails() {
       <div className="relative -mt-24 px-4 lg:px-8 pb-32 lg:pb-16">
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="max-w-lg lg:max-w-6xl mx-auto lg:grid lg:grid-cols-[1.5fr_1fr] lg:gap-8 lg:items-start">
           <div className="card-elevated p-6 lg:p-8 mb-4 lg:mb-0">
-            <h1 className="font-display font-extrabold text-3xl lg:text-4xl text-foreground mb-5">{event.title}</h1>
+            <h1 className="text-display text-foreground mb-5">{event.title}</h1>
             <div className="space-y-3">
               <div className="flex items-center gap-3 text-muted-foreground"><MapPin className="w-5 h-5 text-primary" /><span>{event.venue}, {event.city}</span></div>
               <div className="flex items-center gap-3 text-muted-foreground"><Calendar className="w-5 h-5 text-accent" /><span>{formattedDate}</span></div>
@@ -126,7 +133,7 @@ export default function EventDetails() {
               <button
                 key={tab}
                 onClick={() => setSelectedTab(tab)}
-                className="relative flex-1 py-3 rounded-2xl font-semibold bg-muted"
+                className="relative flex-1 py-3 rounded-2xl font-semibold bg-muted focus-ring"
               >
                 {selectedTab === tab && (
                   <motion.span
@@ -154,11 +161,28 @@ export default function EventDetails() {
                 </div>
                 <div className="text-sm text-muted-foreground bg-muted px-3 py-1.5 rounded-full inline-block">{event.available_tickets} tickets available</div>
               </div>
-              <button onClick={handlePurchase} disabled={busy} className="w-full btn-primary-gradient py-4 text-lg disabled:opacity-60">🎟️ Buy Ticket</button>
-              <button onClick={handleCreateGroup} disabled={busy} className="w-full py-4 rounded-2xl border-2 border-primary text-primary font-semibold flex items-center justify-center gap-2 hover:bg-primary hover:text-white transition-all disabled:opacity-60">
+              <button onClick={handlePurchase} disabled={busy || !purchasable} className="w-full btn-primary-gradient py-4 text-lg disabled:opacity-60 disabled:cursor-not-allowed">{buyLabel}</button>
+              {purchasable && (
+                <div className="card-elevated p-4 flex items-center justify-between">
+                  <label htmlFor="group-size" className="text-sm font-medium text-foreground flex items-center gap-2">
+                    <Users className="w-4 h-4 text-primary" /> Group size
+                  </label>
+                  <input
+                    id="group-size"
+                    type="number"
+                    min={2}
+                    max={Math.max(2, event.available_tickets)}
+                    step={1}
+                    value={groupSize}
+                    onChange={(e) => setGroupSize(Math.max(2, Math.floor(Number(e.target.value) || 2)))}
+                    className="w-20 py-2 px-3 rounded-xl border border-border bg-card text-center font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
+              )}
+              <button onClick={handleCreateGroup} disabled={busy || !purchasable} className="w-full py-4 rounded-2xl border-2 border-primary text-primary font-semibold flex items-center justify-center gap-2 hover:bg-primary hover:text-primary-foreground transition-all disabled:opacity-60 disabled:cursor-not-allowed focus-ring">
                 <Users className="w-5 h-5" /> Start Group Purchase
               </button>
-              <button onClick={() => setShowContactManager(true)} className="w-full py-3 rounded-2xl bg-muted text-foreground font-medium flex items-center justify-center gap-2 hover:bg-muted/80 transition-all">
+              <button onClick={() => setShowContactManager(true)} className="w-full py-3 rounded-2xl bg-muted text-foreground font-medium flex items-center justify-center gap-2 hover:bg-muted/80 transition-all focus-ring">
                 <MessageCircle className="w-5 h-5" /> Contact Event Manager
               </button>
             </motion.div>

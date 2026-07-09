@@ -9,7 +9,6 @@ import { toast } from 'sonner';
 interface GroupPurchasePaymentProps {
   isOpen: boolean;
   onClose: () => void;
-  participantId: string;
   groupId: string;
   amount: number;
   onPaid: () => void;
@@ -18,7 +17,6 @@ interface GroupPurchasePaymentProps {
 export function GroupPurchasePayment({
   isOpen,
   onClose,
-  participantId,
   groupId,
   amount,
   onPaid,
@@ -36,8 +34,8 @@ export function GroupPurchasePayment({
   const handlePayment = async () => {
     setIsPaying(true);
     try {
-      // Simulated payment: changes real DB state (no real money).
-      await payParticipant(participantId, groupId);
+      // Simulated payment: changes real DB state (no real money) via the pay_participant RPC.
+      await payParticipant(groupId);
       setPaid(true);
       toast.success('Payment confirmed — your tickets are secured');
       onPaid();

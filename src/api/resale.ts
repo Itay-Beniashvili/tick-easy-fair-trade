@@ -16,9 +16,28 @@ export async function unlistResale(ticketId: string): Promise<void> {
   if (error) throw new Error(error.message);
 }
 
+/** A single resale listing returned by get_tickets_for_sale. `is_mine` is true when
+ *  the listing belongs to the calling user (so the UI can hide their own tickets).
+ *  The raw seller user_id is never exposed. */
+export interface ResaleListing {
+  id: string;
+  event_id: string;
+  event_title: string;
+  event_venue: string;
+  event_city: string;
+  event_date: string;
+  event_time: string;
+  event_image: string | null;
+  ticket_type: string;
+  seat_info: string | null;
+  sale_price: number;
+  created_at: string;
+  is_mine: boolean;
+}
+
 /** Public marketplace listings (SECURITY DEFINER view of tickets for sale). */
-export async function listForSaleMarketplace() {
-  return unwrap(await supabase.rpc('get_tickets_for_sale'));
+export async function listForSaleMarketplace(): Promise<ResaleListing[]> {
+  return unwrap(await supabase.rpc('get_tickets_for_sale')) as unknown as ResaleListing[];
 }
 
 /** Buy a resale ticket. Ownership transfer + new barcode happen atomically server-side,

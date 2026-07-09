@@ -44,7 +44,7 @@
          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm mb-4">
            <Ticket className="w-8 h-8 text-white" />
          </div>
-         <h1 className="text-3xl font-bold text-white mb-1">Welcome Back!</h1>
+         <h1 className="font-display text-3xl font-bold text-white mb-1">Welcome Back!</h1>
          <p className="text-white/70">Sign in to your account</p>
        </motion.div>
  
@@ -79,7 +79,9 @@
              <button
                type="button"
                onClick={() => setShowPassword(!showPassword)}
-               className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+               aria-label={showPassword ? 'Hide password' : 'Show password'}
+               aria-pressed={showPassword}
+               className="absolute right-1.5 top-1/2 -translate-y-1/2 w-9 h-9 grid place-items-center rounded-lg text-muted-foreground hover:text-foreground focus-ring"
              >
                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
              </button>

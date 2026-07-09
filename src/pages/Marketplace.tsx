@@ -24,6 +24,7 @@ interface Listing {
   seat_info: string | null;
   sale_price: number;
   created_at: string;
+  is_mine: boolean;
 }
 
 export default function Marketplace() {
@@ -32,7 +33,8 @@ export default function Marketplace() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [buyingId, setBuyingId] = useState<string | null>(null);
-  const [buyerName, setBuyerName] = useState('You');
+  // Real buyer label: full name, else the user's email (never a UI pronoun).
+  const [buyerName, setBuyerName] = useState(user?.email ?? '');
 
   const load = async () => {
     setLoading(true);
@@ -64,22 +66,22 @@ export default function Marketplace() {
   };
 
   // Hide the current user's own listings (they can't buy their own ticket).
-  const visible = listings;
+  const visible = listings.filter((l) => !l.is_mine);
 
   return (
     <div className="min-h-screen bg-background pb-24 lg:pb-10 lg:pt-16">
       <div className="bg-gradient-success pt-12 pb-6 px-4">
         <div className="max-w-lg lg:max-w-6xl mx-auto">
-          <button onClick={() => navigate(-1)} className="mb-4 flex items-center gap-2 text-white/80 hover:text-white transition-colors">
+          <button onClick={() => navigate(-1)} className="mb-4 flex items-center gap-2 rounded-lg text-success-foreground/80 hover:text-success-foreground transition-colors focus-ring">
             <ArrowLeft className="w-5 h-5" /> <span>Back</span>
           </button>
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center">
-              <RefreshCcw className="w-6 h-6 text-white" />
+            <div className="w-12 h-12 rounded-2xl bg-success-foreground/15 flex items-center justify-center">
+              <RefreshCcw className="w-6 h-6 text-success-foreground" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-white">Resale Marketplace</h1>
-              <p className="text-white/80 text-sm">Verified second-hand tickets</p>
+              <h1 className="font-display text-2xl font-bold text-success-foreground">Resale Marketplace</h1>
+              <p className="text-success-foreground/80 text-sm">Verified second-hand tickets</p>
             </div>
           </div>
         </div>
@@ -98,8 +100,12 @@ export default function Marketplace() {
             {Array.from({ length: 6 }).map((_, i) => <EventCardSkeleton key={i} />)}
           </div>
         ) : visible.length === 0 ? (
-          <div className="card-elevated p-8 text-center">
-            <p className="text-muted-foreground">No resale tickets available right now</p>
+          <div className="text-center py-16">
+            <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-success/20 to-teal-500/20 mx-auto mb-4 flex items-center justify-center">
+              <RefreshCcw className="w-12 h-12 text-success" />
+            </div>
+            <h2 className="text-lg font-semibold text-foreground mb-2">No resale tickets yet</h2>
+            <p className="text-muted-foreground">Verified second-hand tickets will appear here</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -131,7 +137,7 @@ export default function Marketplace() {
                   <button
                     onClick={() => handleBuy(listing)}
                     disabled={buyingId === listing.id}
-                    className="px-4 py-1.5 bg-success text-white text-sm font-semibold rounded-lg hover:bg-success/90 transition-colors disabled:opacity-50"
+                    className="px-4 py-1.5 bg-success text-success-foreground text-sm font-semibold rounded-lg hover:bg-success/90 transition-colors disabled:opacity-50 focus-ring"
                   >
                     {buyingId === listing.id ? 'Buying…' : 'Buy'}
                   </button>

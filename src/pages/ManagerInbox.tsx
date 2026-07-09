@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Inbox, Reply, Check, AlertCircle, HelpCircle, RotateCcw, MessageSquare, Filter } from 'lucide-react';
+import { Inbox, Check, AlertCircle, HelpCircle, RotateCcw, MessageSquare, Filter } from 'lucide-react';
 import { ManagerSidebar } from '@/components/ManagerSidebar';
 import { MobileManagerNav } from '@/components/MobileManagerNav';
 import { listInquiriesForManager, resolveInquiry } from '@/api/inquiries';
@@ -61,15 +61,15 @@ export default function ManagerInbox() {
   const eventTitles = new Map(events.map((e) => [e.id, e.title]));
   const getEventTitle = (eventId: string) => eventTitles.get(eventId) || 'Unknown Event';
 
-  const handleReply = async (id: string) => {
+  const handleResolve = async (id: string) => {
     try {
       await resolveInquiry(id);
       setInquiries((prev) =>
         prev.map((inq) => (inq.id === id ? { ...inq, status: 'resolved' } : inq))
       );
-      toast.success('Reply sent successfully');
+      toast.success('Inquiry marked as resolved');
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to send reply');
+      toast.error(err instanceof Error ? err.message : 'Failed to update inquiry');
     }
   };
 
@@ -98,7 +98,7 @@ export default function ManagerInbox() {
                   <Inbox className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold text-white mb-1">Inbox</h1>
+                  <h1 className="font-display text-2xl font-bold text-white mb-1">Inbox</h1>
                   <p className="text-white/80">{pendingCount} pending inquiries</p>
                 </div>
               </div>
@@ -201,11 +201,11 @@ export default function ManagerInbox() {
 
                     {inquiry.status === 'pending' && (
                       <button
-                        onClick={() => handleReply(inquiry.id)}
+                        onClick={() => handleResolve(inquiry.id)}
                         className="flex items-center gap-2 px-4 py-2 btn-primary-gradient text-sm"
                       >
-                        <Reply className="w-4 h-4" />
-                        Send Reply
+                        <Check className="w-4 h-4" />
+                        Mark resolved
                       </button>
                     )}
 
