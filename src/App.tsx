@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { motion, MotionConfig } from "framer-motion";
 import { AppProvider } from "./context/AppContext";
 import { AuthProvider } from "./context/AuthContext";
-import { RoleSelection } from "./components/RoleSelection";
+import Landing from "./pages/Landing";
 import { UserOnboarding } from "./components/UserOnboarding";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import Home from "./pages/Home";
@@ -44,7 +44,7 @@ function AnimatedRoutes() {
       transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
     >
       <Routes location={location}>
-              <Route path="/" element={<RoleSelection />} />
+              <Route path="/" element={<Landing />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/manager/login" element={<ManagerLogin />} />
