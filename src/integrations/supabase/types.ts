@@ -284,6 +284,54 @@ export type Database = {
         }
         Relationships: []
       }
+      seats: {
+        Row: {
+          id: string
+          row_label: string
+          seat_number: number
+          section_id: string
+          status: string
+          ticket_id: string | null
+          x: number | null
+          y: number | null
+        }
+        Insert: {
+          id?: string
+          row_label: string
+          seat_number: number
+          section_id: string
+          status?: string
+          ticket_id?: string | null
+          x?: number | null
+          y?: number | null
+        }
+        Update: {
+          id?: string
+          row_label?: string
+          seat_number?: number
+          section_id?: string
+          status?: string
+          ticket_id?: string | null
+          x?: number | null
+          y?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seats_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "venue_sections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seats_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tickets: {
         Row: {
           created_at: string
@@ -398,6 +446,59 @@ export type Database = {
         }
         Relationships: []
       }
+      venue_sections: {
+        Row: {
+          capacity: number
+          color: string
+          event_id: string
+          geometry: Json
+          id: string
+          kind: string
+          label: string
+          price: number
+          rows_count: number | null
+          seats_per_row: number | null
+          sold: number
+          sort: number
+        }
+        Insert: {
+          capacity: number
+          color?: string
+          event_id: string
+          geometry: Json
+          id?: string
+          kind?: string
+          label: string
+          price: number
+          rows_count?: number | null
+          seats_per_row?: number | null
+          sold?: number
+          sort?: number
+        }
+        Update: {
+          capacity?: number
+          color?: string
+          event_id?: string
+          geometry?: Json
+          id?: string
+          kind?: string
+          label?: string
+          price?: number
+          rows_count?: number | null
+          seats_per_row?: number | null
+          sold?: number
+          sort?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "venue_sections_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -405,6 +506,10 @@ export type Database = {
     Functions: {
       cancel_expired_groups: { Args: never; Returns: number }
       complete_group_if_paid: { Args: { p_group_id: string }; Returns: string }
+      create_event_sections: {
+        Args: { p_event_id: string; p_sections: Json }
+        Returns: number
+      }
       get_tickets_for_sale: {
         Args: never
         Returns: {
@@ -462,6 +567,35 @@ export type Database = {
           to: "tickets"
           isOneToOne: true
           isSetofReturn: false
+        }
+      }
+      purchase_section_seats: {
+        Args: { p_event_id: string; p_quantity: number; p_section_id: string }
+        Returns: {
+          created_at: string
+          event_city: string
+          event_date: string
+          event_id: string
+          event_image: string | null
+          event_time: string
+          event_title: string
+          event_venue: string
+          id: string
+          is_for_sale: boolean | null
+          price: number
+          purchase_date: string
+          qr_code: string | null
+          sale_price: number | null
+          seat_info: string | null
+          ticket_type: string
+          updated_at: string
+          user_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "tickets"
+          isOneToOne: false
+          isSetofReturn: true
         }
       }
       purchase_ticket: {
