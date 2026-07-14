@@ -14,6 +14,11 @@ interface SectionPickerProps {
   /** Performs the purchase (and the success overlay / navigate / refetch that follow it)
    *  in the parent — this component only owns sheet UI state and rethrows/toasts errors. */
   onPurchase: (sectionId: string, quantity: number) => Promise<void>;
+  /** Event-level purchase gate (e.g. the event has already passed). When true, every
+   *  section renders inert regardless of its own availability. */
+  disabled?: boolean;
+  /** Shown in the banner (and section labels) when `disabled` is true. */
+  disabledLabel?: string;
 }
 
 interface SectionView {
@@ -26,7 +31,7 @@ interface SectionView {
 /** Venue silhouette + zone sheet — the buyer-facing seat picker for events with
  *  sections. The map is orientation; the legend rows underneath are equally valid
  *  tap targets (and the real selection surface on small screens). */
-export function SectionPicker({ sections, busy, onPurchase }: SectionPickerProps) {
+export function SectionPicker({ sections, busy, onPurchase, disabled = false, disabledLabel = 'Unavailable' }: SectionPickerProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null); // hover OR keyboard focus
   const [quantity, setQuantity] = useState(1);
@@ -48,7 +53,7 @@ export function SectionPicker({ sections, busy, onPurchase }: SectionPickerProps
   const maxQty = selected ? Math.min(6, selected.remaining) : 1;
 
   const openSection = (sectionId: string, initialQuantity = 1) => {
-    if (busy) return;
+    if (busy || disabled) return;
     const view = views.find((v) => v.section.id === sectionId);
     if (!view || view.soldOut) return;
     setSelectedId(sectionId);
@@ -75,17 +80,26 @@ export function SectionPicker({ sections, busy, onPurchase }: SectionPickerProps
 
   return (
     <div className="space-y-4">
-      <button
-        type="button"
-        onClick={() => bestAvailable && openSection(bestAvailable.id, 1)}
-        disabled={!bestAvailable || busy}
-        className="w-full py-3.5 rounded-2xl border-2 border-primary text-primary font-semibold flex items-center justify-center gap-2 hover:bg-primary hover:text-primary-foreground transition-all disabled:opacity-50 disabled:cursor-not-allowed focus-ring"
-      >
-        <Sparkles className="w-4 h-4" />
-        {bestAvailable ? `Best available · ${formatILS(bestAvailable.price)}` : 'Sold out'}
-      </button>
+      {disabled ? (
+        <div
+          role="status"
+          className="w-full py-3.5 rounded-2xl border border-border bg-muted/50 text-center text-sm font-medium text-muted-foreground"
+        >
+          {disabledLabel}
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => bestAvailable && openSection(bestAvailable.id, 1)}
+          disabled={!bestAvailable || busy}
+          className="w-full py-3.5 rounded-2xl border-2 border-primary text-primary font-semibold flex items-center justify-center gap-2 hover:bg-primary hover:text-primary-foreground transition-all disabled:opacity-50 disabled:cursor-not-allowed focus-ring"
+        >
+          <Sparkles className="w-4 h-4" />
+          {bestAvailable ? `Best available · ${formatILS(bestAvailable.price)}` : 'Sold out'}
+        </button>
+      )}
 
-      <svg viewBox="0 0 100 100" className="w-full h-auto rounded-2xl bg-muted/40" aria-hidden="true">
+      <svg viewBox="0 0 100 100" className="w-full h-auto rounded-2xl bg-muted/40" role="group" aria-label="Venue map">
         {/* Decorative stage marker — orients the map, not a section. */}
         <g aria-hidden="true">
           <rect x={32} y={2} width={36} height={7} rx={2} className="fill-foreground/15" />
@@ -97,36 +111,39 @@ export function SectionPicker({ sections, busy, onPurchase }: SectionPickerProps
         {views.map(({ section, points, remaining: left, soldOut }) => {
           const isSelected = selectedId === section.id;
           const isActive = activeId === section.id;
+          const inert = disabled || soldOut;
           const fillAlpha = isSelected ? 0.45 : isActive ? 0.35 : 0.25;
           const strokeAlpha = isSelected ? 0.85 : 0.6;
           const strokeWidth = isSelected ? 2 : isActive ? 1.4 : 1;
-          const fill = soldOut ? 'hsl(258 9% 45% / 0.12)' : `hsl(${section.color} / ${fillAlpha})`;
-          const stroke = soldOut ? 'hsl(258 9% 45% / 0.4)' : `hsl(${section.color} / ${strokeAlpha})`;
-          const label = soldOut
-            ? `${section.label} — Sold out`
-            : `${section.label} — ${formatILS(section.price)}, ${left} available`;
+          const fill = inert ? 'hsl(258 9% 45% / 0.12)' : `hsl(${section.color} / ${fillAlpha})`;
+          const stroke = inert ? 'hsl(258 9% 45% / 0.4)' : `hsl(${section.color} / ${strokeAlpha})`;
+          const label = disabled
+            ? `${section.label} — ${disabledLabel}`
+            : soldOut
+              ? `${section.label} — Sold out`
+              : `${section.label} — ${formatILS(section.price)}, ${left} available`;
 
           return (
             <g
               key={section.id}
               role="button"
-              tabIndex={soldOut ? -1 : 0}
+              tabIndex={inert ? -1 : 0}
               aria-label={label}
-              aria-disabled={soldOut}
+              aria-disabled={inert}
               aria-pressed={isSelected}
-              onClick={() => openSection(section.id)}
+              onClick={() => !inert && openSection(section.id)}
               onKeyDown={(e) => {
-                if (soldOut) return;
+                if (inert) return;
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault();
                   openSection(section.id);
                 }
               }}
-              onMouseEnter={() => !soldOut && setActiveId(section.id)}
+              onMouseEnter={() => !inert && setActiveId(section.id)}
               onMouseLeave={() => setActiveId((id) => (id === section.id ? null : id))}
-              onFocus={() => !soldOut && setActiveId(section.id)}
+              onFocus={() => !inert && setActiveId(section.id)}
               onBlur={() => setActiveId((id) => (id === section.id ? null : id))}
-              className={cn('outline-none transition-[filter] duration-150', soldOut ? 'cursor-not-allowed' : 'cursor-pointer')}
+              className={cn('outline-none transition-[filter] duration-150', inert ? 'cursor-not-allowed' : 'cursor-pointer')}
               style={{ filter: isSelected ? `drop-shadow(0 0 6px hsl(${section.color} / 0.65))` : undefined }}
             >
               <polygon
@@ -141,16 +158,18 @@ export function SectionPicker({ sections, busy, onPurchase }: SectionPickerProps
       <div className="space-y-2">
         {views.map(({ section, remaining: left, soldOut }) => {
           const isSelected = selectedId === section.id;
+          const inert = disabled || soldOut;
           return (
             <button
               key={section.id}
               type="button"
-              disabled={soldOut || busy}
+              disabled={inert || busy}
+              aria-disabled={inert}
               aria-pressed={isSelected}
-              onClick={() => openSection(section.id)}
+              onClick={() => !inert && openSection(section.id)}
               className={cn(
                 'w-full min-h-[44px] flex items-center gap-3 px-3 py-2.5 rounded-xl border text-left transition-colors focus-ring',
-                soldOut
+                inert
                   ? 'border-border/50 opacity-50 cursor-not-allowed'
                   : isSelected
                     ? 'border-primary bg-primary/5'
@@ -159,11 +178,13 @@ export function SectionPicker({ sections, busy, onPurchase }: SectionPickerProps
             >
               <span
                 className="w-3 h-3 rounded-full shrink-0"
-                style={{ background: soldOut ? 'hsl(258 9% 45%)' : `hsl(${section.color})` }}
+                style={{ background: inert ? 'hsl(258 9% 45%)' : `hsl(${section.color})` }}
               />
               <span className="flex-1 min-w-0">
                 <span className="block font-medium text-sm text-foreground truncate">{section.label}</span>
-                <span className="block text-xs text-muted-foreground">{soldOut ? 'Sold out' : `${left} left`}</span>
+                <span className="block text-xs text-muted-foreground">
+                  {disabled ? disabledLabel : soldOut ? 'Sold out' : `${left} left`}
+                </span>
               </span>
               <span className="font-semibold text-sm text-foreground shrink-0">{formatILS(section.price)}</span>
             </button>

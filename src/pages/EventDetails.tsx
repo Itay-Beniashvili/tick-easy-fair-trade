@@ -202,7 +202,7 @@ export default function EventDetails() {
             <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
               {hasSections ? (
                 <>
-                  <SectionPicker sections={sections} busy={busy} onPurchase={handleSectionPurchase} />
+                  <SectionPicker sections={sections} busy={busy} onPurchase={handleSectionPurchase} disabled={eventPassed} disabledLabel="Event Ended" />
                   <p className="text-xs text-muted-foreground text-center px-2">Group buying coming soon for seated events</p>
                 </>
               ) : (
