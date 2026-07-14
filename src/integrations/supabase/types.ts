@@ -284,6 +284,42 @@ export type Database = {
         }
         Relationships: []
       }
+      seat_holds: {
+        Row: {
+          event_id: string
+          expires_at: string
+          seat_id: string
+          user_id: string
+        }
+        Insert: {
+          event_id: string
+          expires_at: string
+          seat_id: string
+          user_id: string
+        }
+        Update: {
+          event_id?: string
+          expires_at?: string
+          seat_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seat_holds_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seat_holds_seat_id_fkey"
+            columns: ["seat_id"]
+            isOneToOne: true
+            referencedRelation: "seats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       seats: {
         Row: {
           id: string
@@ -532,6 +568,10 @@ export type Database = {
         Args: { _role: Database["public"]["Enums"]["app_role"] }
         Returns: boolean
       }
+      hold_seats: {
+        Args: { p_event_id: string; p_seat_ids: string[] }
+        Returns: string
+      }
       join_group: {
         Args: { p_group_id: string; p_ticket_count: number }
         Returns: Database["public"]["Tables"]["group_participants"]["Row"]
@@ -567,6 +607,35 @@ export type Database = {
           to: "tickets"
           isOneToOne: true
           isSetofReturn: false
+        }
+      }
+      purchase_held_seats: {
+        Args: { p_event_id: string }
+        Returns: {
+          created_at: string
+          event_city: string
+          event_date: string
+          event_id: string
+          event_image: string | null
+          event_time: string
+          event_title: string
+          event_venue: string
+          id: string
+          is_for_sale: boolean | null
+          price: number
+          purchase_date: string
+          qr_code: string | null
+          sale_price: number | null
+          seat_info: string | null
+          ticket_type: string
+          updated_at: string
+          user_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "tickets"
+          isOneToOne: false
+          isSetofReturn: true
         }
       }
       purchase_section_seats: {
@@ -626,6 +695,14 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      release_expired_seat_holds: {
+        Args: never
+        Returns: number
+      }
+      release_my_holds: {
+        Args: { p_event_id: string }
+        Returns: number
       }
       transfer_ticket_ownership: {
         Args: { p_buyer_name: string; p_ticket_id: string }
