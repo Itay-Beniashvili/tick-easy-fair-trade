@@ -6,6 +6,7 @@
  import { toast } from 'sonner';
  import { Input } from '@/components/ui/input';
  import { Button } from '@/components/ui/button';
+ import { supabase } from '@/integrations/supabase/client';
 
  export default function ManagerRegister() {
    const [name, setName] = useState('');
@@ -32,6 +33,15 @@
        toast.error(err instanceof Error ? err.message : 'Sign up failed');
      } finally {
        setSubmitting(false);
+     }
+   };
+
+   const handleResendEmail = async () => {
+     try {
+       await supabase.auth.resend({ type: 'signup', email });
+       toast.success('Confirmation email resent');
+     } catch (err) {
+       toast.error(err instanceof Error ? err.message : 'Failed to resend email');
      }
    };
  
@@ -126,7 +136,13 @@
 
          {verificationSent && (
            <div className="mt-4 p-4 rounded-xl bg-white/10 border border-white/20 text-center text-white text-sm">
-             Check your email to confirm your account
+             <p>Check your email to confirm your account</p>
+             <button
+               onClick={handleResendEmail}
+               className="mt-3 text-sm text-gel underline underline-offset-4 hover:opacity-80 transition-opacity"
+             >
+               Resend email
+             </button>
            </div>
          )}
  
