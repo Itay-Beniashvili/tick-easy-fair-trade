@@ -228,6 +228,10 @@ begin
   select * into e from public.events where id = p_event_id;
   if not found then raise exception 'event not found'; end if;
 
+  -- Serialize this buyer's purchases for this event so the per-user cap
+  -- cannot be bypassed by concurrent purchases in different sections.
+  perform pg_advisory_xact_lock(hashtext(p_event_id::text || v_buyer::text));
+
   -- Per-user / per-event cap across ALL of the event's tickets (mirrors 005's
   -- purchase_ticket cap; seated purchases count toward the same limit).
   select count(*) into v_owned
@@ -336,3 +340,61 @@ begin
   return;
 end $$;
 grant execute on function public.purchase_section_seats(uuid, uuid, int) to authenticated;
+
+-- ---------------------------------------------------------------------------
+-- 5.  purchase_ticket guard — 010 supersedes 005's purchase_ticket ONLY to add
+--     a guard against the flat GA purchase path being used on events that have
+--     been split into sections. Everything else below is byte-for-byte the
+--     live 005 definition (same signature, body, and grant) so events WITHOUT
+--     sections keep today's flat GA flow unchanged, per the file header above.
+-- ---------------------------------------------------------------------------
+create or replace function public.purchase_ticket(p_event_id uuid, p_seat_info text)
+returns public.tickets
+language plpgsql security definer set search_path = public as $$
+declare
+  e public.events;
+  t public.tickets;
+  v_buyer uuid := auth.uid();
+  v_owned int;
+  -- Documented cap: at most this many tickets per user, per event, on the
+  -- primary market. Change here to adjust the policy.
+  c_cap  constant int := 6;
+begin
+  if v_buyer is null then raise exception 'not authenticated'; end if;
+
+  -- Lock the event row: concurrent purchase_ticket calls now serialize here.
+  select * into e from public.events where id = p_event_id for update;
+  if not found then raise exception 'event not found'; end if;
+
+  if exists (select 1 from public.venue_sections vs where vs.event_id = p_event_id) then
+    raise exception 'this event uses seated sections — purchase through a section';
+  end if;
+
+  if e.available_tickets <= 0 then raise exception 'sold out'; end if;
+
+  -- Per-user / per-event cap (counts every ticket the buyer holds for this event).
+  select count(*) into v_owned
+  from public.tickets
+  where user_id = v_buyer and event_id = e.id::text;
+  if v_owned >= c_cap then
+    raise exception 'purchase limit reached: max % tickets per event', c_cap;
+  end if;
+
+  insert into public.tickets(user_id, event_id, event_title, event_venue, event_city,
+    event_date, event_time, event_image, ticket_type, seat_info, price, qr_code, is_for_sale)
+  values (v_buyer, e.id::text, e.title, e.venue, e.city, e.event_date::text, e.event_time,
+    e.image, 'standard', p_seat_info, e.price,
+    'TKT-' || replace(gen_random_uuid()::text, '-', ''), false)
+  returning * into t;
+
+  -- Guarded decrement: only succeeds while inventory remains; belt-and-suspenders
+  -- with the row lock above and the CHECK(available_tickets >= 0) constraint.
+  update public.events set available_tickets = available_tickets - 1
+    where id = e.id and available_tickets > 0;
+  if not found then raise exception 'sold out'; end if;
+
+  insert into public.transactions(ticket_id, event_id, buyer_id, amount, type)
+    values (t.id, e.id, v_buyer, e.price, 'primary');
+  return t;
+end $$;
+grant execute on function public.purchase_ticket(uuid, text) to authenticated;
