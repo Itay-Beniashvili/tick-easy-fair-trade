@@ -162,10 +162,10 @@ export default function Community() {
                   </div>
                   <p className="text-sm text-foreground break-words">{post.content}</p>
                   <div className="flex items-center gap-3 mt-2">
-                    <p className="text-xs text-muted-foreground">— {post.user_name}</p>
+                    <p className="flex-1 min-w-0 truncate text-xs text-muted-foreground">— {post.user_name}</p>
                     <button
                       onClick={() => setOpenReplyFor(isOpen ? null : post.id)}
-                      className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors ml-auto"
+                      className="inline-flex flex-shrink-0 items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors ml-auto"
                     >
                       <MessageCircle className="w-3.5 h-3.5" />
                       Reply
@@ -181,7 +181,7 @@ export default function Community() {
                           className="border-l-2 border-primary/20 pl-3 min-w-0"
                         >
                           <div className="flex items-center gap-2">
-                            <span className="text-xs font-semibold text-foreground">{reply.user_name}</span>
+                            <span className="min-w-0 truncate text-xs font-semibold text-foreground">{reply.user_name}</span>
                             <span className="text-[11px] text-muted-foreground">
                               {format(new Date(reply.created_at), 'MMM d, HH:mm')}
                             </span>
