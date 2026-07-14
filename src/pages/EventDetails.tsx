@@ -9,12 +9,13 @@ import { getEvent } from '@/api/events';
 import { purchaseTicket } from '@/api/tickets';
 import { listForSaleMarketplace, buyResale } from '@/api/resale';
 import { createGroup } from '@/api/groups';
-import { getSections } from '@/api/seats';
+import { getSections, purchaseSectionSeats, type VenueSectionRow } from '@/api/seats';
 import { getProfile } from '@/api/profile';
 import { useAuth } from '@/context/AuthContext';
 import { formatILS } from '@/lib/currency';
 import { ContactManagerModal } from '@/components/ContactManagerModal';
 import { PurchaseSuccess } from '@/components/PurchaseSuccess';
+import { SectionPicker } from '@/components/SectionPicker';
 import { Skeleton } from '@/components/Skeletons';
 import type { EventRow } from '@/api/client';
 import { setGel, resetGel } from '@/lib/gel';
@@ -38,10 +39,9 @@ export default function EventDetails() {
   const [groupSize, setGroupSize] = useState(2);
   // Buyer/sender label: real full name, else the user's email (never a UI pronoun).
   const [name, setName] = useState(user?.email ?? '');
-  // Seated events (venue_sections exist) hide the flat group-buy CTA — group buying
-  // attaches to seats only from P3 onward. S4 builds the full zone-picker UI; this
-  // is just the minimal fetch+flag needed to hide the button until then.
-  const [hasSections, setHasSections] = useState(false);
+  // Seated events have venue_sections rows — S4's zone picker replaces the flat
+  // price card/Buy button for these; GA/flat events (empty array) are unaffected.
+  const [sections, setSections] = useState<VenueSectionRow[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -54,8 +54,7 @@ export default function EventDetails() {
         setResale((all ?? []).filter((t) => t.event_id === id && !t.is_mine));
         const p = await getProfile();
         if (p?.full_name) setName(p.full_name);
-        const sections = await getSections(id);
-        setHasSections(sections.length > 0);
+        setSections(await getSections(id));
       } catch (e) {
         toast.error((e as Error).message);
       } finally {
@@ -93,6 +92,7 @@ export default function EventDetails() {
   const soldOut = event.available_tickets <= 0;
   const purchasable = !eventPassed && !soldOut;
   const buyLabel = eventPassed ? 'Event Ended' : soldOut ? 'Sold Out' : '🎟️ Buy Ticket';
+  const hasSections = sections.length > 0;
 
   const handlePurchase = async () => {
     setBusy(true);
@@ -102,6 +102,21 @@ export default function EventDetails() {
       setSuccess(true);
       setTimeout(() => navigate('/wallet'), 2000);
     } catch (e) { toast.error((e as Error).message); setBusy(false); }
+  };
+
+  const handleSectionPurchase = async (sectionId: string, quantity: number) => {
+    setBusy(true);
+    try {
+      await purchaseSectionSeats(event.id, sectionId, quantity);
+      setSuccess(true);
+      setTimeout(() => navigate('/wallet'), 2000);
+      // Refresh counts in the background; a failure here shouldn't block the
+      // success flow that already fired above.
+      getSections(event.id).then(setSections).catch(() => {});
+    } catch (e) {
+      setBusy(false);
+      throw e; // let SectionPicker's sheet catch it, toast, and stay open
+    }
   };
 
   const handleResaleBuy = async (listing: Listing) => {
@@ -185,37 +200,42 @@ export default function EventDetails() {
 
           {selectedTab === 'primary' && (
             <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
-              <div className="card-elevated p-5">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2"><Tag className="w-5 h-5 text-primary" /><span className="text-muted-foreground">Ticket Price</span></div>
-                  <span className="text-3xl font-bold text-gradient-warm">{formatILS(event.price)}</span>
-                </div>
-                <div className="text-sm text-muted-foreground bg-muted px-3 py-1.5 rounded-full inline-block">{event.available_tickets} tickets available</div>
-              </div>
-              <button onClick={handlePurchase} disabled={busy || !purchasable} className="w-full btn-primary-gradient py-4 text-lg disabled:opacity-60 disabled:cursor-not-allowed">{buyLabel}</button>
-              {purchasable && (
-                <div className="card-elevated p-4 flex items-center justify-between">
-                  <label htmlFor="group-size" className="text-sm font-medium text-foreground flex items-center gap-2">
-                    <Users className="w-4 h-4 text-primary" /> Group size
-                  </label>
-                  <input
-                    id="group-size"
-                    type="number"
-                    min={2}
-                    max={Math.max(2, event.available_tickets)}
-                    step={1}
-                    value={groupSize}
-                    onChange={(e) => setGroupSize(Math.max(2, Math.floor(Number(e.target.value) || 2)))}
-                    className="w-20 py-2 px-3 rounded-xl border border-border bg-card text-center font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  />
-                </div>
-              )}
               {hasSections ? (
-                <p className="text-xs text-muted-foreground text-center px-2">Group buying coming soon for seated events</p>
+                <>
+                  <SectionPicker sections={sections} busy={busy} onPurchase={handleSectionPurchase} />
+                  <p className="text-xs text-muted-foreground text-center px-2">Group buying coming soon for seated events</p>
+                </>
               ) : (
-                <button onClick={handleCreateGroup} disabled={busy || !purchasable} className="w-full py-4 rounded-2xl border-2 border-primary text-primary font-semibold flex items-center justify-center gap-2 hover:bg-primary hover:text-primary-foreground transition-all disabled:opacity-60 disabled:cursor-not-allowed focus-ring">
-                  <Users className="w-5 h-5" /> Start Group Purchase
-                </button>
+                <>
+                  <div className="card-elevated p-5">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-2"><Tag className="w-5 h-5 text-primary" /><span className="text-muted-foreground">Ticket Price</span></div>
+                      <span className="text-3xl font-bold text-gradient-warm">{formatILS(event.price)}</span>
+                    </div>
+                    <div className="text-sm text-muted-foreground bg-muted px-3 py-1.5 rounded-full inline-block">{event.available_tickets} tickets available</div>
+                  </div>
+                  <button onClick={handlePurchase} disabled={busy || !purchasable} className="w-full btn-primary-gradient py-4 text-lg disabled:opacity-60 disabled:cursor-not-allowed">{buyLabel}</button>
+                  {purchasable && (
+                    <div className="card-elevated p-4 flex items-center justify-between">
+                      <label htmlFor="group-size" className="text-sm font-medium text-foreground flex items-center gap-2">
+                        <Users className="w-4 h-4 text-primary" /> Group size
+                      </label>
+                      <input
+                        id="group-size"
+                        type="number"
+                        min={2}
+                        max={Math.max(2, event.available_tickets)}
+                        step={1}
+                        value={groupSize}
+                        onChange={(e) => setGroupSize(Math.max(2, Math.floor(Number(e.target.value) || 2)))}
+                        className="w-20 py-2 px-3 rounded-xl border border-border bg-card text-center font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      />
+                    </div>
+                  )}
+                  <button onClick={handleCreateGroup} disabled={busy || !purchasable} className="w-full py-4 rounded-2xl border-2 border-primary text-primary font-semibold flex items-center justify-center gap-2 hover:bg-primary hover:text-primary-foreground transition-all disabled:opacity-60 disabled:cursor-not-allowed focus-ring">
+                    <Users className="w-5 h-5" /> Start Group Purchase
+                  </button>
+                </>
               )}
               <button onClick={() => setShowContactManager(true)} className="w-full py-3 rounded-2xl bg-muted text-foreground font-medium flex items-center justify-center gap-2 hover:bg-muted/80 transition-all focus-ring">
                 <MessageCircle className="w-5 h-5" /> Contact Event Manager
