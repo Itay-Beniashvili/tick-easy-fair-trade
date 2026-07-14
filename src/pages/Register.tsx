@@ -1,186 +1,185 @@
- import { useEffect, useState } from 'react';
- import { motion } from 'framer-motion';
- import { Mail, Lock, User, Ticket, ArrowRight, Eye, EyeOff } from 'lucide-react';
- import { Link, useLocation, useNavigate } from 'react-router-dom';
- import { useAuth } from '@/context/AuthContext';
- import { toast } from 'sonner';
- import { Input } from '@/components/ui/input';
- import { Button } from '@/components/ui/button';
- import { supabase } from '@/integrations/supabase/client';
- import { getProfile } from '@/api/profile';
+import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
+import { Mail, Lock, User, Ticket, ArrowRight, Eye, EyeOff } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
+import { toast } from 'sonner';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
+import { getProfile } from '@/api/profile';
+import { saveReturnPath, consumeReturnPath } from '@/lib/returnPath';
 
- const RETURN_TO_KEY = 'te_return_to';
+export default function Register() {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [verificationSent, setVerificationSent] = useState(false);
+  const { signUp } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const fromPath = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname;
 
- export default function Register() {
-   const [name, setName] = useState('');
-   const [email, setEmail] = useState('');
-   const [password, setPassword] = useState('');
-   const [showPassword, setShowPassword] = useState(false);
-   const [submitting, setSubmitting] = useState(false);
-   const [verificationSent, setVerificationSent] = useState(false);
-   const { signUp } = useAuth();
-   const navigate = useNavigate();
-   const location = useLocation();
-   const fromPath = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname;
+  // Persist the return path so it survives the register -> verify-email -> login
+  // detour; a friend who registers instead of signing in still lands back
+  // on the group page once they verify and log in.
+  useEffect(() => {
+    saveReturnPath(fromPath);
+  }, [fromPath]);
 
-   // Persist the return path so it survives the register -> verify-email -> login
-   // detour; a friend who registers instead of signing in still lands back
-   // on the group page once they verify and log in.
-   useEffect(() => {
-     if (fromPath) {
-       try { sessionStorage.setItem(RETURN_TO_KEY, fromPath); } catch { /* ignore */ }
-     }
-   }, [fromPath]);
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      const { needsVerification } = await signUp(email, password, name, 'user');
+      if (needsVerification) {
+        setVerificationSent(true);
+        return;
+      }
 
-   const handleRegister = async (e: React.FormEvent) => {
-     e.preventDefault();
-     setSubmitting(true);
-     try {
-       const { needsVerification } = await signUp(email, password, name, 'user');
-       if (needsVerification) {
-         setVerificationSent(true);
-         return;
-       }
+      // Only reachable when email verification is disabled — apply the same
+      // return-path/onboarding rule Login uses.
+      const returnTo = fromPath ?? consumeReturnPath();
 
-       // Only reachable when email verification is disabled — apply the same
-       // return-path/onboarding rule Login uses.
-       let returnTo: string | null = fromPath ?? null;
-       try {
-         if (!returnTo) returnTo = sessionStorage.getItem(RETURN_TO_KEY);
-         sessionStorage.removeItem(RETURN_TO_KEY);
-       } catch { /* ignore */ }
+      if (returnTo && returnTo.startsWith('/')) {
+        navigate(returnTo, { replace: true });
+        return;
+      }
 
-       if (returnTo && returnTo.startsWith('/')) {
-         navigate(returnTo, { replace: true });
-         return;
-       }
+      // Auth already succeeded at this point — a profile-fetch failure here
+      // is not a sign-up failure and must not surface a sign-up error toast.
+      try {
+        const profile = await getProfile();
+        const hasPrefs =
+          !!profile &&
+          ((profile.preferred_genres?.length ?? 0) > 0 || (profile.preferred_artists?.length ?? 0) > 0);
+        navigate(hasPrefs ? '/home' : '/onboarding', { replace: true });
+      } catch {
+        navigate('/home', { replace: true });
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Sign up failed');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
-       const profile = await getProfile();
-       const hasPrefs =
-         !!profile &&
-         ((profile.preferred_genres?.length ?? 0) > 0 || (profile.preferred_artists?.length ?? 0) > 0);
-       navigate(hasPrefs ? '/home' : '/onboarding');
-     } catch (err) {
-       toast.error(err instanceof Error ? err.message : 'Sign up failed');
-     } finally {
-       setSubmitting(false);
-     }
-   };
+  const handleResendEmail = async () => {
+    try {
+      await supabase.auth.resend({ type: 'signup', email });
+      toast.success('Confirmation email resent');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to resend email');
+    }
+  };
 
-   const handleResendEmail = async () => {
-     try {
-       await supabase.auth.resend({ type: 'signup', email });
-       toast.success('Confirmation email resent');
-     } catch (err) {
-       toast.error(err instanceof Error ? err.message : 'Failed to resend email');
-     }
-   };
- 
-   return (
-     <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-hero">
-       {/* Decorative circles */}
-       <div className="absolute top-20 left-10 w-32 h-32 rounded-full bg-warning/20 blur-3xl" />
-       <div className="absolute bottom-20 right-10 w-40 h-40 rounded-full bg-accent/20 blur-3xl" />
-       
-       {/* Logo */}
-       <motion.div
-         initial={{ opacity: 0, y: -30 }}
-         animate={{ opacity: 1, y: 0 }}
-         transition={{ duration: 0.6 }}
-         className="text-center mb-8 relative z-10"
-       >
-         <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm mb-4">
-           <Ticket className="w-8 h-8 text-white" />
-         </div>
-         <h1 className="text-3xl font-bold text-white mb-1">Join Us!</h1>
-         <p className="text-white/70">Create your account easily</p>
-       </motion.div>
- 
-       {/* Register Form */}
-       <motion.div
-         initial={{ opacity: 0, y: 20 }}
-         animate={{ opacity: 1, y: 0 }}
-         transition={{ delay: 0.2, duration: 0.5 }}
-         className="w-full max-w-sm relative z-10"
-       >
-         <form onSubmit={handleRegister} className="space-y-4">
-           <div className="relative">
-             <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-             <Input
-               type="text"
-               placeholder="Full name"
-               value={name}
-               onChange={(e) => setName(e.target.value)}
-               className="pl-10 h-12 bg-card/70 border border-white/10 text-foreground placeholder:text-muted-foreground rounded-xl"
-             />
-           </div>
- 
-           <div className="relative">
-             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-             <Input
-               type="email"
-               placeholder="Email address"
-               value={email}
-               onChange={(e) => setEmail(e.target.value)}
-               className="pl-10 h-12 bg-card/70 border border-white/10 text-foreground placeholder:text-muted-foreground rounded-xl"
-             />
-           </div>
-           
-           <div className="relative">
-             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-             <Input
-               type={showPassword ? 'text' : 'password'}
-               placeholder="Password"
-               value={password}
-               onChange={(e) => setPassword(e.target.value)}
-               className="pl-10 pr-10 h-12 bg-card/70 border border-white/10 text-foreground placeholder:text-muted-foreground rounded-xl"
-             />
-             <button
-               type="button"
-               onClick={() => setShowPassword(!showPassword)}
-               className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-             >
-               {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-             </button>
-           </div>
- 
-           <Button
-             type="submit"
-             disabled={submitting}
-             className="w-full h-12 rounded-xl btn-primary-gradient text-lg font-semibold"
-           >
-             {submitting ? 'Signing up...' : 'Sign Up'}
-             <ArrowRight className="w-5 h-5 mr-2" />
-           </Button>
-         </form>
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-hero">
+      {/* Decorative circles */}
+      <div className="absolute top-20 left-10 w-32 h-32 rounded-full bg-warning/20 blur-3xl" />
+      <div className="absolute bottom-20 right-10 w-40 h-40 rounded-full bg-accent/20 blur-3xl" />
 
-         {verificationSent && (
-           <div className="mt-4 p-4 rounded-xl bg-white/90 text-center text-foreground text-sm">
-             <p>Check your email to confirm your account</p>
-             <button
-               onClick={handleResendEmail}
-               className="mt-3 text-sm text-foreground underline underline-offset-4 hover:opacity-80 transition-opacity"
-             >
-               Resend email
-             </button>
-           </div>
-         )}
- 
-         <div className="mt-6 text-center">
-           <p className="text-white/70">
-             Already have an account?{' '}
-             <Link to="/login" className="text-white font-semibold underline">
-               Sign In
-             </Link>
-           </p>
-         </div>
- 
-         <div className="mt-4 text-center">
-           <Link to="/" className="text-white/50 text-sm hover:text-white/70 transition-colors">
-             Back to role selection
-           </Link>
-         </div>
-       </motion.div>
-     </div>
-   );
- }
+      {/* Logo */}
+      <motion.div
+        initial={{ opacity: 0, y: -30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="text-center mb-8 relative z-10"
+      >
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm mb-4">
+          <Ticket className="w-8 h-8 text-white" />
+        </div>
+        <h1 className="text-3xl font-bold text-white mb-1">Join Us!</h1>
+        <p className="text-white/70">Create your account easily</p>
+      </motion.div>
+
+      {/* Register Form */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.5 }}
+        className="w-full max-w-sm relative z-10"
+      >
+        <form onSubmit={handleRegister} className="space-y-4">
+          <div className="relative">
+            <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Full name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="pl-10 h-12 bg-card/70 border border-white/10 text-foreground placeholder:text-muted-foreground rounded-xl"
+            />
+          </div>
+
+          <div className="relative">
+            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <Input
+              type="email"
+              placeholder="Email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="pl-10 h-12 bg-card/70 border border-white/10 text-foreground placeholder:text-muted-foreground rounded-xl"
+            />
+          </div>
+
+          <div className="relative">
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <Input
+              type={showPassword ? 'text' : 'password'}
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="pl-10 pr-10 h-12 bg-card/70 border border-white/10 text-foreground placeholder:text-muted-foreground rounded-xl"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+            >
+              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+            </button>
+          </div>
+
+          <Button
+            type="submit"
+            disabled={submitting}
+            className="w-full h-12 rounded-xl btn-primary-gradient text-lg font-semibold"
+          >
+            {submitting ? 'Signing up...' : 'Sign Up'}
+            <ArrowRight className="w-5 h-5 mr-2" />
+          </Button>
+        </form>
+
+        {verificationSent && (
+          <div className="mt-4 p-4 rounded-xl bg-white/90 text-center text-foreground text-sm">
+            <p>Check your email to confirm your account</p>
+            <button
+              onClick={handleResendEmail}
+              className="mt-3 text-sm text-foreground underline underline-offset-4 hover:opacity-80 transition-opacity"
+            >
+              Resend email
+            </button>
+          </div>
+        )}
+
+        <div className="mt-6 text-center">
+          <p className="text-white/70">
+            Already have an account?{' '}
+            <Link to="/login" className="text-white font-semibold underline">
+              Sign In
+            </Link>
+          </p>
+        </div>
+
+        <div className="mt-4 text-center">
+          <Link to="/" className="text-white/50 text-sm hover:text-white/70 transition-colors">
+            Back to role selection
+          </Link>
+        </div>
+      </motion.div>
+    </div>
+  );
+}

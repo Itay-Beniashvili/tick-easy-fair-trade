@@ -6,18 +6,7 @@ import { cn } from '@/lib/utils';
 import { upsertPreferences } from '@/api/profile';
 import { toast } from 'sonner';
 import type { Genre } from '@/lib/recommend';
-
-const RETURN_TO_KEY = 'te_return_to';
-
-function consumeReturnTo(): string | null {
-  try {
-    const returnTo = sessionStorage.getItem(RETURN_TO_KEY);
-    sessionStorage.removeItem(RETURN_TO_KEY);
-    return returnTo;
-  } catch {
-    return null;
-  }
-}
+import { consumeReturnPath } from '@/lib/returnPath';
 
  type Category = 'music' | 'sports' | 'standup';
  type Artist = string;
@@ -88,8 +77,8 @@ export function UserOnboarding() {
     setSaving(true);
     try {
       await upsertPreferences(selectedGenres, selectedArtists);
-      const returnTo = consumeReturnTo();
-      navigate(returnTo && returnTo.startsWith('/') ? returnTo : '/home');
+      const returnTo = consumeReturnPath();
+      navigate(returnTo && returnTo.startsWith('/') ? returnTo : '/home', { replace: true });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to save preferences');
     } finally {
@@ -242,8 +231,8 @@ export function UserOnboarding() {
  
          <button
            onClick={() => {
-             const returnTo = consumeReturnTo();
-             navigate(returnTo && returnTo.startsWith('/') ? returnTo : '/home');
+             const returnTo = consumeReturnPath();
+             navigate(returnTo && returnTo.startsWith('/') ? returnTo : '/home', { replace: true });
            }}
            className="w-full mt-3 py-3 text-muted-foreground text-sm hover:text-foreground transition-colors"
          >

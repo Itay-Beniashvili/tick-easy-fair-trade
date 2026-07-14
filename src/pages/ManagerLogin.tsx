@@ -1,126 +1,121 @@
- import { useState } from 'react';
- import { motion } from 'framer-motion';
- import { Mail, Lock, Settings, ArrowRight, Eye, EyeOff } from 'lucide-react';
- import { Link, useLocation, useNavigate } from 'react-router-dom';
- import { useAuth } from '@/context/AuthContext';
- import { toast } from 'sonner';
- import { Input } from '@/components/ui/input';
- import { Button } from '@/components/ui/button';
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Mail, Lock, Settings, ArrowRight, Eye, EyeOff } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
+import { toast } from 'sonner';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
- const RETURN_TO_KEY = 'te_return_to';
+export default function ManagerLogin() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const { signIn } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const fromPath = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname;
 
- export default function ManagerLogin() {
-   const [email, setEmail] = useState('');
-   const [password, setPassword] = useState('');
-   const [showPassword, setShowPassword] = useState(false);
-   const [submitting, setSubmitting] = useState(false);
-   const { signIn } = useAuth();
-   const navigate = useNavigate();
-   const location = useLocation();
-   const fromPath = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname;
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      await signIn(email, password);
 
-   const handleLogin = async (e: React.FormEvent) => {
-     e.preventDefault();
-     setSubmitting(true);
-     try {
-       await signIn(email, password);
+      // Deliberately does NOT read the buyer return-path store (te_return_to):
+      // only a live, validated location.state.from is honored, so an
+      // abandoned buyer invite link can never hijack a manager login.
+      navigate(fromPath && fromPath.startsWith('/') ? fromPath : '/manager', { replace: true });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Sign in failed');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
-       let returnTo: string | null = fromPath ?? null;
-       try {
-         if (!returnTo) returnTo = sessionStorage.getItem(RETURN_TO_KEY);
-         sessionStorage.removeItem(RETURN_TO_KEY);
-       } catch { /* ignore */ }
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-manager">
+      {/* Decorative circles */}
+      <div className="absolute top-20 left-10 w-32 h-32 rounded-full bg-primary/10 blur-3xl" />
+      <div className="absolute bottom-20 right-10 w-40 h-40 rounded-full bg-accent/10 blur-3xl" />
 
-       navigate(returnTo && returnTo.startsWith('/') ? returnTo : '/manager');
-     } catch (err) {
-       toast.error(err instanceof Error ? err.message : 'Sign in failed');
-     } finally {
-       setSubmitting(false);
-     }
-   };
- 
-   return (
-     <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-manager">
-       {/* Decorative circles */}
-       <div className="absolute top-20 left-10 w-32 h-32 rounded-full bg-primary/10 blur-3xl" />
-       <div className="absolute bottom-20 right-10 w-40 h-40 rounded-full bg-accent/10 blur-3xl" />
-       
-       {/* Logo */}
-       <motion.div
-         initial={{ opacity: 0, y: -30 }}
-         animate={{ opacity: 1, y: 0 }}
-         transition={{ duration: 0.6 }}
-         className="text-center mb-8 relative z-10"
-       >
-         <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-sm mb-4">
-           <Settings className="w-8 h-8 text-white" />
-         </div>
-         <h1 className="text-3xl font-bold text-white mb-1">Manager Portal</h1>
-         <p className="text-white/70">Sign in to manage your events</p>
-       </motion.div>
- 
-       {/* Login Form */}
-       <motion.div
-         initial={{ opacity: 0, y: 20 }}
-         animate={{ opacity: 1, y: 0 }}
-         transition={{ delay: 0.2, duration: 0.5 }}
-         className="w-full max-w-sm relative z-10"
-       >
-         <form onSubmit={handleLogin} className="space-y-4">
-           <div className="relative">
-             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-             <Input
-               type="email"
-               placeholder="Email address"
-               value={email}
-               onChange={(e) => setEmail(e.target.value)}
-               className="pl-10 h-12 bg-white/10 border-white/20 rounded-xl text-white placeholder:text-muted-foreground"
-             />
-           </div>
-           
-           <div className="relative">
-             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-             <Input
-               type={showPassword ? 'text' : 'password'}
-               placeholder="Password"
-               value={password}
-               onChange={(e) => setPassword(e.target.value)}
-               className="pl-10 pr-10 h-12 bg-white/10 border-white/20 rounded-xl text-white placeholder:text-muted-foreground"
-             />
-             <button
-               type="button"
-               onClick={() => setShowPassword(!showPassword)}
-               className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-             >
-               {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-             </button>
-           </div>
- 
-           <Button
-             type="submit"
-             disabled={submitting}
-             className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 text-lg font-semibold"
-           >
-             {submitting ? 'Signing in...' : 'Sign In'}
-             <ArrowRight className="w-5 h-5 mr-2" />
-           </Button>
-         </form>
- 
-         <div className="mt-6 text-center">
-           <p className="text-white/70">
-             Don't have an account?{' '}
-             <Link to="/manager/register" className="text-white font-semibold underline">
-               Register as Event Manager
-             </Link>
-           </p>
-         </div>
- 
-         <div className="mt-4 text-center">
-           <Link to="/" className="text-white/50 text-sm hover:text-white/70 transition-colors">
-             Back to role selection
-           </Link>
-         </div>
-       </motion.div>
-     </div>
-   );
- }
+      {/* Logo */}
+      <motion.div
+        initial={{ opacity: 0, y: -30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="text-center mb-8 relative z-10"
+      >
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-sm mb-4">
+          <Settings className="w-8 h-8 text-white" />
+        </div>
+        <h1 className="text-3xl font-bold text-white mb-1">Manager Portal</h1>
+        <p className="text-white/70">Sign in to manage your events</p>
+      </motion.div>
+
+      {/* Login Form */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.5 }}
+        className="w-full max-w-sm relative z-10"
+      >
+        <form onSubmit={handleLogin} className="space-y-4">
+          <div className="relative">
+            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <Input
+              type="email"
+              placeholder="Email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="pl-10 h-12 bg-white/10 border-white/20 rounded-xl text-white placeholder:text-muted-foreground"
+            />
+          </div>
+
+          <div className="relative">
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <Input
+              type={showPassword ? 'text' : 'password'}
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="pl-10 pr-10 h-12 bg-white/10 border-white/20 rounded-xl text-white placeholder:text-muted-foreground"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+            >
+              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+            </button>
+          </div>
+
+          <Button
+            type="submit"
+            disabled={submitting}
+            className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 text-lg font-semibold"
+          >
+            {submitting ? 'Signing in...' : 'Sign In'}
+            <ArrowRight className="w-5 h-5 mr-2" />
+          </Button>
+        </form>
+
+        <div className="mt-6 text-center">
+          <p className="text-white/70">
+            Don't have an account?{' '}
+            <Link to="/manager/register" className="text-white font-semibold underline">
+              Register as Event Manager
+            </Link>
+          </p>
+        </div>
+
+        <div className="mt-4 text-center">
+          <Link to="/" className="text-white/50 text-sm hover:text-white/70 transition-colors">
+            Back to role selection
+          </Link>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
