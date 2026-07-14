@@ -9,6 +9,7 @@ import { getEvent } from '@/api/events';
 import { purchaseTicket } from '@/api/tickets';
 import { listForSaleMarketplace, buyResale } from '@/api/resale';
 import { createGroup } from '@/api/groups';
+import { getSections } from '@/api/seats';
 import { getProfile } from '@/api/profile';
 import { useAuth } from '@/context/AuthContext';
 import { formatILS } from '@/lib/currency';
@@ -37,6 +38,10 @@ export default function EventDetails() {
   const [groupSize, setGroupSize] = useState(2);
   // Buyer/sender label: real full name, else the user's email (never a UI pronoun).
   const [name, setName] = useState(user?.email ?? '');
+  // Seated events (venue_sections exist) hide the flat group-buy CTA — group buying
+  // attaches to seats only from P3 onward. S4 builds the full zone-picker UI; this
+  // is just the minimal fetch+flag needed to hide the button until then.
+  const [hasSections, setHasSections] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -49,6 +54,8 @@ export default function EventDetails() {
         setResale((all ?? []).filter((t) => t.event_id === id && !t.is_mine));
         const p = await getProfile();
         if (p?.full_name) setName(p.full_name);
+        const sections = await getSections(id);
+        setHasSections(sections.length > 0);
       } catch (e) {
         toast.error((e as Error).message);
       } finally {
@@ -203,9 +210,13 @@ export default function EventDetails() {
                   />
                 </div>
               )}
-              <button onClick={handleCreateGroup} disabled={busy || !purchasable} className="w-full py-4 rounded-2xl border-2 border-primary text-primary font-semibold flex items-center justify-center gap-2 hover:bg-primary hover:text-primary-foreground transition-all disabled:opacity-60 disabled:cursor-not-allowed focus-ring">
-                <Users className="w-5 h-5" /> Start Group Purchase
-              </button>
+              {hasSections ? (
+                <p className="text-xs text-muted-foreground text-center px-2">Group buying coming soon for seated events</p>
+              ) : (
+                <button onClick={handleCreateGroup} disabled={busy || !purchasable} className="w-full py-4 rounded-2xl border-2 border-primary text-primary font-semibold flex items-center justify-center gap-2 hover:bg-primary hover:text-primary-foreground transition-all disabled:opacity-60 disabled:cursor-not-allowed focus-ring">
+                  <Users className="w-5 h-5" /> Start Group Purchase
+                </button>
+              )}
               <button onClick={() => setShowContactManager(true)} className="w-full py-3 rounded-2xl bg-muted text-foreground font-medium flex items-center justify-center gap-2 hover:bg-muted/80 transition-all focus-ring">
                 <MessageCircle className="w-5 h-5" /> Contact Event Manager
               </button>

@@ -1,14 +1,18 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Calendar, MapPin, Clock, DollarSign, Users, Image, FileText, Music, Dumbbell, Theater } from 'lucide-react';
+import { ArrowLeft, Calendar, MapPin, Clock, DollarSign, Users, Image, FileText, Music, Dumbbell, Theater, Armchair } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { ManagerSidebar } from '@/components/ManagerSidebar';
 import { MobileManagerNav } from '@/components/MobileManagerNav';
 import { createEvent } from '@/api/events';
+import { createEventSections } from '@/api/seats';
+import { buildSections, VENUE_TEMPLATE_LIST, type TemplateId, type VenueTemplate, type Point, type SeatingSection } from '@/lib/venueTemplates';
+import { formatILS } from '@/lib/currency';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import {
   Select,
   SelectContent,
@@ -16,12 +20,34 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { EventRow } from '@/api/client';
 
 const genres = [
   { id: 'music', label: 'Music', icon: Music },
   { id: 'sports', label: 'Sports', icon: Dumbbell },
   { id: 'theater', label: 'Theater', icon: Theater },
 ];
+
+const pointsToStr = (points: Point[]) => points.map(([x, y]) => `${x},${y}`).join(' ');
+
+/** Tiny gel-tinted silhouette of a venue template, built straight from its
+ *  hand-authored polygons — same points buildSections sends to the server. */
+function VenueTemplatePreview({ template }: { template: VenueTemplate }) {
+  return (
+    <svg viewBox="0 0 100 100" className="w-full h-20 rounded-lg bg-muted/60" aria-hidden="true">
+      {template.stage && (
+        <polygon points={pointsToStr(template.stage.points)} className="fill-foreground/25" />
+      )}
+      {template.sections.map((s, i) => (
+        <polygon
+          key={i}
+          points={pointsToStr(s.geometry.points)}
+          style={{ fill: `hsl(${s.color} / 0.55)`, stroke: `hsl(${s.color})`, strokeWidth: 0.6 }}
+        />
+      ))}
+    </svg>
+  );
+}
 
 export default function CreateEvent() {
   const navigate = useNavigate();
@@ -39,40 +65,77 @@ export default function CreateEvent() {
     description: '',
     image: '',
   });
+  const [seatingMode, setSeatingMode] = useState<'ga' | 'seated'>('ga');
+  const [selectedTemplate, setSelectedTemplate] = useState<TemplateId>('theater');
+  // Set once createEvent succeeds. If createEventSections then fails, we keep this
+  // around so a retry re-runs only section creation — never a second createEvent.
+  const [createdEvent, setCreatedEvent] = useState<EventRow | null>(null);
 
   const handleChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const totalTickets = Number(formData.availableTickets);
+  // Prices are whole shekels — currency is displayed with 0 fraction digits, so
+  // integer prices keep displayed values truthful (no rounded-away agorot).
+  const price = Math.trunc(Number(formData.price));
+
+  // Live read-only preview of each section's capacity/price for the chosen template —
+  // same buildSections call the submit handler will use, so what managers see here is
+  // exactly what gets created.
+  const previewSections = useMemo<{ sections: SeatingSection[] | null; error: string | null }>(() => {
+    if (seatingMode !== 'seated') return { sections: null, error: null };
+    if (!Number.isFinite(totalTickets) || totalTickets <= 0 || !Number.isFinite(price)) {
+      return { sections: null, error: null };
+    }
+    try {
+      return { sections: buildSections(selectedTemplate, Math.trunc(totalTickets), price), error: null };
+    } catch (err) {
+      return { sections: null, error: err instanceof Error ? err.message : 'Could not preview sections' };
+    }
+  }, [seatingMode, selectedTemplate, totalTickets, price]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    const totalTickets = Number(formData.availableTickets);
-    // Prices are whole shekels — currency is displayed with 0 fraction digits, so
-    // integer prices keep displayed values truthful (no rounded-away agorot).
-    const price = Math.trunc(Number(formData.price));
-
     try {
-      await createEvent({
-        title: formData.title,
-        artist: formData.artist,
-        venue: formData.venue,
-        city: formData.city,
-        event_date: formData.date, // 'YYYY-MM-DD' from <input type="date" />
-        event_time: formData.time,
-        price,
-        original_price: price,
-        image: formData.image,
-        genre: formData.genre as 'music' | 'sports' | 'theater',
-        description: formData.description,
-        total_tickets: totalTickets,
-        available_tickets: totalTickets,
-      });
+      let event = createdEvent;
+      if (!event) {
+        event = await createEvent({
+          title: formData.title,
+          artist: formData.artist,
+          venue: formData.venue,
+          city: formData.city,
+          event_date: formData.date, // 'YYYY-MM-DD' from <input type="date" />
+          event_time: formData.time,
+          price,
+          original_price: price,
+          image: formData.image,
+          genre: formData.genre as 'music' | 'sports' | 'theater',
+          description: formData.description,
+          total_tickets: totalTickets,
+          available_tickets: totalTickets,
+        });
+        setCreatedEvent(event);
+      }
+
+      if (seatingMode === 'seated') {
+        const sections = buildSections(selectedTemplate, Math.trunc(totalTickets), price);
+        await createEventSections(event.id, sections);
+      }
+
       toast.success('Event created successfully!');
       navigate('/manager/events');
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to create event');
+      const message = err instanceof Error ? err.message : 'Failed to create event';
+      if (createdEvent) {
+        toast.error(`Event created, but seating setup failed: ${message}. Fix the details below and try again.`);
+      } else {
+        toast.error(message);
+      }
+      // No navigation on failure — form state (incl. createdEvent, if the event
+      // itself was created) is kept so the manager can retry.
     } finally {
       setIsSubmitting(false);
     }
@@ -229,16 +292,105 @@ export default function CreateEvent() {
               </div>
             </div>
 
+            {/* Seating */}
+            <div className="card-elevated p-6">
+              <h2 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                <Armchair className="w-5 h-5 text-primary" />
+                Seating
+              </h2>
+
+              <RadioGroup
+                value={seatingMode}
+                onValueChange={(value) => setSeatingMode(value as 'ga' | 'seated')}
+                className="grid grid-cols-1 sm:grid-cols-2 gap-3"
+              >
+                <label
+                  htmlFor="seating-ga"
+                  className={cn(
+                    "flex items-center gap-3 rounded-xl border p-4 cursor-pointer transition-colors",
+                    seatingMode === 'ga' ? "border-primary bg-primary/5" : "border-border hover:bg-muted"
+                  )}
+                >
+                  <RadioGroupItem value="ga" id="seating-ga" />
+                  <div>
+                    <p className="font-medium text-foreground">General admission</p>
+                    <p className="text-xs text-muted-foreground">One flat price, no sections — today's default flow.</p>
+                  </div>
+                </label>
+                <label
+                  htmlFor="seating-venue"
+                  className={cn(
+                    "flex items-center gap-3 rounded-xl border p-4 cursor-pointer transition-colors",
+                    seatingMode === 'seated' ? "border-primary bg-primary/5" : "border-border hover:bg-muted"
+                  )}
+                >
+                  <RadioGroupItem value="seated" id="seating-venue" />
+                  <div>
+                    <p className="font-medium text-foreground">Seated venue</p>
+                    <p className="text-xs text-muted-foreground">Split capacity into priced sections from a venue template.</p>
+                  </div>
+                </label>
+              </RadioGroup>
+
+              {seatingMode === 'seated' && (
+                <div className="mt-5 space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {VENUE_TEMPLATE_LIST.map((template) => (
+                      <button
+                        type="button"
+                        key={template.id}
+                        onClick={() => setSelectedTemplate(template.id)}
+                        className={cn(
+                          "text-left rounded-xl border p-3 transition-colors focus-ring",
+                          selectedTemplate === template.id ? "border-primary bg-primary/5" : "border-border hover:bg-muted"
+                        )}
+                      >
+                        <VenueTemplatePreview template={template} />
+                        <p className="font-semibold text-sm text-foreground mt-2">{template.label}</p>
+                        <p className="text-xs text-muted-foreground">{template.description}</p>
+                      </button>
+                    ))}
+                  </div>
+
+                  <div>
+                    <p className="text-sm font-medium text-foreground mb-2">Sections preview</p>
+                    {previewSections.error && (
+                      <p className="text-xs text-destructive">{previewSections.error}</p>
+                    )}
+                    {previewSections.sections && (
+                      <div className="rounded-xl border border-border divide-y divide-border overflow-hidden">
+                        {previewSections.sections.map((section, i) => (
+                          <div key={i} className="flex items-center justify-between px-3 py-2 text-sm">
+                            <span className="flex items-center gap-2 text-foreground">
+                              <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: `hsl(${section.color})` }} />
+                              {section.label}
+                              {section.kind === 'ga' && <span className="text-xs text-muted-foreground">(GA)</span>}
+                            </span>
+                            <span className="text-muted-foreground">{section.capacity} tickets · {formatILS(section.price)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {!previewSections.sections && !previewSections.error && (
+                      <p className="text-xs text-muted-foreground">Fill in price and available tickets below to preview sections.</p>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Tickets & Pricing */}
             <div className="card-elevated p-6">
               <h2 className="font-semibold text-lg mb-4 flex items-center gap-2">
                 <DollarSign className="w-5 h-5 text-success" />
                 Tickets & Pricing
               </h2>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-foreground mb-2 block">Ticket Price (₪)</label>
+                  <label className="text-sm font-medium text-foreground mb-2 block">
+                    {seatingMode === 'seated' ? 'Base Price (₪)' : 'Ticket Price (₪)'}
+                  </label>
                   <Input
                     type="number"
                     placeholder="0"
@@ -248,11 +400,14 @@ export default function CreateEvent() {
                     step="1"
                     required
                   />
+                  {seatingMode === 'seated' && (
+                    <p className="text-xs text-muted-foreground mt-1">Each section's price is this base price × the template's multiplier.</p>
+                  )}
                 </div>
                 <div>
                   <label className="text-sm font-medium text-foreground mb-2 block flex items-center gap-2">
                     <Users className="w-4 h-4" />
-                    Available Tickets
+                    {seatingMode === 'seated' ? 'Total Capacity' : 'Available Tickets'}
                   </label>
                   <Input
                     type="number"
@@ -317,7 +472,7 @@ export default function CreateEvent() {
                   isSubmitting && "opacity-50 cursor-not-allowed"
                 )}
               >
-                {isSubmitting ? 'Creating...' : 'Create Event'}
+                {isSubmitting ? 'Creating...' : createdEvent ? 'Retry Seating Setup' : 'Create Event'}
               </button>
             </div>
           </motion.form>
