@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Users, Clock, CheckCircle, XCircle, Copy, Check, Share2, CreditCard, UserPlus } from 'lucide-react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { ArrowLeft, Users, Clock, CheckCircle, XCircle, Copy, Check, Share2, CreditCard, UserPlus, Wallet as WalletIcon } from 'lucide-react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { BottomNav } from '@/components/BottomNav';
 import { GroupPurchasePayment } from '@/components/GroupPurchasePayment';
 import { Progress } from '@/components/ui/progress';
@@ -227,11 +227,18 @@ export default function GroupPurchaseStatus() {
             className="bg-success/10 border border-success/20 rounded-2xl p-5 flex items-start gap-3"
           >
             <CheckCircle className="w-6 h-6 text-success shrink-0 mt-0.5" />
-            <div>
+            <div className="flex-1">
               <p className="font-bold text-success">Group complete!</p>
               <p className="text-sm text-muted-foreground">
                 Everyone has paid and all tickets are confirmed.
               </p>
+              <Link
+                to="/wallet"
+                className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-success hover:underline"
+              >
+                <WalletIcon className="w-4 h-4" />
+                Tickets issued — view them in your wallet
+              </Link>
             </div>
           </motion.div>
         )}
