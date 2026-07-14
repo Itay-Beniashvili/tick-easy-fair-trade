@@ -1,12 +1,15 @@
- import { useState } from 'react';
+ import { useEffect, useState } from 'react';
  import { motion } from 'framer-motion';
  import { Mail, Lock, User, Ticket, ArrowRight, Eye, EyeOff } from 'lucide-react';
- import { Link, useNavigate } from 'react-router-dom';
+ import { Link, useLocation, useNavigate } from 'react-router-dom';
  import { useAuth } from '@/context/AuthContext';
  import { toast } from 'sonner';
  import { Input } from '@/components/ui/input';
  import { Button } from '@/components/ui/button';
  import { supabase } from '@/integrations/supabase/client';
+ import { getProfile } from '@/api/profile';
+
+ const RETURN_TO_KEY = 'te_return_to';
 
  export default function Register() {
    const [name, setName] = useState('');
@@ -17,6 +20,17 @@
    const [verificationSent, setVerificationSent] = useState(false);
    const { signUp } = useAuth();
    const navigate = useNavigate();
+   const location = useLocation();
+   const fromPath = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname;
+
+   // Persist the return path so it survives the register -> verify-email -> login
+   // detour; a friend who registers instead of signing in still lands back
+   // on the group page once they verify and log in.
+   useEffect(() => {
+     if (fromPath) {
+       try { sessionStorage.setItem(RETURN_TO_KEY, fromPath); } catch { /* ignore */ }
+     }
+   }, [fromPath]);
 
    const handleRegister = async (e: React.FormEvent) => {
      e.preventDefault();
@@ -25,9 +39,27 @@
        const { needsVerification } = await signUp(email, password, name, 'user');
        if (needsVerification) {
          setVerificationSent(true);
-       } else {
-         navigate('/onboarding');
+         return;
        }
+
+       // Only reachable when email verification is disabled — apply the same
+       // return-path/onboarding rule Login uses.
+       let returnTo: string | null = fromPath ?? null;
+       try {
+         if (!returnTo) returnTo = sessionStorage.getItem(RETURN_TO_KEY);
+         sessionStorage.removeItem(RETURN_TO_KEY);
+       } catch { /* ignore */ }
+
+       if (returnTo && returnTo.startsWith('/')) {
+         navigate(returnTo, { replace: true });
+         return;
+       }
+
+       const profile = await getProfile();
+       const hasPrefs =
+         !!profile &&
+         ((profile.preferred_genres?.length ?? 0) > 0 || (profile.preferred_artists?.length ?? 0) > 0);
+       navigate(hasPrefs ? '/home' : '/onboarding');
      } catch (err) {
        toast.error(err instanceof Error ? err.message : 'Sign up failed');
      } finally {

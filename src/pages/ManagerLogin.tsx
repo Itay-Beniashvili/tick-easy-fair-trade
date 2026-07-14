@@ -1,11 +1,13 @@
  import { useState } from 'react';
  import { motion } from 'framer-motion';
  import { Mail, Lock, Settings, ArrowRight, Eye, EyeOff } from 'lucide-react';
- import { Link, useNavigate } from 'react-router-dom';
+ import { Link, useLocation, useNavigate } from 'react-router-dom';
  import { useAuth } from '@/context/AuthContext';
  import { toast } from 'sonner';
  import { Input } from '@/components/ui/input';
  import { Button } from '@/components/ui/button';
+
+ const RETURN_TO_KEY = 'te_return_to';
 
  export default function ManagerLogin() {
    const [email, setEmail] = useState('');
@@ -14,13 +16,22 @@
    const [submitting, setSubmitting] = useState(false);
    const { signIn } = useAuth();
    const navigate = useNavigate();
+   const location = useLocation();
+   const fromPath = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname;
 
    const handleLogin = async (e: React.FormEvent) => {
      e.preventDefault();
      setSubmitting(true);
      try {
        await signIn(email, password);
-       navigate('/manager');
+
+       let returnTo: string | null = fromPath ?? null;
+       try {
+         if (!returnTo) returnTo = sessionStorage.getItem(RETURN_TO_KEY);
+         sessionStorage.removeItem(RETURN_TO_KEY);
+       } catch { /* ignore */ }
+
+       navigate(returnTo && returnTo.startsWith('/') ? returnTo : '/manager');
      } catch (err) {
        toast.error(err instanceof Error ? err.message : 'Sign in failed');
      } finally {

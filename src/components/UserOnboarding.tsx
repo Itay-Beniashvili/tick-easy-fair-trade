@@ -7,6 +7,18 @@ import { upsertPreferences } from '@/api/profile';
 import { toast } from 'sonner';
 import type { Genre } from '@/lib/recommend';
 
+const RETURN_TO_KEY = 'te_return_to';
+
+function consumeReturnTo(): string | null {
+  try {
+    const returnTo = sessionStorage.getItem(RETURN_TO_KEY);
+    sessionStorage.removeItem(RETURN_TO_KEY);
+    return returnTo;
+  } catch {
+    return null;
+  }
+}
+
  type Category = 'music' | 'sports' | 'standup';
  type Artist = string;
 
@@ -76,7 +88,8 @@ export function UserOnboarding() {
     setSaving(true);
     try {
       await upsertPreferences(selectedGenres, selectedArtists);
-      navigate('/home');
+      const returnTo = consumeReturnTo();
+      navigate(returnTo && returnTo.startsWith('/') ? returnTo : '/home');
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to save preferences');
     } finally {
@@ -228,7 +241,10 @@ export function UserOnboarding() {
          )}
  
          <button
-           onClick={() => navigate('/home')}
+           onClick={() => {
+             const returnTo = consumeReturnTo();
+             navigate(returnTo && returnTo.startsWith('/') ? returnTo : '/home');
+           }}
            className="w-full mt-3 py-3 text-muted-foreground text-sm hover:text-foreground transition-colors"
          >
            Skip for now

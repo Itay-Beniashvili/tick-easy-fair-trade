@@ -1,11 +1,14 @@
- import { useState } from 'react';
+ import { useEffect, useState } from 'react';
  import { motion } from 'framer-motion';
- import { Mail, Lock, Ticket, ArrowRight, Eye, EyeOff } from 'lucide-react';
- import { Link, useNavigate } from 'react-router-dom';
+ import { Mail, Lock, Ticket, ArrowRight, Eye, EyeOff, Users } from 'lucide-react';
+ import { Link, useLocation, useNavigate } from 'react-router-dom';
  import { useAuth } from '@/context/AuthContext';
  import { toast } from 'sonner';
  import { Input } from '@/components/ui/input';
  import { Button } from '@/components/ui/button';
+ import { getProfile } from '@/api/profile';
+
+ const RETURN_TO_KEY = 'te_return_to';
 
  export default function Login() {
    const [email, setEmail] = useState('');
@@ -14,13 +17,40 @@
    const [submitting, setSubmitting] = useState(false);
    const { signIn } = useAuth();
    const navigate = useNavigate();
+   const location = useLocation();
+   const fromPath = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname;
+   const isGroupInvite = !!fromPath && fromPath.startsWith('/group-purchase/');
+
+   // Persist the return path so it survives a detour to /register and back
+   // (email verification breaks the direct navigation chain).
+   useEffect(() => {
+     if (fromPath) {
+       try { sessionStorage.setItem(RETURN_TO_KEY, fromPath); } catch { /* ignore */ }
+     }
+   }, [fromPath]);
 
    const handleLogin = async (e: React.FormEvent) => {
      e.preventDefault();
      setSubmitting(true);
      try {
        await signIn(email, password);
-       navigate('/home');
+
+       let returnTo: string | null = fromPath ?? null;
+       try {
+         if (!returnTo) returnTo = sessionStorage.getItem(RETURN_TO_KEY);
+         sessionStorage.removeItem(RETURN_TO_KEY);
+       } catch { /* ignore */ }
+
+       if (returnTo && returnTo.startsWith('/')) {
+         navigate(returnTo, { replace: true });
+         return;
+       }
+
+       const profile = await getProfile();
+       const hasPrefs =
+         !!profile &&
+         ((profile.preferred_genres?.length ?? 0) > 0 || (profile.preferred_artists?.length ?? 0) > 0);
+       navigate(hasPrefs ? '/home' : '/onboarding');
      } catch (err) {
        toast.error(err instanceof Error ? err.message : 'Sign in failed');
      } finally {
@@ -47,7 +77,21 @@
          <h1 className="font-display text-3xl font-bold text-white mb-1">Welcome Back!</h1>
          <p className="text-white/70">Sign in to your account</p>
        </motion.div>
- 
+
+       {isGroupInvite && (
+         <motion.div
+           initial={{ opacity: 0, y: 10 }}
+           animate={{ opacity: 1, y: 0 }}
+           transition={{ delay: 0.1, duration: 0.5 }}
+           className="w-full max-w-sm relative z-10 mb-4 flex items-center gap-3 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 p-4"
+         >
+           <Users className="w-5 h-5 text-white shrink-0" />
+           <p className="text-sm text-white/90">
+             You've been invited to a group purchase — sign in to join and pay your share.
+           </p>
+         </motion.div>
+       )}
+
        {/* Login Form */}
        <motion.div
          initial={{ opacity: 0, y: 20 }}

@@ -11,8 +11,6 @@ interface AppContextType {
   setRole: (role: UserRole) => void;
   selectedGenres: Genre[];
   setSelectedGenres: (genres: Genre[]) => void;
-  hasCompletedOnboarding: boolean;
-  setHasCompletedOnboarding: (value: boolean) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -20,7 +18,6 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export function AppProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<UserRole>(null);
   const [selectedGenres, setSelectedGenres] = useState<Genre[]>([]);
-  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
 
   return (
     <AppContext.Provider
@@ -29,8 +26,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setRole,
         selectedGenres,
         setSelectedGenres,
-        hasCompletedOnboarding,
-        setHasCompletedOnboarding,
       }}
     >
       {children}
