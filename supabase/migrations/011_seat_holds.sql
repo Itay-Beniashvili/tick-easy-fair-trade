@@ -84,7 +84,7 @@ begin
   from public.seat_holds where user_id = v_buyer and event_id = p_event_id;
 
   update public.seats set status = 'available'
-    where id = any(coalesce(v_released_ids, array[]::uuid[]));
+    where id = any(coalesce(v_released_ids, array[]::uuid[])) and status = 'held';
 
   delete from public.seat_holds where user_id = v_buyer and event_id = p_event_id;
 
@@ -92,7 +92,8 @@ begin
   -- expired hold (someone else's lapsed session) become claimable inline.
   update public.seats s set status = 'available'
     from public.seat_holds h
-    where h.seat_id = s.id and s.id = any(p_seat_ids) and h.expires_at < now();
+    where h.seat_id = s.id and s.id = any(p_seat_ids) and h.expires_at < now()
+      and s.status = 'held';
 
   delete from public.seat_holds
     where seat_id = any(p_seat_ids) and expires_at < now();
@@ -239,6 +240,7 @@ declare
   v_seat_ids  uuid[];
   v_count     int := 0;
   v_seat_info text;
+  v_rows      int;
 begin
   if v_buyer is null then raise exception 'not authenticated'; end if;
 
@@ -286,7 +288,12 @@ begin
       'TKT-seat-' || substr(gen_random_uuid()::text, 1, 12), false)
     returning * into t;
 
-    update public.seats set status = 'sold', ticket_id = t.id where id = v_seat.seat_id;
+    update public.seats set status = 'sold', ticket_id = t.id
+      where id = v_seat.seat_id and status = 'held';
+    get diagnostics v_rows = row_count;
+    if v_rows <> 1 then
+      raise exception 'hold expired — reselect seats';
+    end if;
 
     insert into public.transactions(ticket_id, event_id, buyer_id, amount, type)
       values (t.id, e.id, v_buyer, v_seat.section_price, 'primary');
@@ -351,6 +358,7 @@ begin
   return v_total;
 end $$;
 grant execute on function public.release_expired_seat_holds() to authenticated;
+revoke execute on function public.release_expired_seat_holds() from authenticated;
 
 -- Guarded pg_cron scheduling (mirrors 006's conditional block): pg_cron may
 -- be available-but-not-installed on this project; everything here is guarded
@@ -389,5 +397,5 @@ for select
 to authenticated
 using (
   realtime.messages.extension = 'broadcast'
-  and realtime.topic() like 'event-seats:%'
+  and (select realtime.topic()) like 'event-seats:%'
 );
