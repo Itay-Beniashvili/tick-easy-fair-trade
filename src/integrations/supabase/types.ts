@@ -20,6 +20,7 @@ export type Database = {
           created_at: string
           event_id: string | null
           id: string
+          parent_post_id: string | null
           type: string
           user_id: string
           user_name: string
@@ -29,6 +30,7 @@ export type Database = {
           created_at?: string
           event_id?: string | null
           id?: string
+          parent_post_id?: string | null
           type?: string
           user_id: string
           user_name: string
@@ -38,6 +40,7 @@ export type Database = {
           created_at?: string
           event_id?: string | null
           id?: string
+          parent_post_id?: string | null
           type?: string
           user_id?: string
           user_name?: string
@@ -48,6 +51,13 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_posts_parent_post_id_fkey"
+            columns: ["parent_post_id"]
+            isOneToOne: false
+            referencedRelation: "community_posts"
             referencedColumns: ["id"]
           },
         ]

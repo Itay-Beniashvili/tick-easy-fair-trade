@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Users, Car, UserPlus, MessageSquarePlus, Send } from 'lucide-react';
+import { Users, Car, UserPlus, MessageSquarePlus, Send, MessageCircle } from 'lucide-react';
 import { BottomNav } from '@/components/BottomNav';
-import { listPosts, createPost } from '@/api/community';
+import { listPosts, listReplies, createPost, createReply } from '@/api/community';
 import { getProfile } from '@/api/profile';
 import type { CommunityPostRow } from '@/api/client';
 import { toast } from 'sonner';
@@ -19,15 +19,27 @@ const typeMeta: Record<PostType, { label: string; icon: typeof Users }> = {
 
 export default function Community() {
   const [posts, setPosts] = useState<CommunityPostRow[]>([]);
+  const [replies, setReplies] = useState<Record<string, CommunityPostRow[]>>({});
   const [loading, setLoading] = useState(true);
   const [type, setType] = useState<PostType>('partner');
   const [content, setContent] = useState('');
   const [userName, setUserName] = useState('You');
+  const [openReplyFor, setOpenReplyFor] = useState<string | null>(null);
+  const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({});
+  const [replySubmitting, setReplySubmitting] = useState<string | null>(null);
 
   const load = async () => {
     setLoading(true);
     try {
-      setPosts(await listPosts());
+      const topLevel = await listPosts();
+      setPosts(topLevel);
+      const flatReplies = await listReplies(topLevel.map((p) => p.id));
+      const grouped: Record<string, CommunityPostRow[]> = {};
+      for (const r of flatReplies) {
+        const key = r.parent_post_id as string;
+        (grouped[key] ??= []).push(r);
+      }
+      setReplies(grouped);
       const p = await getProfile();
       if (p?.full_name) setUserName(p.full_name);
     } catch (e) {
@@ -47,6 +59,22 @@ export default function Community() {
       load();
     } catch (e) {
       toast.error((e as Error).message);
+    }
+  };
+
+  const submitReply = async (postId: string) => {
+    const draft = (replyDrafts[postId] ?? '').trim();
+    if (!draft) return;
+    setReplySubmitting(postId);
+    try {
+      await createReply(postId, draft, userName);
+      setReplyDrafts((d) => ({ ...d, [postId]: '' }));
+      setOpenReplyFor(null);
+      await load();
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setReplySubmitting(null);
     }
   };
 
@@ -114,6 +142,8 @@ export default function Community() {
             {posts.map((post, i) => {
               const meta = typeMeta[(post.type as PostType)] ?? typeMeta.other;
               const Icon = meta.icon;
+              const postReplies = replies[post.id] ?? [];
+              const isOpen = openReplyFor === post.id;
               return (
                 <motion.div
                   key={post.id}
@@ -130,8 +160,56 @@ export default function Community() {
                       {format(new Date(post.created_at), 'MMM d, HH:mm')}
                     </span>
                   </div>
-                  <p className="text-sm text-foreground">{post.content}</p>
-                  <p className="text-xs text-muted-foreground mt-2">— {post.user_name}</p>
+                  <p className="text-sm text-foreground break-words">{post.content}</p>
+                  <div className="flex items-center gap-3 mt-2">
+                    <p className="text-xs text-muted-foreground">— {post.user_name}</p>
+                    <button
+                      onClick={() => setOpenReplyFor(isOpen ? null : post.id)}
+                      className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors ml-auto"
+                    >
+                      <MessageCircle className="w-3.5 h-3.5" />
+                      Reply
+                      {postReplies.length > 0 && <span>({postReplies.length})</span>}
+                    </button>
+                  </div>
+
+                  {postReplies.length > 0 && (
+                    <div className="mt-3 space-y-2.5">
+                      {postReplies.map((reply) => (
+                        <div
+                          key={reply.id}
+                          className="border-l-2 border-primary/20 pl-3 min-w-0"
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-semibold text-foreground">{reply.user_name}</span>
+                            <span className="text-[11px] text-muted-foreground">
+                              {format(new Date(reply.created_at), 'MMM d, HH:mm')}
+                            </span>
+                          </div>
+                          <p className="text-xs text-foreground/90 break-words mt-0.5">{reply.content}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {isOpen && (
+                    <div className="mt-3 border-l-2 border-primary/20 pl-3 space-y-2">
+                      <textarea
+                        value={replyDrafts[post.id] ?? ''}
+                        onChange={(e) => setReplyDrafts((d) => ({ ...d, [post.id]: e.target.value }))}
+                        placeholder="Write a reply…"
+                        className="w-full rounded-lg border border-border bg-background p-2 text-xs text-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        rows={2}
+                      />
+                      <button
+                        onClick={() => submitReply(post.id)}
+                        disabled={!(replyDrafts[post.id] ?? '').trim() || replySubmitting === post.id}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary text-xs font-semibold disabled:opacity-50"
+                      >
+                        <Send className="w-3 h-3" /> Send
+                      </button>
+                    </div>
+                  )}
                 </motion.div>
               );
             })}
