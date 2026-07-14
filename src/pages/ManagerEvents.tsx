@@ -58,7 +58,7 @@ export default function ManagerEvents() {
                   <Flame className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-bold text-white mb-1">Events</h1>
+                  <h1 className="font-display text-2xl font-bold text-white mb-1">Events</h1>
                   <p className="text-white/80">{events.length} active events</p>
                 </div>
               </div>

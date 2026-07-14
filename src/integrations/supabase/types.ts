@@ -407,6 +407,7 @@ export type Database = {
           event_title: string
           event_venue: string
           id: string
+          is_mine: boolean
           sale_price: number
           seat_info: string
           ticket_type: string
@@ -415,6 +416,14 @@ export type Database = {
       has_role: {
         Args: { _role: Database["public"]["Enums"]["app_role"] }
         Returns: boolean
+      }
+      join_group: {
+        Args: { p_group_id: string; p_ticket_count: number }
+        Returns: Database["public"]["Tables"]["group_participants"]["Row"]
+      }
+      pay_participant: {
+        Args: { p_group_id: string }
+        Returns: string
       }
       list_ticket_for_resale: {
         Args: { p_price: number; p_ticket_id: string }

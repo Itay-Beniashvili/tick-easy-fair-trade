@@ -55,7 +55,7 @@ export default function Profile() {
           <div className="w-24 h-24 rounded-full bg-white/20 backdrop-blur-sm mx-auto mb-4 flex items-center justify-center ring-4 ring-white/30">
             <User className="w-12 h-12 text-white" />
           </div>
-          <h1 className="text-xl font-bold text-white mb-1">{fullName}</h1>
+          <h1 className="font-display text-xl font-bold text-white mb-1">{fullName}</h1>
           <p className="text-white/80 text-sm">{email}</p>
         </motion.div>
       </div>

@@ -37,9 +37,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(s);
       setUser(s?.user ?? null);
       if (s?.user) {
-        setTimeout(() => { fetchRole(s.user.id).then(setRole); }, 0);
+        // Keep loading=true while the role resolves, so role-gated routes never see
+        // a (loading=false, role=null) window right after sign-in and misfire.
+        setLoading(true);
+        setTimeout(() => {
+          fetchRole(s.user.id).then((r) => { setRole(r); setLoading(false); });
+        }, 0);
       } else {
         setRole(null);
+        setLoading(false);
       }
     });
     supabase.auth.getSession().then(async ({ data: { session: s } }) => {

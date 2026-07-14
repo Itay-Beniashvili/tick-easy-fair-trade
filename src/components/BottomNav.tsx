@@ -29,7 +29,7 @@ export function BottomNav() {
             <button
               onClick={openCommand}
               aria-label="Search"
-              className="group flex items-center gap-2.5 w-52 xl:w-60 pl-3.5 pr-2 py-2 rounded-full text-sm text-muted-foreground bg-card/60 border border-white/[0.06] hover:border-gel/40 transition-colors"
+              className="group flex items-center gap-2.5 w-52 xl:w-60 pl-3.5 pr-2 py-2 rounded-full text-sm text-muted-foreground bg-card/60 border border-white/[0.06] hover:border-gel/40 transition-colors focus-ring"
             >
               <Search className="w-[18px] h-[18px] text-muted-foreground group-hover:text-gel transition-colors" />
               <span className="flex-1 text-left">Search shows…</span>
@@ -42,7 +42,7 @@ export function BottomNav() {
                   key={path}
                   to={path}
                   className={cn(
-                    'flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-colors pressable',
+                    'flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-colors pressable focus-ring',
                     isActive ? 'text-gel bg-gel/10' : 'text-muted-foreground hover:text-foreground',
                   )}
                 >
@@ -65,7 +65,7 @@ export function BottomNav() {
               <NavLink
                 key={path}
                 to={path}
-                className="relative flex flex-col items-center gap-1 px-4 py-1.5 rounded-2xl pressable"
+                className="relative flex flex-col items-center gap-1 px-4 py-1.5 rounded-2xl pressable focus-ring"
               >
                 {isActive && (
                   <motion.div

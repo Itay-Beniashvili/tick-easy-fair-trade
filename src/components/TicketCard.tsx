@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { QrCode, MapPin, Calendar, Clock, Repeat } from 'lucide-react';
+import { QrCode, MapPin, Calendar, Clock, Repeat, XCircle } from 'lucide-react';
 import { format } from 'date-fns';
+import { toast } from 'sonner';
 import { ResaleModal } from './ResaleModal';
+import { unlistResale } from '@/api/resale';
 import { cn } from '@/lib/utils';
 import { formatILS } from '@/lib/currency';
 import { springSnappy } from '@/lib/motion';
@@ -32,6 +34,20 @@ function qrPattern(seed: string): boolean[] {
 export function TicketCard({ ticket, index = 0, onChanged }: TicketCardProps) {
   const [showQR, setShowQR] = useState(false);
   const [showResaleModal, setShowResaleModal] = useState(false);
+  const [unlisting, setUnlisting] = useState(false);
+
+  const handleUnlist = async () => {
+    setUnlisting(true);
+    try {
+      await unlistResale(ticket.id);
+      toast.success('Listing removed', { description: 'Your ticket is no longer for sale.' });
+      onChanged?.();
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setUnlisting(false);
+    }
+  };
 
   const formattedDate = (() => {
     const d = new Date(ticket.event_date);
@@ -102,16 +118,23 @@ export function TicketCard({ ticket, index = 0, onChanged }: TicketCardProps) {
           <div className="[perspective:1200px]">
             <motion.div
               onClick={() => setShowQR(!showQR)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setShowQR(!showQR); }
+              }}
+              role="button"
+              tabIndex={0}
+              aria-expanded={showQR}
+              aria-label={showQR ? 'Hide QR code' : 'Show QR code'}
               animate={{ rotateY: showQR ? 180 : 0 }}
               transition={springSnappy}
-              className="relative grid cursor-pointer [transform-style:preserve-3d] pressable"
+              className="relative grid cursor-pointer [transform-style:preserve-3d] pressable focus-ring rounded-2xl"
             >
               {/* front */}
               <div className="[grid-area:1/1] [backface-visibility:hidden] bg-muted p-3 rounded-2xl flex items-center justify-center gap-2">
                 <QrCode className="w-5 h-5 text-gel" />
                 <span className="text-sm font-medium text-foreground">Tap to show QR code</span>
               </div>
-              {/* back */}
+              {/* back — deterministic QR rendering (stable across renders) */}
               <div className="[grid-area:1/1] [backface-visibility:hidden] [transform:rotateY(180deg)] bg-white p-4 rounded-2xl shadow-glow flex flex-col items-center">
                 <div className="w-48 h-48 bg-white p-2 rounded-xl shadow-inner mb-3">
                   <div className="w-full h-full grid grid-cols-8 gap-0.5">
@@ -133,13 +156,22 @@ export function TicketCard({ ticket, index = 0, onChanged }: TicketCardProps) {
           </div>
 
           {/* Actions */}
-          {!ticket.is_for_sale && (
+          {!ticket.is_for_sale ? (
             <button
               onClick={() => setShowResaleModal(true)}
-              className="w-full py-3 rounded-2xl border border-gel/40 text-gel font-semibold flex items-center justify-center gap-2 hover:bg-gel hover:text-primary-foreground transition-all"
+              className="w-full py-3 rounded-2xl border border-gel/40 text-gel font-semibold flex items-center justify-center gap-2 hover:bg-gel hover:text-primary-foreground transition-all focus-ring"
             >
               <Repeat className="w-5 h-5" />
               Resell Ticket
+            </button>
+          ) : (
+            <button
+              onClick={handleUnlist}
+              disabled={unlisting}
+              className="w-full py-3 rounded-2xl border border-destructive/40 text-destructive font-semibold flex items-center justify-center gap-2 hover:bg-destructive hover:text-destructive-foreground transition-all disabled:opacity-60 disabled:cursor-not-allowed focus-ring"
+            >
+              <XCircle className="w-5 h-5" />
+              {unlisting ? 'Removing…' : 'Remove listing'}
             </button>
           )}
         </div>

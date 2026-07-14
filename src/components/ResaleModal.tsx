@@ -100,11 +100,11 @@ export function ResaleModal({ isOpen, onClose, ticketId, originalPrice, eventTit
         >
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
-            <button onClick={onClose} className="p-2 hover:bg-muted rounded-full transition-colors">
+            <button onClick={onClose} aria-label="Close" className="w-11 h-11 grid place-items-center hover:bg-muted rounded-full transition-colors focus-ring">
               <X className="w-5 h-5 text-muted-foreground" />
             </button>
             <h2 className="text-xl font-bold text-foreground">Resell Ticket</h2>
-            <div className="w-9" />
+            <div className="w-11" />
           </div>
 
           {/* Event Info */}
