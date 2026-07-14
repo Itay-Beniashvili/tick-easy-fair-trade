@@ -175,7 +175,7 @@ export interface SeatingSection {
  *  into integer capacities that sum EXACTLY to `total`, every part >= 1 (as long as
  *  total >= shares.length — the only case buildSections allows). Deterministic:
  *  remainder ties break by section index. */
-function distributeCapacity(total: number, shares: number[]): number[] {
+export function distributeCapacity(total: number, shares: number[]): number[] {
   const raw = shares.map((s) => total * s);
   const floors = raw.map(Math.floor);
   const distributed = floors.reduce((a, b) => a + b, 0);

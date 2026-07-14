@@ -386,6 +386,10 @@ export default function CreateEvent() {
                 Tickets & Pricing
               </h2>
 
+              {createdEvent && (
+                <p className="text-xs text-muted-foreground mb-4">Event already created — retrying section setup with its original price and capacity.</p>
+              )}
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium text-foreground mb-2 block">
@@ -398,6 +402,7 @@ export default function CreateEvent() {
                     onChange={(e) => handleChange('price', e.target.value)}
                     min="0"
                     step="1"
+                    disabled={!!createdEvent}
                     required
                   />
                   {seatingMode === 'seated' && (
@@ -415,6 +420,7 @@ export default function CreateEvent() {
                     value={formData.availableTickets}
                     onChange={(e) => handleChange('availableTickets', e.target.value)}
                     min="1"
+                    disabled={!!createdEvent}
                     required
                   />
                 </div>

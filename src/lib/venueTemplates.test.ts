@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildSections, deriveGrid, VENUE_TEMPLATE_LIST, VENUE_TEMPLATES, type TemplateId } from './venueTemplates';
+import { buildSections, deriveGrid, distributeCapacity, VENUE_TEMPLATE_LIST, VENUE_TEMPLATES, type TemplateId } from './venueTemplates';
 
 const TEMPLATE_IDS: TemplateId[] = ['theater', 'arena', 'club'];
 const TOTALS = [7, 100, 953];
@@ -78,6 +78,16 @@ describe('deriveGrid', () => {
       const { rows_count, seats_per_row } = deriveGrid(capacity);
       expect(rows_count).toBeLessThanOrEqual(20);
       expect(rows_count * seats_per_row).toBeGreaterThanOrEqual(capacity);
+    }
+  });
+});
+
+describe('distributeCapacity — capacity safety-net branch', () => {
+  it('handles skewed shares: total=5, shares=[0.96,0.01,0.01,0.01,0.01] robs from largest', () => {
+    const result = distributeCapacity(5, [0.96, 0.01, 0.01, 0.01, 0.01]);
+    expect(result.reduce((a, b) => a + b, 0)).toBe(5);
+    for (const capacity of result) {
+      expect(capacity).toBeGreaterThanOrEqual(1);
     }
   });
 });
