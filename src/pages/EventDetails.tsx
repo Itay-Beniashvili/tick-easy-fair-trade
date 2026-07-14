@@ -109,7 +109,9 @@ export default function EventDetails() {
   const handleCreateGroup = async () => {
     setBusy(true);
     try {
-      const group = await createGroup(event.id, groupSize, event.price, 600);
+      // 30-minute reservation window — friends need time to receive the link,
+      // sign in (or register + verify email), join, and pay.
+      const group = await createGroup(event.id, groupSize, event.price, 1800);
       toast.success('Group created — share the link to invite friends!');
       navigate(`/group-purchase/${group.id}`);
     } catch (e) { toast.error((e as Error).message); } finally { setBusy(false); }
