@@ -52,3 +52,37 @@ export function sectionPoints(section: Pick<VenueSectionRow, 'geometry'>): Point
 export function pointsToStr(points: Point[]): string {
   return points.map(([x, y]) => `${x},${y}`).join(' ');
 }
+
+// ---------------------------------------------------------------------------
+// Seat-level picker (P2-C) — maps a seat's section-local x/y (baked 0-100 by
+// 010's generation, per-section grid space) into the section polygon's
+// bounding box within the shared 0-100 viewBox, so seat dots render inside
+// the expanded section wherever it sits on the venue map.
+// ---------------------------------------------------------------------------
+export interface BBox {
+  minX: number;
+  maxX: number;
+  minY: number;
+  maxY: number;
+}
+
+/** Axis-aligned bounding box of a polygon's points, in shared-viewBox units.
+ *  Falls back to the full viewBox for an empty/malformed polygon so callers
+ *  never divide by a degenerate (zero-area) box downstream without reason. */
+export function boundingBox(points: Point[]): BBox {
+  if (points.length === 0) return { minX: 0, maxX: 100, minY: 0, maxY: 100 };
+  const xs = points.map(([x]) => x);
+  const ys = points.map(([, y]) => y);
+  return { minX: Math.min(...xs), maxX: Math.max(...xs), minY: Math.min(...ys), maxY: Math.max(...ys) };
+}
+
+/** Linear-maps a seat's section-local x/y (0-100) into a bounding box in
+ *  shared-viewBox units. A degenerate box (zero width/height) collapses every
+ *  seat onto its single point rather than dividing by zero. */
+export function seatPosition(x: number, y: number, bbox: BBox): Point {
+  const w = bbox.maxX - bbox.minX;
+  const h = bbox.maxY - bbox.minY;
+  const cx = bbox.minX + (w === 0 ? 0 : (x / 100) * w);
+  const cy = bbox.minY + (h === 0 ? 0 : (y / 100) * h);
+  return [cx, cy];
+}
