@@ -1,8 +1,8 @@
 -- 011_seat_holds.sql — Phase 2 seat holds: session-scoped seat locking with
--- lazy + swept expiry, live broadcast via Supabase Realtime (Broadcast from
--- Database), and the purchase RPC that converts a hold into real tickets.
--- Idempotent / re-runnable. SECURITY DEFINER, search_path = public. Mirrors
--- 010's advisory-lock + ticket-insert conventions and 006's guarded pg_cron
+-- lazy + swept expiry, live updates via Supabase Postgres Changes, and the
+-- purchase RPC that converts a hold into real tickets. Idempotent /
+-- re-runnable. SECURITY DEFINER, search_path = public. Mirrors 010's
+-- advisory-lock + ticket-insert conventions and 006's guarded pg_cron
 -- scheduling pattern. WRITE-ONLY: do NOT apply until reviewed — controller
 -- applies to the live DB.
 --
@@ -10,11 +10,15 @@
 --   hold_seats(p_event_id uuid, p_seat_ids uuid[]) -> timestamptz (hold expiry)
 --   release_my_holds(p_event_id uuid)              -> int (seats released)
 --   purchase_held_seats(p_event_id uuid)            -> setof tickets
--- Realtime: every state change broadcasts on topic 'event-seats:<event_id>'
--- (Broadcast-from-Database, private channel), event name 'seat-status',
--- payload {seat_ids: uuid[], status: 'available'|'held'|'sold'}. Clients
--- subscribe with supabase.channel('event-seats:'+eventId, {config:{private:true}})
--- and refetch once on SUBSCRIBED to cover any missed messages (best-effort).
+-- Realtime: this project has no realtime.messages table / realtime.send()
+-- function (broadcast-from-database is unavailable here), so live seat-status
+-- updates ride Postgres Changes instead: every UPDATE to public.seats is
+-- published automatically on the `supabase_realtime` publication (added
+-- below). Clients subscribe per expanded section with
+-- supabase.channel(...).on('postgres_changes', {event:'UPDATE', schema:'public',
+-- table:'seats', filter:'section_id=eq.<id>'}, handler) and refetch once on
+-- subscribe to cover any missed changes (best-effort). RLS (public SELECT on
+-- seats) governs what each client receives.
 
 -- ---------------------------------------------------------------------------
 -- 1.  seats.status gains 'held' (drop + re-add the column check by name)
@@ -161,25 +165,9 @@ begin
   insert into public.seat_holds(seat_id, user_id, event_id, expires_at)
     select x, v_buyer, p_event_id, v_expires from unnest(p_seat_ids) x;
 
-  -- Broadcast the release of the caller's prior seats (if any) and the new
-  -- hold. realtime.send failures must never abort the transaction.
-  if v_released_ids is not null and array_length(v_released_ids, 1) > 0 then
-    begin
-      perform realtime.send(
-        jsonb_build_object('seat_ids', v_released_ids, 'status', 'available'),
-        'seat-status', 'event-seats:' || p_event_id::text, true);
-    exception when others then
-      raise notice 'realtime.send (release) failed: %', sqlerrm;
-    end;
-  end if;
-
-  begin
-    perform realtime.send(
-      jsonb_build_object('seat_ids', p_seat_ids, 'status', 'held'),
-      'seat-status', 'event-seats:' || p_event_id::text, true);
-  exception when others then
-    raise notice 'realtime.send (hold) failed: %', sqlerrm;
-  end;
+  -- No manual broadcast needed: the UPDATEs above (release of prior seats,
+  -- atomic claim to 'held') are published automatically via Postgres Changes
+  -- on the supabase_realtime publication (see bottom of file).
 
   return v_expires;
 end $$;
@@ -213,13 +201,8 @@ begin
   delete from public.seat_holds where user_id = v_buyer and event_id = p_event_id;
   get diagnostics v_count = row_count;
 
-  begin
-    perform realtime.send(
-      jsonb_build_object('seat_ids', v_seat_ids, 'status', 'available'),
-      'seat-status', 'event-seats:' || p_event_id::text, true);
-  exception when others then
-    raise notice 'realtime.send failed: %', sqlerrm;
-  end;
+  -- No manual broadcast needed: the UPDATE above is published automatically
+  -- via Postgres Changes on the supabase_realtime publication.
 
   return v_count;
 end $$;
@@ -311,20 +294,17 @@ begin
     where id = p_event_id and available_tickets >= v_count;
   if not found then raise exception 'sold out'; end if;
 
-  begin
-    perform realtime.send(
-      jsonb_build_object('seat_ids', v_seat_ids, 'status', 'sold'),
-      'seat-status', 'event-seats:' || p_event_id::text, true);
-  exception when others then
-    raise notice 'realtime.send failed: %', sqlerrm;
-  end;
+  -- No manual broadcast needed: the per-seat UPDATE above (status='sold') is
+  -- published automatically via Postgres Changes on the supabase_realtime
+  -- publication.
 
   return;
 end $$;
 grant execute on function public.purchase_held_seats(uuid) to authenticated;
 
 -- ---------------------------------------------------------------------------
--- 6.  release_expired_seat_holds — sweeper, batched per event, broadcasts.
+-- 6.  release_expired_seat_holds — sweeper, batched per event. The seats
+--     UPDATE below is published automatically via Postgres Changes.
 -- ---------------------------------------------------------------------------
 create or replace function public.release_expired_seat_holds()
 returns int
@@ -341,14 +321,6 @@ begin
   loop
     update public.seats set status = 'available'
       where id = any(r.seat_ids) and status = 'held';
-
-    begin
-      perform realtime.send(
-        jsonb_build_object('seat_ids', r.seat_ids, 'status', 'available'),
-        'seat-status', 'event-seats:' || r.event_id::text, true);
-    exception when others then
-      raise notice 'realtime.send failed: %', sqlerrm;
-    end;
 
     v_total := v_total + coalesce(array_length(r.seat_ids, 1), 0);
   end loop;
@@ -385,17 +357,17 @@ begin
 end $cron$;
 
 -- ---------------------------------------------------------------------------
--- 7.  realtime.messages RLS — authenticated may RECEIVE broadcast on topics
---     'event-seats:%'. Idempotent (drop + create by name). Per Supabase
---     "Broadcast from Database" docs: policy on realtime.messages, gated on
---     extension = 'broadcast' and realtime.topic() pattern-matched.
+-- 7.  Live seat-status updates ride Postgres Changes: seats UPDATEs are
+--     published on the supabase_realtime publication (this project has no
+--     realtime.send / broadcast-from-database infrastructure). RLS (public
+--     SELECT) governs receipt.
 -- ---------------------------------------------------------------------------
-drop policy if exists "tickeasy event-seats broadcast receive" on realtime.messages;
-create policy "tickeasy event-seats broadcast receive"
-on realtime.messages
-for select
-to authenticated
-using (
-  realtime.messages.extension = 'broadcast'
-  and (select realtime.topic()) like 'event-seats:%'
-);
+do $$
+begin
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'seats'
+  ) then
+    alter publication supabase_realtime add table public.seats;
+  end if;
+end $$;
